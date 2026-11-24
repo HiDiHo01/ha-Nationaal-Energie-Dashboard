@@ -20,7 +20,7 @@ The tested national P0 quarter-hour queries have been structurally validated. Th
 
 ## Priority sensors
 
-The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. These are planned features; renewable share requires additional confirmation of the source mix and BL-003 remains open.
+The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. These are planned features. Renewable share will be explicitly labelled as an estimate based on solar, wind, biomass cofiring and 53% of waste electricity (provisional 2025 CBS annual factor); other mixed sources are excluded. The six input datasets require contract and combined validation first; BL-003 remains open.
 
 ## Further information
 
