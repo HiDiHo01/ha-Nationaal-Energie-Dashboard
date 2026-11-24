@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BL-006: isolated synthetic wheel through the real HA requirements manager.
+# BL-006: isolated synthetic and actual wheels through the real HA requirements manager.
 set -euo pipefail
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -44,19 +44,27 @@ wheel="$work/wheelhouse/ned_api_runtime_probe-0.0.1-py3-none-any.whl"
 test -f "$wheel"
 sha256sum "$wheel"
 
+# Build the actual package before switching the installer to offline mode.
+cmp LICENSE packages/ned-api/LICENSE
+api_version=$("$runtime" -I -c 'import tomllib; from pathlib import Path; project = tomllib.loads(Path("packages/ned-api/pyproject.toml").read_text())["project"]; assert project["name"] == "ned-api"; print(project["version"])')
+uv build --wheel --no-sources --out-dir "$work/wheelhouse" packages/ned-api
+api_wheel="$work/wheelhouse/ned_api-${api_version}-py3-none-any.whl"
+test -f "$api_wheel"
+sha256sum "$api_wheel"
+
 # Only the temporary wheelhouse is available to HA's real uv installer.
 # No editable package, source-tree import, external index or publish action.
 cd "$work"
 export UV_NO_INDEX=1 UV_OFFLINE=1 UV_NO_CACHE=1
 export UV_FIND_LINKS="$work/wheelhouse"
-"$runtime" -I - "$work/config" "$root/hacs.json" <<'PY'
-"""Exercise the exact Core requirements manager with an uninstalled wheel."""
+"$runtime" -I - "$work/config" "$root/hacs.json" "$api_version" <<'PY'
+"""Exercise the exact Core requirements manager with uninstalled wheels."""
 import asyncio
 import importlib
 import importlib.util
 import json
 import sys
-from importlib.metadata import version
+from importlib.metadata import distribution, distributions, version
 from pathlib import Path
 
 from aiohttp import ClientSession
@@ -65,15 +73,26 @@ from homeassistant.requirements import async_process_requirements
 
 assert version("homeassistant") == json.loads(Path(sys.argv[2]).read_text())["homeassistant"]
 assert importlib.util.find_spec("ned_api_runtime_probe") is None
-before = version("aiohttp")
+assert importlib.util.find_spec("ned_api") is None
+before = {item.metadata["Name"]: item.version for item in distributions()}
+api_version = sys.argv[3]
 
 
 async def main() -> None:
-    """Install the pinned package using the native custom integration path."""
+    """Install pinned packages using the native custom integration path."""
     hass = HomeAssistant(sys.argv[1])
     await async_process_requirements(
         hass, "ned_api_runtime_probe", ["ned-api-runtime-probe==0.0.1"], is_built_in=False
     )
+    await async_process_requirements(
+        hass, "nationaal_energie_dashboard", [f"ned-api=={api_version}"], is_built_in=False
+    )
+    importlib.invalidate_caches()
+    api_module = importlib.import_module("ned_api")
+    async with ClientSession() as session:
+        transport = api_module.NedTransport(session, "https://example.invalid")
+        assert str(transport.origin) == "https://example.invalid"
+        assert not session.closed
 
 
 asyncio.run(main())
@@ -82,9 +101,21 @@ module = importlib.import_module("ned_api_runtime_probe")
 assert version("ned-api-runtime-probe") == "0.0.1"
 assert Path(module.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
 assert module.session_type() is ClientSession
-assert version("aiohttp") == before
 assert Path(module.__file__).with_name("py.typed").is_file()
-print("Native HA requirement install, pinned version, isolated import and typing marker passed.")
+print("Native HA synthetic requirement install, isolated import and typing marker passed.")
+
+api_module = importlib.import_module("ned_api")
+api_dist = distribution("ned-api")
+assert api_dist.version == api_version
+assert api_dist.metadata["License-Expression"] == "GPL-3.0-only"
+assert Path(api_module.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
+assert Path(api_module.__file__).with_name("py.typed").is_file()
+assert any(str(path).endswith(".dist-info/licenses/LICENSE") for path in api_dist.files or ())
+assert issubclass(api_module.NedConnectionError, api_module.NedApiError)
+after = {item.metadata["Name"]: item.version for item in distributions()}
+assert all(after.get(name) == installed_version for name, installed_version in before.items())
+assert set(after) - set(before) == {"ned-api", "ned-api-runtime-probe"}
+print("Native HA actual API wheel install, dependency preservation, typed import and session injection passed.")
 PY
 uv pip check --python "$runtime"
-echo "Synthetic runtime wheel probe passed; full integration installation is not evaluated."
+echo "Synthetic and actual runtime wheel probes passed; full integration installation is not evaluated."

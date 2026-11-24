@@ -134,7 +134,7 @@ jobs:
       - name: Exercise Dependabot merge policy offline
         shell: bash
         run: bash scripts/test_dependabot_automerge.sh
-      - name: Validate isolated runtime distribution prototype
+      - name: Validate synthetic and actual wheels via native HA requirements
         shell: bash
         run: bash scripts/check_runtime_distribution.sh
       - name: Audit installed dependencies

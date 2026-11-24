@@ -43,3 +43,5 @@ Deze registratie legt besluit, onderbouwing en bewijs vast. Het integratieplan b
 - Motivatie: native installer, onafhankelijk versiebeheer en geen runtime Git- of PYTHONPATH-workaround.
 - Gevolgen: controleer distributienaam, buildmetadata, dependencycompatibiliteit en echte wheel/installatie bij fase 1 en 7. De tijdelijke offline wheelhouse-proef is geen volledige HACS-installatie of publieke PyPI-proef.
 - Bewijs: [PR #19](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/pull/19), [geslaagde CI-job](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45482964831/job/138760699296), Core 2026.11.3/Python 3.14.10 en 164 gecontroleerde packages; [integratieplan §26.1](INTEGRATION_PLAN.md#261-beperkingen-en-ontwerpbeslissingen).
+
+- Aanvullende fase-1-validatie: de [native runtimeproef](../scripts/check_runtime_distribution.sh) omvat nu ook de daadwerkelijke API-wheel naast de synthetische wheel. Gelockte CI-uitvoering van deze uitbreiding nog te bevestigen; volledige integratie- en releasevalidatie blijft open.
