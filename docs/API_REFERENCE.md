@@ -31,7 +31,7 @@ Querydimensies: point, type, granularity, granularitytimezone, classification, a
 
 De handleiding geeft tegenstrijdige tijdzone-informatie: 0 = UTC, 1 = Europe/Amsterdam, maar het voorbeeld toont een request met 1 en een record met 0. De handleiding vermeldt dat dag/maand/jaar 1 vereisen. Live-observaties hieronder bevestigen voor nationale historische zonne-energie dat kwartierdata met querytijdzone 1 records met tijdzone-ID 0 en correcte Nederlandse kalendergrenzen levert. Ook levert daggranulariteit met querytijdzone 0 een record op, in strijd met de verwachte beperking. De gerichte dagprobe hieronder heeft beide grensafwijkingen gemeten; oorzaken en meetsemantiek blijven open.
 
-Velden: capacity (gemiddeld kW), volume (kWh), emission (kg), emissionfactor (kg/kWh), percentage (benuttingsgraad), validfrom, validto, lastupdate. De getoonde percentagewaarde lijkt een ratio; bewijs schaal en bereik vóór conversie. Het documentatievoorbeeld is geen geldige volledige JSON-response. Null, afwezigheid en nul niet gelijkstellen zonder contractbewijs.
+Velden volgens de handleiding: capacity (naar uurwaarde omgerekende capaciteit in kW), volume (intervalenergie in kWh), emission (kg volgens handleiding, ton volgens OpenAPI; formele eenheid onbevestigd, zie SEM-002), emissionfactor (kg/kWh volgens handleiding), percentage (benuttingsgraad), validfrom, validto, lastupdate. De getoonde percentagewaarde lijkt een ratio; bewijs schaal en bereik vóór conversie. Het documentatievoorbeeld is geen geldige volledige JSON-response. Null, afwezigheid en nul niet gelijkstellen zonder contractbewijs.
 
 ## P0: productiecatalogus
 

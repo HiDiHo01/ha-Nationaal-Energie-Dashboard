@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Openbare documentatie in beide talen afgestemd op de waargenomen kwartiercontracten, de onbevestigde emissie-eenheid en de uitsluiting van upstream-dagaggregaten.
+
 - Gerichte dagaggregatieprobe voor TZ-002/TZ-003 met twee vaste aanvragen, intervalduur en afzonderlijke grensafwijkingen; beide afwijkingen live bevestigd, oorzaakanalyse blijft open.
 
 - Nationale P0-datasets en paginering live gevalideerd voor de geteste queries; NL-kwartierdekking voor historische zon bevestigd, afwijkende recordtijdzone en twee dagaggregatie-afwijkingen vastgelegd. Verdere contractvalidatie blijft open.
@@ -22,6 +24,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Public documentation in both languages aligned with observed quarter-hour contracts, the unconfirmed emission unit and exclusion of upstream daily aggregates.
 
 - Focused daily aggregation probe for TZ-002/TZ-003 with two fixed requests, interval duration and separate boundary offsets; both deviations confirmed live, root cause remains unresolved.
 
