@@ -45,7 +45,8 @@ Initiële referentie: 24 november 2026. De repositorybaseline staat in AGENTS.md
 - Registreer actions volgens het actuele Core-contract in async_setup; gebruik SupportsResponse.ONLY waar passend. Valideer entryselectie, datumbereik, datasetcombinaties en responsegrootte. Geen grote tijdreeksen in Recorder-attributen.
 - Vertaal tijdelijke setupfouten naar ConfigEntryNotReady, bevestigde authenticatiefouten naar ConfigEntryAuthFailed, updatefouten naar UpdateFailed en actionfouten naar passende native exceptions. Controleer actuele signatures; preserveer cancellation.
 - Diagnostics gebruiken alleen relevante reeds beschikbare data en redacten secrets recursief. Geen extra API-call en geen ruwe gevoelige response. Repairs alleen voor concrete, oplosbare problemen.
-- Onderhoud Nederlandse en Engelse vertalingen voor relevante flows, entiteiten, actions, fouten en repairs. Controleer de actuele custom-integration-vertalingsstructuur; neem Core-specifieke buildmechanismen niet blind over.
+- Nederlands en Engels zijn gelijkwaardige verplichte gebruikerstalen. Volg de native taalkeuze van Home Assistant; Engels is de native fallback. Gebruik voor deze custom integratie complete translations/en.json en translations/nl.json met identieke sleutelstructuur en placeholdernamen/-aantallen. Geen strings.json, Core-vertaalreferenties of lege placeholderbestanden. Gebruik native translation keys voor flows, entities, actions, fouten en repairs; technische identifiers en interne code/logging blijven Engelstalig. Valideer bij iedere functionele wijziging de vertalingen en beide gebruikersdocumentatieversies.
+- Bevestigd op 24 november 2026 voor Core 2026.11.3: de [custom-integration-vertaalreferentie](https://contributors.home-assistant.io/core/integrations/translations/) en [Core translation.py](https://github.com/home-assistant/core/blob/2026.11.3/homeassistant/helpers/translation.py) beschrijven het laden van translations/<language>.json en de Engelse fallback. Gebruik geen Core-compileproces of niet-opgeloste Core-referenties. Test native taalgedrag en gebruikte keys zodra de integratie bestaat.
 
 ## 8. Tests en Platinum
 
@@ -73,5 +74,7 @@ De onderstaande Home Assistant-documentatiepagina's zijn op 24 november 2026 geo
 AI controleert dit document bij iedere relevante taak, faseovergang, Core-upgrade en nieuwe deprecation. Verwerk bewezen wijzigingen met bron, datum, toepasselijke versie en impact; verwijder verouderde aanwijzingen. Houd AGENTS.md, integratieplan, skills en tooling consistent. Verander geen mandaat of kwaliteitsdrempel. Meld onopgeloste conflicten en onbevestigde compatibiliteit. Gebruik de [skill-index](.agents/skills/README.md) en de skill project-knowledge-maintenance om herbruikbare kennis vast te leggen.
 
 ### Onderhoudslog
+
+- 2026-11-24: NL/EN-beleid en custom-integration-vertaalstructuur gecontroleerd tegen Core 2026.11.3; documentatievalidator voorbereid. Runtimevertaaltests blijven open.
 
 - 2026-11-24: initiële technische referentie aangemaakt op basis van bestaande projectregels en gecontroleerde officiële referentielinks. Geen runtimevalidatie uitgevoerd; fase 0 blijft open.

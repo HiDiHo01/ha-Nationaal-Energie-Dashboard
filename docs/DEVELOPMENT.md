@@ -40,7 +40,7 @@ De coverage-drempel bedraagt 95% voor de gecombineerde lijn- en branchdekking; d
 
 De TOML-syntaxis, versie-uitlijning en dependency-specifiers zijn statisch gevalideerd. Een geïsoleerde smoketest met synthetische testcode op Python 3.13.5 bevestigde async-testuitvoering, standaard uitsluiting van live_api en de 95%-coveragepoort. Dit is geen integratietest. Python 3.14.10 kon eerder niet in de lokale validatieomgeving worden geïnstalleerd. GitHub Actions heeft inmiddels de exacte Python/Core-baseline en gelockte dependencies succesvol geïnstalleerd; de broncodegebonden lint-, type- en runtimecontroles staan nog open.
 
-De huidige structuur bevat geen uitvoerbare integratie of repositorytests. Maak geen publieke releases zonder toestemming.
+De huidige structuur bevat nog geen uitvoerbare integratie of integratietests; de afzonderlijke maintenance-tests staan onder scripts/. Maak geen publieke releases zonder toestemming.
 
 ## Pre-commit en VS Code
 
@@ -56,6 +56,23 @@ uv run --locked pre-commit run --all-files
 De eerste hookinstallatie vereist internettoegang voor de vastgepinde externe hookrepositories en hun Python-/Go-builddependencies. De root-tools komen uit uv.lock; externe hooks hebben eigen geïsoleerde omgevingen en SHA-pins. De hooks controleren JSON, YAML, TOML inclusief uv.lock, mergeconflicten, hoofdletterconflicten, regeleinden, private keys, credentialbestandsnamen, secrets in de Git-index en de lockfile. Gitleaks redigeert alle gevonden secrets en scant niet de lokale werkboom, .venv of ongevolgde bestanden. Geen volledige historiescan of garantie op afwezigheid van secrets. Los findings op; voeg geen generieke uitzonderingen toe. Ruff, Pylint en strict mypy gebruiken pyproject.toml en de gelockte tools; ze draaien zodra passende Python-broncode bestaat. Baseline CI voert dezelfde hooks uit en bewaakt daarnaast de bestaande offline tests, coverage en dependency-audit. De pre-commit-checks veranderen bestanden niet automatisch.
 
 Open de repository-root in VS Code, installeer de aanbevolen extensies via het Extensions-paneel en selecteer de interpreter in .venv indien een eerder gekozen interpreter blijft staan. [Workspace-instellingen](../.vscode/settings.json) gebruiken de virtuele omgeving, Ruff-formattering en pytest. [Taken](../.vscode/tasks.json) bieden synchronisatie, hookinstallatie, controles, offline tests en audit via uv. Extensies kunnen eigen gebundelde tools gebruiken wanneer de omgeving ontbreekt; de gelockte CLI en CI zijn daarom leidend. De taken voor inhoudelijke tests zijn pas toepasbaar zodra tests bestaan. De instellingen zijn als JSON gecontroleerd; de grafische VS Code-omgeving is hier niet beschikbaar. [Baseline CI-run 45462898030](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45462898030) bevestigt dat pre-commit validate-config en pre-commit run --all-files met pre-commit 4.7.0 en de exacte baseline slagen: negen hooks geslaagd, zes zonder toepasselijke bestanden overgeslagen. De volledige broncodegebonden lint-, type- en testvalidatie blijft open.
+
+## Autonoom documentatie- en taalbeheer
+
+Volg AGENTS.md: actualiseer geraakte documentatie in dezelfde PR, inclusief [Nederlandse README](../README.md), [English README](../README.en.md), [changelog](../CHANGELOG.md), backlog, plan en relevante technische referenties. Voor nieuwe gebruikershandleidingen gebruik je gelijknamige bestanden onder docs/user/nl en docs/user/en. Beide talen moeten inhoudelijk gelijkwaardig zijn. De gebruiksvoorwaarden blijven de canonieke juridische bron.
+
+De [validator](../scripts/check_project_docs.py) controleert gevolgde Markdown-bestandslinks (inline en referentiedefinities, buiten eenvoudige codeblokken), documentparen en, zodra een manifest of vertaalbestand bestaat, complete niet-lege NL/EN-vertalingen met gelijke keys en placeholders. Hij verwerpt dubbele JSON-keys en niet-opgeloste Core-vertaalreferenties. Dit is een offline structurele controle, geen volledige Markdown-parser, anchorcontrole, externe linkcheck of vertaalreview. Controleer die onderdelen bij relevante wijzigingen aanvullend. Maak geen lege vertaalbestanden om CI te laten slagen.
+
+Voer lokaal uit:
+
+```bash
+uv run --locked python scripts/check_project_docs.py
+uv run --locked python -m unittest discover -s scripts -t .
+uv run --locked pylint scripts
+uv run --locked mypy scripts
+```
+
+Deze controles draaien ook via pre-commit in Baseline CI. De maintenance-tests zijn onafhankelijk van Home Assistant en veranderen de bestaande integratiecoveragepoort niet. Native taalgedrag en daadwerkelijke vertalingen worden in de implementatiefasen getest. De elf regressietests zijn lokaal geslaagd op Python 3.13.5 en in de eerste Baseline CI-run op de exacte baseline, waarin documentatiecontrole en strict mypy ook slagen. Ruff/Pylint vonden drie herstelbare punten; de herhaalde kwaliteitscontrole blijft open.
 
 ## Forward Compatibility Testing
 

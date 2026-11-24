@@ -1,5 +1,7 @@
 # Nationaal Energie Dashboard voor Home Assistant
 
+Nederlands | [English](README.en.md)
+
 Krijg inzicht en maak bewuste keuzes met historische, actuele en voorspellende energiedata.
 
 Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.home-assistant.io/) op basis van de API van het [Nationaal Energie Dashboard (NED)](https://ned.nl/). Het doel is Nederlandse energiedata beschikbaar te maken voor sensoren, dashboards en automatiseringen in Home Assistant.
@@ -8,7 +10,7 @@ Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.h
 
 ## Energiedata
 
-De NED API biedt onder meer de volgende gegevens. Ondersteuning door de Home Assistant-integratie moet nog worden geïmplementeerd.
+De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De exacte API-contracten en ondersteunde datasetcombinaties moeten nog worden gevalideerd; ondersteuning door de integratie moet nog worden geïmplementeerd.
 
 | Gegevens | Beschrijving |
 | --- | --- |
@@ -40,13 +42,13 @@ Voor toegang tot de NED API is een persoonlijke API-sleutel vereist.
 3. Genereer een API-sleutel.
 4. Bewaar deze veilig voor de toekomstige configuratie van de integratie.
 
-Het actuele API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit via GitHub-issues, commits of diagnostische gegevens.
+Het beoogde API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit via GitHub-issues, commits of diagnostische gegevens.
 
 ## Installatie en configuratie
 
 **Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
 
-Het distributiedoel is Home Assistant Marketplace (vanaf Home Assistant 2026.11). Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
+Het distributiedoel is Home Assistant Marketplace; toelating en runtime-distributie moeten nog worden gevalideerd. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
 
 ## Ontwikkeling en kwaliteit
 
@@ -61,6 +63,10 @@ Technische uitgangspunten:
 - Veilige herauthenticatie, herconfiguratie en diagnostiek zonder gevoelige gegevens.
 - Geautomatiseerde tests, linting, typecontrole en CI-validatie.
 
+## Taalondersteuning
+
+De integratie en gebruikershandleidingen worden in het Nederlands en Engels ontwikkeld, met de native taalkeuze van Home Assistant en Engels als fallback. De daadwerkelijke integratievertalingen volgen bij de implementatie. Zie ook de [changelog](CHANGELOG.md).
+
 ## Roadmap
 
 Zie de [geprioriteerde backlog](docs/BACKLOG.md) voor openstaande instellingen, afhankelijkheden en acceptatiecriteria.
@@ -69,8 +75,9 @@ Zie de [geprioriteerde backlog](docs/BACKLOG.md) voor openstaande instellingen, 
 - [ ] NED API-client en datamodellen implementeren.
 - [ ] Configuratieflow en gegevenscoördinator implementeren.
 - [ ] Sensoren en voorspellingen beschikbaar maken.
-- [ ] Vertalingen, diagnostiek en foutafhandeling toevoegen.
-- [ ] Tests en GitHub Actions inrichten.
+- [ ] Nederlandse en Engelse integratievertalingen, diagnostiek en foutafhandeling toevoegen.
+- [x] Ontwikkeltooling, pre-commit en basis-CI inrichten.
+- [ ] Inhoudelijke integratietests en volledige kwaliteitsvalidatie afronden.
 - [ ] Marketplace-toelatingsvoorwaarden en runtime-distributiestrategie bevestigen.
 - [ ] Marketplace-compatibiliteit, metadata, branding en installatie-/updatetests realiseren.
 - [ ] HACS- en Hassfest-validatie en Platinum-criteria aantoonbaar afronden.

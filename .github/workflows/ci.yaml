@@ -61,7 +61,7 @@ jobs:
           uv run --no-sync pylint --version
           uv run --no-sync mypy --version
           uv run --no-sync pytest --version
-      - name: Validate configuration and run pre-commit
+      - name: Validate configuration, documentation, translations and run pre-commit
         run: |
           uv run --no-sync pre-commit validate-config
           uv run --no-sync pre-commit run --all-files --show-diff-on-failure

@@ -74,5 +74,32 @@ repos:
         name: Strict mypy
         language: unsupported
         entry: uv run --locked mypy
+        files: '^(custom_components/|packages/|tests/)'
         types: [python]
         pass_filenames: false
+      - id: pylint-maintenance
+        name: Pylint maintenance tools
+        language: unsupported
+        entry: uv run --locked pylint scripts
+        files: '^scripts/'
+        types: [python]
+        pass_filenames: false
+      - id: mypy-maintenance
+        name: Strict mypy maintenance tools
+        language: unsupported
+        entry: uv run --locked mypy scripts
+        files: '^scripts/'
+        types: [python]
+        pass_filenames: false
+      - id: project-documentation
+        name: Check documentation links and NL/EN parity
+        language: unsupported
+        entry: uv run --locked python scripts/check_project_docs.py
+        pass_filenames: false
+        always_run: true
+      - id: project-documentation-tests
+        name: Test documentation validator
+        language: unsupported
+        entry: uv run --locked python -m unittest discover -s scripts -t .
+        pass_filenames: false
+        always_run: true

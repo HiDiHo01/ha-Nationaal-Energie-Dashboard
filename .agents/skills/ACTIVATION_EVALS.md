@@ -20,9 +20,11 @@ Gebruik de prompts ongewijzigd, in een nieuwe sessie per scenario. De verwachte 
 | EN05 | Audit integration quality against Platinum. | ha-quality-verification | Evidence and missing prerequisites. |
 | NL06 | Bereid de integratie voor op opname in de Marketplace. | marketplace-readiness, ha-quality-verification | Validatie, gebruiksrechten, geen ongeautoriseerde publicatie. |
 | EN06 | Prepare the integration for Marketplace admission. | marketplace-readiness, ha-quality-verification | Admission checks and publication boundary. |
-| NL07 | Actualiseer de ontwikkelrichtlijnen met bewezen nieuwe Home Assistant-kennis. | project-knowledge-maintenance | Bronnen, datum en consistente instructies. |
-| EN07 | Update the repository guidance with verified new Home Assistant knowledge. | project-knowledge-maintenance | Verified references and consistent guidance. |
+| NL07 | Actualiseer de ontwikkelrichtlijnen met bewezen nieuwe Home Assistant-kennis. | project-knowledge-maintenance | Bronnen, datum, consistente instructies en autonome documentatie-impactanalyse. |
+| EN07 | Update the repository guidance with verified new Home Assistant knowledge. | project-knowledge-maintenance | Verified references, consistent guidance and autonomous documentation impact review. |
 | NEG01 | Vertaal 'good morning' naar Nederlands. | Geen projectspecifieke skill nodig | Geen onnodige activatie. |
+| NL08 | Voeg een gebruikersgerichte wijziging toe aan de integratie en actualiseer de documentatie. | ha-integration, ha-quality-verification, project-knowledge-maintenance | Gelijke NL/EN-keys, placeholders, beide gebruikersdocumentatieversies en validator of expliciete implementatieblokkade. |
+| EN08 | Add a user-facing integration change and update its documentation. | ha-integration, ha-quality-verification, project-knowledge-maintenance | Matching NL/EN keys and placeholders, both user-documentation versions and validator evidence or explicit implementation blocker. |
 
 ## Uitvoering en beoordeling
 

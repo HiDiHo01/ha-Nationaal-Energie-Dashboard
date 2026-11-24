@@ -34,7 +34,7 @@ Ontwikkel een robuuste, schaalbare, volledig asynchrone Home Assistant-integrati
 | Datamodellen | Typed dataclasses |
 | Tijdverwerking | Timezone-aware UTC |
 | Lokale tijdzone NED | Europe/Amsterdam |
-| Vertalingen | Nederlands en Engels |
+| Vertalingen | Nederlands en Engels, gelijkwaardig; Engels native fallback |
 | Testframework | pytest |
 | Linting | Ruff en Pylint |
 | Typecontrole | mypy strict |
@@ -220,7 +220,6 @@ ha-Nationaal-Energie-Dashboard/
 │       ├── manifest.json
 │       ├── quality_scale.yaml
 │       ├── icons.json
-│       ├── strings.json
 │       ├── brand/
 │       │   └── icon.png
 │       └── translations/
@@ -290,7 +289,7 @@ ha-Nationaal-Energie-Dashboard/
 | services.py | Historie en voorspellingen |
 | quality_scale.yaml | Traceerbaarheid kwaliteitscriteria |
 
-Voeg modules pas toe bij een concrete verantwoordelijkheid; vermijd lege placeholders. Valideer de vertaal- en manifestbestanden voor de gekozen Home Assistant- en HACS-versies.
+Voeg modules pas toe bij een concrete verantwoordelijkheid; vermijd lege placeholders. Ship translations/en.json en translations/nl.json direct; geen strings.json voor de custom integratie. Gebruikershandleidingen worden per taal gepaard onder docs/user/nl en docs/user/en; README.md en README.en.md zijn de tweetalige ingang. Valideer de vertaal- en manifestbestanden voor de gekozen Home Assistant- en HACS-versies.
 
 ## 6. Datamodellen
 
@@ -854,6 +853,8 @@ Dependabot controleert GitHub Actions en uv-dependencies dagelijks volgens AGENT
 
 ### 20.1 GitHub Actions
 
+Documentatie en vertaalpariteit worden via pre-commit in de verplichte Baseline CI gecontroleerd. Dezelfde controles zijn lokaal uitvoerbaar; inhoudelijke documentatiecontrole blijft een verplicht onderdeel van review.
+
 Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → geautoriseerde release en Marketplace-catalogusaanmelding na geslaagde controles.
 
 AI beoordeelt bij iedere ontwikkeltaak en faseovergang zelfstandig welke CI/CD-automatisering nuttig is en implementeert, valideert en onderhoudt deze volgens de verplichte regel in AGENTS.md paragraaf 13.3, binnen AI_POLICY.md.
@@ -904,6 +905,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 | Totaal | 32 werkdagen | Indicatieve inspanning |
 
 ### 21.1 Fase 0 — Repository Foundation
+
+- [ ] Autonoom documentatiebeheer en NL/EN-taalbeleid vastleggen en automatische controles valideren (BL-007/BL-008; runtimevertalingen volgen per implementatiefase).
 
 - [x] AGENTS.md opstellen.
 - [x] Home Assistant-ontwikkelreferentie en repositoryskills opstellen; zelfstandig gebruik en onderhoud verplicht stellen.
@@ -1055,7 +1058,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 - [ ] Ruff en Pylint geslaagd.
 - [ ] Strict mypy geslaagd.
 - [ ] Vereiste testdekking behaald.
-- [ ] Documentatie en vertalingen bijgewerkt.
+- [ ] Autonome documentatie-impactanalyse, actuele documentatie en changelog/backlog, gelijkwaardige NL/EN-gebruikersdocumentatie en vertalingen, automatische validator en inhoudelijke review uitgevoerd.
 - [ ] Quality Scale-criteria onderbouwd.
 - [ ] GitHub Actions geslaagd.
 - [ ] Geen openstaande releaseblokkerende fouten.
@@ -1093,7 +1096,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Marketplace | Doel vastgelegd; niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
 | Live API-contracttests | Niet uitgevoerd |
-| CI/CD | Niet ingericht |
+| CI/CD | Basis-CI, pre-commit, dependency-audit en branchbescherming operationeel; inhoudelijke integratievalidatie nog niet uitgevoerd |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
 
