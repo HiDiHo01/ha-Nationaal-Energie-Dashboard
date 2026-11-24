@@ -177,6 +177,8 @@ Volg de teststrategie en de volledige scenario-checklist in hoofdstuk 19. Iedere
 
 Test authenticatie, netwerkfouten, 429, onveilige paginering, malforme responses, concurrency, cancellation, lifecycle, unieke IDs, gedeeltelijke uitval, revisies, eenheden, DST, onvolledige forecasts en credentialredactie. Deze interne doelen vervangen de officiële toepasselijke kwaliteitscriteria niet.
 
+De root-pyproject.toml is een niet-installeerbare ontwikkelworkspace (uv package=false); de zelfstandige API-library krijgt in fase 1 eigen buildmetadata. Gebruik de officiële pytest-homeassistant-plugin met exact dezelfde versie als Home Assistant Core; installeer niet daarnaast pytest-homeassistant-custom-component. De dev-dependencygroep bevat de tooling. Lock de volledige dependencyboom in fase 0 en valideer de installatie op de exacte .python-version. Gebruik `mypy` zonder padargumenten voor alle in pyproject.toml vastgelegde bron- en testmappen. De coverage-configuratie bewaakt de totale gecombineerde lijn- en branchdekking met branchmeting ingeschakeld (95%); de aanvullende per-module- en afzonderlijke branchdoelen moeten in CI expliciet worden bewaakt. Live API-tests krijgen marker live_api en zijn standaard uitgesloten; voer deze alleen expliciet uit met veilige credentials.
+
 ### 11.1 Validatiecommando's
 
 Gebruik de volgende geplande commando's vanuit de repository-root zodra de tooling en bijbehorende modules in fase 0/1 zijn ingericht. Gebruik vervolgens de vastgestelde configuraties in pyproject.toml en CI. Een ontbrekende dependency of module is een blokkade, geen geslaagde controle.
@@ -186,8 +188,7 @@ ruff format --check .
 ruff check .
 pylint custom_components/nationaal_energie_dashboard
 pylint packages/ned-api/src/ned_api
-mypy --strict custom_components/nationaal_energie_dashboard
-mypy --strict packages/ned-api/src/ned_api
+mypy
 pytest --cov --cov-branch --cov-report=term-missing
 pip-audit
 ```

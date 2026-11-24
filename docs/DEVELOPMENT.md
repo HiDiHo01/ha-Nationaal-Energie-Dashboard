@@ -12,4 +12,26 @@ Baseline 24 november 2026: Home Assistant Core 2026.11.3, Python 3.14, upstream 
 
 De repository bevat een .python-version met de exacte ontwikkelpin. Verifieer compatibiliteit van runtime en testdependencies voordat de tooling als gereed wordt gemarkeerd.
 
-De projecttooling, dependencies, testcommando's en CI worden in fase 0 definitief ingericht. De huidige structuur bevat geen uitvoerbare integratie of tests. Maak geen publieke releases zonder toestemming.
+## Centrale tooling
+
+[pyproject.toml](../pyproject.toml) bevat de projectmetadata, dev-dependencygroep en configuratie voor Ruff, Pylint, strict mypy, pytest en coverage. De root is een ontwikkelworkspace, geen distributiepackage. Versie 0.0.0 is uitsluitend de metadata van de nog niet uitgebrachte workspace. De runtime-library krijgt eigen buildmetadata in fase 1.
+
+De officiële [pytest-homeassistant](https://pypi.org/project/pytest-homeassistant/2026.11.3/) testplugin volgt Core 2026.11.3; combineer deze niet met pytest-homeassistant-custom-component. Gebruik uv met de exacte .python-version. Volgende stap: resolveer en commit uv.lock en verifieer de volledige ontwikkelinstallatie. Er is nog geen gevalideerde lockfile.
+
+Na installatie van de ontwikkelomgeving en implementatie van de broncode:
+
+```bash
+ruff format --check .
+ruff check .
+pylint custom_components/nationaal_energie_dashboard
+pylint packages/ned-api/src/ned_api
+mypy
+pytest --cov --cov-branch --cov-report=term-missing
+pip-audit
+```
+
+De coverage-drempel bedraagt 95% voor de gecombineerde lijn- en branchdekking; de afzonderlijke branch- en modulecoverage-doelen uit het integratieplan worden aanvullend in CI bewaakt. Live contracttests zijn standaard uitgesloten. Gebruik uitsluitend voor een geautoriseerde live test `pytest -m live_api` met veilig geïnjecteerde credentials.
+
+De TOML-syntaxis, versie-uitlijning en dependency-specifiers zijn statisch gevalideerd. Een geïsoleerde smoketest met synthetische testcode op Python 3.13.5 bevestigde async-testuitvoering, standaard uitsluiting van live_api en de 95%-coveragepoort. Dit is geen integratietest. Python 3.14.10 kon in de validatieomgeving niet worden geïnstalleerd; volledige dependencyresolutie, tooluitvoering en runtimevalidatie staan nog open.
+
+De huidige structuur bevat geen uitvoerbare integratie of repositorytests. Maak geen publieke releases zonder toestemming.

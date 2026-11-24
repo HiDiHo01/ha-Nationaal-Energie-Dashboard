@@ -1,0 +1,90 @@
+[project]
+name = "ha-nationaal-energie-dashboard"
+version = "0.0.0"
+description = "Home Assistant integration for Nationaal Energie Dashboard"
+readme = "README.md"
+requires-python = ">=3.14.2"
+license = "LicenseRef-Proprietary"
+license-files = ["USAGE_TERMS.md"]
+
+[project.urls]
+Repository = "https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard"
+Issues = "https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/issues"
+
+[dependency-groups]
+dev = [
+    "homeassistant==2026.11.3",
+    "pytest-homeassistant==2026.11.3",
+    "pytest>=9,<10",
+    "pytest-asyncio",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.6",
+    "pylint==4.1.4",
+    "mypy==2.4.1",
+    "pre-commit==4.7.0",
+    "pip-audit==2.10.1",
+]
+
+# The repository is a development workspace, not an installable distribution.
+# The independent API package will have its own build metadata in phase 1.
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+src = [".", "packages/ned-api/src"]
+
+[tool.ruff.lint]
+select = ["A", "ANN", "ASYNC", "B", "BLE", "D", "DTZ", "E4", "E7", "E9", "F", "G", "I", "LOG", "N", "RUF", "S", "UP"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pylint.main]
+py-version = "3.14"
+source-roots = ["packages/ned-api/src"]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.messages_control]
+enable = ["logging-fstring-interpolation"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+show_error_codes = true
+warn_unused_configs = true
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "$MYPY_CONFIG_FILE_DIR/packages/ned-api/src"
+files = ["custom_components/nationaal_energie_dashboard", "packages/ned-api/src/ned_api", "tests"]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+pythonpath = [".", "packages/ned-api/src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+asyncio_default_test_loop_scope = "function"
+addopts = "-ra --strict-config --strict-markers -p no:respx -m 'not live_api'"
+markers = ["live_api: opt-in authenticated NED API contract test"]
+
+[tool.coverage.run]
+branch = true
+source = ["custom_components/nationaal_energie_dashboard", "packages/ned-api/src/ned_api"]
+
+[tool.coverage.report]
+fail_under = 95
+precision = 2
+show_missing = true
+skip_covered = false
+include_namespace_packages = true

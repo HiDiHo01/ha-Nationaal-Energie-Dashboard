@@ -848,13 +848,12 @@ ruff format --check .
 ruff check .
 pylint custom_components/nationaal_energie_dashboard
 pylint packages/ned-api/src/ned_api
-mypy --strict custom_components/nationaal_energie_dashboard
-mypy --strict packages/ned-api/src/ned_api
+mypy
 pytest --cov --cov-branch --cov-report=term-missing
 pip-audit
 ```
 
-Definitieve commando's en dependencyversies in AGENTS.md en pyproject.toml. Deze commando's zijn nog niet uitvoerbaar zolang de tooling en code ontbreken.
+De root-pyproject.toml bevat de ontwikkelgroep en centrale toolconfiguratie. De officiële pytest-homeassistant-plugin is gekoppeld aan de exacte Core-baseline. Branchmeting is ingeschakeld en de gecombineerde coverage-drempel is 95%; afzonderlijke branchcoverage en de per-module-doelen moeten aanvullend in CI worden afgedwongen. Volledige dependencyresolutie, lockfile en uitvoering op de vastgelegde Python-versie volgen bij de ontwikkelomgeving. De codecontroles zijn nog niet uitvoerbaar zolang de broncode en tests ontbreken.
 
 ### 20.3 Branchbeleid (voorstel)
 
@@ -891,7 +890,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] Actuele Marketplace-toelatingsvoorwaarden, waaronder eventuele licentievereisten, definitief bevestigen.
 - [ ] Reproduceerbare Marketplace-compatibele runtime-distributiestrategie valideren.
 - [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
-- [ ] pyproject.toml configureren.
+- [x] pyproject.toml configureren en statisch valideren.
+- [ ] Dependencyresolutie, lockfile en toolconfiguratie op de exacte Python/Core-baseline valideren.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
 - [ ] Basis-CI configureren.
 - [ ] OpenAPI-contract valideren.
