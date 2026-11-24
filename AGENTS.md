@@ -160,7 +160,7 @@ Volg hoofdstukken 9–11, 14, 16 en 18 van het integratieplan en actuele Home As
 - Gebruik correcte device classes, state classes, native units en native_value. Gebruik extra_state_attributes, nooit het verouderde device_state_attributes.
 - Sensorproperties retourneren in-memory data en voeren geen I/O uit. Attributen blijven klein; grote tijdreeksen gaan via response actions.
 - Registreer actions in async_setup(), met SupportsResponse.ONLY waar passend, invoervalidatie en geldige config-entryselectie. Begrens datumbereik, respons en requests.
-- Implementeer NL/EN-vertalingen voor relevante entiteiten, flows, fouten, repairs en actions. Volg de actuele vereisten voor manifest, icons en HACS-distributie.
+- Nederlands en Engels zijn gelijkwaardige verplichte gebruikerstalen. Volg de native taalkeuze van Home Assistant; Engels is de native fallback. Gebruik voor deze custom integratie complete translations/en.json en translations/nl.json met identieke sleutelstructuur en placeholdernamen/-aantallen. Geen strings.json, Core-vertaalreferenties of lege placeholderbestanden. Gebruik native translation keys voor flows, entities, actions, fouten en repairs; technische identifiers en interne code/logging blijven Engelstalig. Valideer bij iedere functionele wijziging de vertalingen en beide gebruikersdocumentatieversies. Volg ook de actuele vereisten voor manifest, icons en HACS-distributie.
 - Start reauth alleen bij bevestigde authenticatiefout. Gebruik ConfigEntryNotReady voor tijdelijke setupfouten, ConfigEntryAuthFailed voor authenticatiefouten, UpdateFailed voor mislukte refreshes, ServiceValidationError voor ongeldige action-invoer en HomeAssistantError voor operationele action-fouten.
 - Gebruik Repairs uitsluitend voor relevante oplosbare problemen. Valideer sensorsemantiek: intervalenergie is niet zonder meer TOTAL_INCREASING; forecastwaarden zijn geen actuele statistische metingen.
 
@@ -240,6 +240,12 @@ pip-audit
 - Documenteer publieke API-contracten, configuratieopties, eenheden, beperkingen, breaking changes en migratiepaden.
 - Houd AGENTS.md voor technische standaarden, AI_POLICY.md voor beleid en INTEGRATION_PLAN.md voor ontwerp en fasevoortgang. Vermijd dubbele of tegenstrijdige bronnen.
 
+### Autonoom documentatie- en taalbeheer
+
+**Verplichte regel: AI beheert documentatie autonoom.** Controleer bij iedere taak en faseovergang de impact op README, changelog, backlog, integratieplan, ontwikkelreferenties, skills en gebruikersdocumentatie. Werk alle geraakte documenten in dezelfde pull request bij zonder afzonderlijke opdracht. Baseer status, voorbeelden, versies en compatibiliteitsclaims op geverifieerde implementatie en testbewijs. Vermeld ontbrekende controles en onderhoud canonieke bronnen zonder duplicatie. Houd beide gebruikersdocumentatietalen inhoudelijk gelijkwaardig; gebruik README.md (NL), README.en.md (EN) en voor nieuwe gebruikershandleidingen gelijknamige bestanden onder docs/user/nl en docs/user/en. Changelog bevat beide talen; interne technische en beleidsdocumenten mogen Nederlands blijven. Verifieer verwijzingen, vertaalpariteit en inhoudelijke juistheid vóór oplevering. Wijzig geen rechten of kwaliteitscriteria.
+
+- Voer de [documentatievalidator](scripts/check_project_docs.py) en de regressietests via pre-commit uit. Controleer inhoud en externe verwijzingen aanvullend handmatig; bestandspariteit bewijst geen vertaal- of inhoudskwaliteit. Vertalingen zijn verplicht vanaf het manifest, of eerder zodra vertaalbestanden worden toegevoegd. Houd ontbrekende native gedragsevaluaties expliciet open.
+
 ### 13.1 Auteursrecht en distributie
 
 - Alle rechten voorbehouden, met beperkte gebruikstoestemming voor Home Assistant volgens [USAGE_TERMS.md](USAGE_TERMS.md). Geen open-sourcelicentie. Verleen geen aanvullende rechten aan derden zonder toestemming.
@@ -285,7 +291,7 @@ Een onderdeel is pas gereed wanneer alle toepasselijke punten uit hoofdstuk 24 a
 - [ ] Unit- en integratietests geslaagd.
 - [ ] Ruff, Pylint en strict mypy geslaagd.
 - [ ] Vereiste toepasselijke testdekking behaald.
-- [ ] Documentatie, vertalingen en planvoortgang bijgewerkt.
+- [ ] Autonome documentatie-impactanalyse uitgevoerd; geraakte documenten, NL/EN-gebruikersdocumentatie, vertalingen, changelog, backlog en planvoortgang synchroon; documentatievalidator en inhoudelijke review uitgevoerd.
 - [ ] Toepasselijke Quality Scale-criteria onderbouwd.
 - [ ] Toepasselijke GitHub Actions en releasecontroles geslaagd.
 - [ ] Geen openstaande releaseblokkerende fouten.
