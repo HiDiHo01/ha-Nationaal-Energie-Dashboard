@@ -852,6 +852,8 @@ Reguliere CI gebruikt reproduceerbare fixtures en gemockte responses zonder pers
 
 Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → geautoriseerde release en Marketplace-catalogusaanmelding na geslaagde controles.
 
+AI beoordeelt bij iedere ontwikkeltaak en faseovergang zelfstandig welke CI/CD-automatisering nuttig is en implementeert, valideert en onderhoudt deze volgens de verplichte regel in AGENTS.md paragraaf 13.3, binnen AI_POLICY.md.
+
 De actieve workflows zijn beschreven in [.github/workflows/README.md](../.github/workflows/README.md) en AGENTS.md paragraaf 13.3. De productie-CI bevat ook afzonderlijke branchcoverage en modulespecifieke coveragecontroles; onderhoud deze met de daadwerkelijke module-indeling. De dagelijkse baseline-watch is een waarschuwingssignaal, geen automatische versie-upgrade. De Python-next-run is geslaagd, maar er was nog geen API-library om te testen. Baseline-uitvoering, volledige dependencyresolutie en officiële Hassfest/Marketplace-validaties blijven open.
 
 ### 20.2 Beoogde lokale commando's
