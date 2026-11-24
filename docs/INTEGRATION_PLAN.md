@@ -953,7 +953,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk starten vóór volledige BL-003-contractacceptatie: zelfstandige packageconfiguratie, teststructuur, exception-hiërarchie en generieke asynchrone transportlaag met uitsluitend synthetische tests. Datasetafhankelijke parsing, catalogus/meetsemantiek, authenticatie- en foutstatusmapping, API-specifieke rate limiting, revisies, kalenderaggregaties en live NED-aanvragen worden niet vrijgegeven zolang hun contractvoorwaarden ontbreken. BL-003 blijft open; volledige fase-1-acceptatie en volgende afhankelijke fasen blijven geblokkeerd. Geen wijziging aan coverage, CI-kwaliteitsdrempels, beveiliging, Platinum-doel of publicatietoestemming.
 
-- [ ] Contractonafhankelijke packagebasis en exception-hiërarchie: implementatie en negen lokale tests gereed op Python 3.13.5; exacte productie-baseline, wheelbouw en CI nog te bevestigen.
+- [ ] Contractonafhankelijke packagebasis en exception-hiërarchie: implementatie, negen lokale tests op Python 3.13.5 en [negen zelfstandige Python-next-tests](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45496510400/job/138808349728) geslaagd. Eerste [Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45496510328/job/138808349344) stopt bij strict mypy wegens lege integratiemap; recursieve doelselectie hersteld, herhaalde exacte productie-baseline en wheelvalidatie nog te bevestigen.
 - [ ] Generieke transportlaag met synthetische tests; geen NED-specifieke mapping.
 
 - [ ] Zelfstandig Python-package implementeren.
