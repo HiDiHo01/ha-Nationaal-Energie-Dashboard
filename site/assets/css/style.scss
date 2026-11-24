@@ -1,3 +1,5 @@
+---
+---
 :root {
   color-scheme: light dark;
   font-family: system-ui, sans-serif;
@@ -51,3 +53,7 @@ h3 { font-size: 1.1rem; }
 main > section:not(.hero) { margin-bottom: 2.5rem; }
 .resources { max-width: 72ch; }
 footer { border-top: 1px solid var(--line); padding-block: 1.5rem; color: var(--muted); font-size: .875rem; }
+
+nav { flex-wrap: wrap; }
+.resources { padding-bottom: 2rem; }
+.resources > h2 { margin-top: 2rem; }

@@ -3,7 +3,6 @@ name: Project documentation site
 on:
   pull_request:
     branches: [main]
-    paths: ['site/**', '.github/workflows/pages.yaml']
   push:
     branches: [main]
     paths: ['site/**', '.github/workflows/pages.yaml']
@@ -15,49 +14,111 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    env:
+      BUNDLE_FROZEN: 'true'
+      BUNDLE_PATH: vendor/bundle
+      JEKYLL_ENV: production
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - name: Validate and stage explicitly public files
+      - uses: ruby/setup-ruby@78c62f2208e480ce3d5ae4dfd9b9e181acf48b63 # v1.344.0
+        with:
+          working-directory: site
+          bundler-cache: false
+      - name: Install locked site dependencies and audit
+        working-directory: site
+        run: |
+          test -f Gemfile.lock
+          sha256sum Gemfile.lock
+          bundle install
+          bundle check
+          bundle exec bundler-audit check --update
+          git diff --exit-code -- Gemfile.lock
+      - name: Build isolated Jekyll source
+        working-directory: site
+        run: bundle exec jekyll build --safe --strict_front_matter --destination ../_site
+      - name: Validate public output and bilingual navigation
         shell: bash
         run: |
           set -euo pipefail
-          mkdir _site
-          for file in index.html en.html styles.css; do
-            test -f "site/$file"
-            test ! -L "site/$file"
-            cp "site/$file" "_site/$file"
-          done
           python - <<'PY'
+          from html.parser import HTMLParser
           from pathlib import Path
-          from xml.etree import ElementTree
-          from urllib.parse import urlsplit
+          from urllib.parse import urljoin, urlsplit, unquote
 
           root = Path("_site")
-          expected = {"index.html": "nl", "en.html": "en"}
-          for filename, language in expected.items():
-              page = ElementTree.parse(root / filename).getroot()
-              if page.tag != "html" or page.get("lang") != language:
-                  raise SystemExit(f"Invalid language: {filename}")
-              if len(page.findall(".//h1")) != 1:
-                  raise SystemExit(f"Expected one h1: {filename}")
-              if page.findall(".//script") or page.findall(".//iframe"):
-                  raise SystemExit(f"Unexpected executable or embedded content: {filename}")
-              for element in page.iter():
-                  for attr in ("href", "src"):
-                      target = element.get(attr)
-                      if not target:
-                          continue
-                      parsed = urlsplit(target)
-                      if parsed.scheme == "https" and parsed.netloc:
-                          continue
-                      if parsed.scheme or parsed.netloc or parsed.path not in {
-                          "index.html", "en.html", "styles.css"
-                      } or not (root / parsed.path).is_file():
-                          raise SystemExit(f"Invalid link: {filename}")
-          print("Public files and bilingual page structure validated.")
+          base = "/ha-Nationaal-Energie-Dashboard/"
+          pages = {
+              "index.html": ("nl", "en/"),
+              "nl/index.html": ("nl", "en/"),
+              "nl/documentation/index.html": ("nl", "en/documentation/"),
+              "en/index.html": ("en", "nl/"),
+              "en/documentation/index.html": ("en", "nl/documentation/"),
+              "en.html": ("en", "nl/"),
+          }
+          allowed = set(pages) | {"assets/css/style.css"}
+          actual = set()
+          for path in root.rglob("*"):
+              if path.is_symlink():
+                  raise SystemExit("Unexpected symbolic link in public output")
+              if path.is_file():
+                  actual.add(path.relative_to(root).as_posix())
+          if actual != allowed:
+              raise SystemExit(f"Unexpected public output: {actual ^ allowed}")
+
+          class Page(HTMLParser):
+              """Collect structural and navigation evidence from rendered HTML."""
+
+              def __init__(self):
+                  super().__init__()
+                  self.lang = None
+                  self.headings = 0
+                  self.links = []
+                  self.alternates = []
+                  self.ids = set()
+
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  if tag in {"script", "iframe", "object", "embed", "form", "base"}:
+                      raise SystemExit(f"Unexpected active element: {tag}")
+                  if any(key.startswith("on") for key in attrs):
+                      raise SystemExit("Unexpected event handler")
+                  if tag == "html":
+                      self.lang = attrs.get("lang")
+                  if tag == "h1":
+                      self.headings += 1
+                  if "id" in attrs:
+                      self.ids.add(attrs["id"])
+                  for key in ("href", "src"):
+                      if key in attrs:
+                          self.links.append((tag, key, attrs[key]))
+                  if tag == "a" and "hreflang" in attrs:
+                      self.alternates.append(attrs.get("href"))
+
+          parsed = {}
+          for name, (lang, alternate) in pages.items():
+              page = Page()
+              page.feed((root / name).read_text(encoding="utf-8"))
+              if page.lang != lang or page.headings != 1 or base + alternate not in page.alternates:
+                  raise SystemExit(f"Invalid page structure or language switch: {name}")
+              parsed[name] = page
+          for name, page in parsed.items():
+              for tag, key, link in page.links:
+                  target = urlsplit(urljoin(base + name, link))
+                  if target.scheme == "https" and target.netloc and tag == "a" and key == "href":
+                      continue
+                  if target.scheme or target.netloc or not target.path.startswith(base):
+                      raise SystemExit(f"Unsafe URL in {name}: {link}")
+                  path = unquote(target.path[len(base):])
+                  if not path or path.endswith("/"):
+                      path += "index.html"
+                  if path not in allowed:
+                      raise SystemExit(f"Broken link in {name}: {link}")
+                  if target.fragment and (path not in parsed or unquote(target.fragment) not in parsed[path].ids):
+                      raise SystemExit(f"Broken anchor in {name}: {link}")
+          print("Exact public output, language pairs and internal links validated.")
           PY
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

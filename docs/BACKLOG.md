@@ -34,7 +34,7 @@ Deze backlog concretiseert de openstaande instellingen en vervolgstappen uit de 
 | BL-016 | Later | 7 | Gebruikersactie | Marketplace-publicatietoestemming | Vraag expliciete toestemming voor concrete release, eventuele packagepublicatie en catalogusaanmelding na aantoonbaar geslaagde acceptatiecontroles. Verifieer catalogusopname pas na acceptatie en synchronisatie. | BL-005, BL-006, BL-014, BL-015; eigenaar. |
 | BL-017 | Hoog | 0–7 | In uitvoering | Autonome dependencyupdates | Dagelijkse Dependabot-controles voor Actions en uv, verifieer lockfile en geslaagde update-PR's; voeg nieuwe manifesten toe zodra aanwezig. Houd Core/Python gezamenlijk op de baseline en controleer beveiligingsmeldingen; de auto-mergeworkflow is ingericht; verifieer een echte geschikte Dependabot-PR inclusief afwijzing van ongeschikte updates en eventuele opvolgende push-CI. | BL-001, BL-011 voor automatische merge. |
 
-| BL-018 | Normaal | 0–7 | In uitvoering | GitHub Pages | Tweetalige openbare projectsite, gecontroleerd publicatiepakket, geslaagde deployment en bereikbare HTTPS-site; onderhoud documentatie bij functionele wijzigingen. | Pages-publicatiebron GitHub Actions en environment github-pages; eigenaar indien instellingen ontbreken. |
+| BL-018 | Normaal | 0–7 | In uitvoering | GitHub Pages | Tweetalige openbare Jekyll-projectsite, gelockte gems, dependency-audit, gecontroleerd publicatiepakket, geslaagde deployment en bereikbare HTTPS-site; onderhoud documentatie bij functionele wijzigingen. | Jekyll-migratie voorbereid; lock-resolutierun 45471790543 geslaagd. Build, audit en nieuwe deployment nog te verifiëren; Pages-publicatiebron GitHub Actions en environment github-pages. |
 
 ## Actuele bewijzen en beperkingen
 

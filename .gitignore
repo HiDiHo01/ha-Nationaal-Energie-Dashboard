@@ -32,3 +32,11 @@ home-assistant.log*
 *.pem
 *.key
 .DS_Store
+
+# Jekyll build and local Bundler state
+/_site/
+/site/_site/
+/site/.jekyll-cache/
+/site/.jekyll-metadata
+/site/.bundle/
+/site/vendor/

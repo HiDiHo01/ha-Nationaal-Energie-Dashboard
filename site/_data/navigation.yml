@@ -1,0 +1,22 @@
+nl:
+  home: /
+  navigation: Hoofdnavigatie
+  disclaimer: Onafhankelijk project, niet officieel verbonden aan NED of Home Assistant.
+  rights: Alle rechten voorbehouden. Beperkte gebruikstoestemming voor Home Assistant.
+  terms: Gebruiksvoorwaarden
+  items:
+    - label: Home
+      path: /nl/
+    - label: Documentatie
+      path: /nl/documentation/
+en:
+  home: /en/
+  navigation: Main navigation
+  disclaimer: Independent project, not officially affiliated with NED or Home Assistant.
+  rights: All rights reserved. Limited permission for Home Assistant usage.
+  terms: Usage terms (Dutch)
+  items:
+    - label: Home
+      path: /en/
+    - label: Documentation
+      path: /en/documentation/
