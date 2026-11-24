@@ -63,6 +63,8 @@ Technische uitgangspunten:
 
 ## Roadmap
 
+Zie de [geprioriteerde backlog](docs/BACKLOG.md) voor openstaande instellingen, afhankelijkheden en acceptatiecriteria.
+
 - [x] Repositorystructuur en ontwikkelrichtlijnen vastleggen.
 - [ ] NED API-client en datamodellen implementeren.
 - [ ] Configuratieflow en gegevenscoördinator implementeren.

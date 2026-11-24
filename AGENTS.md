@@ -63,6 +63,7 @@ Volg hoofdstukken 21 en 22 van het integratieplan. Werk per afgebakend onderdeel
 | 7 — Release en Marketplace | Installeerbare build, branding, metadata, installatie/upgrade/verwijdering, changelog en catalogusaanmelding | Gevalideerde release, actuele catalogusvoorwaarden en expliciete publicatietoestemming |
 
 - Gebruik de volledige checklists in hoofdstuk 21 en de Definition of Done in hoofdstuk 24 als acceptatiecriteria.
+- Onderhoud de geprioriteerde [backlog](docs/BACKLOG.md) zelfstandig. Werk binnen de opdracht aan uitvoerbare items, respecteer afhankelijkheden en toestemmingseisen, synchroniseer de status met het integratieplan en sluit items alleen met aantoonbaar acceptatiebewijs.
 - Werk voortgang bij in het integratieplan en relevante README-roadmap zodra een taak aantoonbaar is voltooid. Laat niet-geteste onderdelen open staan.
 - Maak onderscheid tussen geïmplementeerd, getest, geblokkeerd en gepland. Een document of placeholder is geen werkende implementatie.
 - Volg Semantic Versioning voor integratie en API-library; versiemijlpalen staan in hoofdstuk 22.

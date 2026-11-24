@@ -885,6 +885,8 @@ Richt pull requests, verplichte statuschecks en branchbescherming in vóór regu
 
 ## 21. Implementatiefasen
 
+De concrete openstaande instellingen, afhankelijkheden en acceptatiecriteria staan in de [backlog](BACKLOG.md). Onderhoud de backlog en deze fasechecklists consistent; de backlog verandert de fasepoorten niet.
+
 Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 | Fase | Inspanning | Resultaat |
