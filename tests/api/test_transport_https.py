@@ -139,7 +139,9 @@ async def test_trusted_https_and_query(local_https: LocalHttps) -> None:
     """Perform a real trusted TLS exchange and preserve query encoding."""
     transport = NedTransport(local_https.session, local_https.origin)
     result = await transport.async_get("/query", params={"q": "a & b"})
-    assert result == TransportResponse(status=200, body=b"a & b:identity")
+    assert result == TransportResponse(
+        status=200, body=b"a & b:identity", media_type="text/plain"
+    )
     assert not local_https.session.closed
 
 
