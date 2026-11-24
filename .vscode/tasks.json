@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "NED: Sync locked environment",
+      "type": "process",
+      "command": "uv",
+      "args": ["sync", "--locked"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "NED: Install Git hooks",
+      "type": "process",
+      "command": "uv",
+      "args": ["run", "--locked", "pre-commit", "install", "--install-hooks"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "NED: Run pre-commit",
+      "type": "process",
+      "command": "uv",
+      "args": ["run", "--locked", "pre-commit", "run", "--all-files"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "NED: Run offline tests with coverage",
+      "type": "process",
+      "command": "uv",
+      "args": ["run", "--locked", "pytest", "--cov", "--cov-branch", "--cov-report=term-missing"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "NED: Dependency audit",
+      "type": "process",
+      "command": "uv",
+      "args": ["run", "--locked", "pip-audit"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    }
+  ]
+}

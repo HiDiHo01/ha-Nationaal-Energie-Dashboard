@@ -850,7 +850,7 @@ Bij ontwikkeltaken worden relevante [repositoryskills](../.agents/skills/README.
 
 ## 20. CI/CD en kwaliteitscontroles
 
-Dependabot controleert GitHub Actions en uv-dependencies dagelijks volgens AGENTS.md §13.3. Core en pytest-homeassistant worden uitsluitend gezamenlijk met de releasebaseline bijgewerkt. Controleer de lockfile en CI voor iedere update. Ruleset 28008175 beschermt main. De Dependabot-auto-mergeworkflow past de beperkingen van AGENTS.md §13.3 toe; echte botmergevalidatie blijft open (BL-017). De standalone API-library en eventuele externe pre-commit-hooks worden toegevoegd zodra hun manifesten bestaan.
+Dependabot controleert GitHub Actions en uv-dependencies dagelijks volgens AGENTS.md §13.3. Core en pytest-homeassistant worden uitsluitend gezamenlijk met de releasebaseline bijgewerkt. Controleer de lockfile en CI voor iedere update. Ruleset 28008175 beschermt main. De Dependabot-auto-mergeworkflow past de beperkingen van AGENTS.md §13.3 toe; echte botmergevalidatie blijft open (BL-017). Externe pre-commit-hooks worden dagelijks bijgewerkt via Dependabot; de standalone API-library volgt zodra haar manifest bestaat.
 
 ### 20.1 GitHub Actions
 
@@ -858,7 +858,7 @@ Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit
 
 AI beoordeelt bij iedere ontwikkeltaak en faseovergang zelfstandig welke CI/CD-automatisering nuttig is en implementeert, valideert en onderhoudt deze volgens de verplichte regel in AGENTS.md paragraaf 13.3, binnen AI_POLICY.md.
 
-De actieve workflows zijn beschreven in [.github/workflows/README.md](../.github/workflows/README.md) en AGENTS.md paragraaf 13.3. De productie-CI bevat ook afzonderlijke branchcoverage en modulespecifieke coveragecontroles; onderhoud deze met de daadwerkelijke module-indeling. De dagelijkse baseline-watch is een waarschuwingssignaal, geen automatische versie-upgrade. De Python-next-run is geslaagd, maar er was nog geen API-library om te testen. Baseline-uitvoering, volledige dependencyresolutie en officiële Hassfest/Marketplace-validaties blijven open.
+De actieve workflows zijn beschreven in [.github/workflows/README.md](../.github/workflows/README.md) en AGENTS.md paragraaf 13.3. De productie-CI bevat ook afzonderlijke branchcoverage en modulespecifieke coveragecontroles; onderhoud deze met de daadwerkelijke module-indeling. De dagelijkse baseline-watch is een waarschuwingssignaal, geen automatische versie-upgrade. De Python-next-run is geslaagd, maar er was nog geen API-library om te testen. Baseline-uitvoering en de gecommitteerde dependencylock zijn gevalideerd. Inhoudelijke tests en officiële Hassfest/Marketplace-validaties blijven open.
 
 ### 20.2 Beoogde lokale commando's
 
@@ -872,7 +872,7 @@ pytest --cov --cov-branch --cov-report=term-missing
 pip-audit
 ```
 
-De root-pyproject.toml bevat de ontwikkelgroep en centrale toolconfiguratie. De officiële pytest-homeassistant-plugin is gekoppeld aan de exacte Core-baseline. Branchmeting is ingeschakeld en de gecombineerde coverage-drempel is 95%; afzonderlijke branchcoverage en de per-module-doelen moeten aanvullend in CI worden afgedwongen. Volledige dependencyresolutie, lockfile en uitvoering op de vastgelegde Python-versie volgen bij de ontwikkelomgeving. De codecontroles zijn nog niet uitvoerbaar zolang de broncode en tests ontbreken.
+De root-pyproject.toml bevat de ontwikkelgroep en centrale toolconfiguratie. De officiële pytest-homeassistant-plugin is gekoppeld aan de exacte Core-baseline. Branchmeting is ingeschakeld en de gecombineerde coverage-drempel is 95%; afzonderlijke branchcoverage en de per-module-doelen moeten aanvullend in CI worden afgedwongen. De dependencyresolutie, lockfile en installatie op de vastgelegde Python-versie zijn gevalideerd. De lokale hooks en CI delen de gelockte tooling. Zie [ontwikkelomgeving](DEVELOPMENT.md#pre-commit-en-vs-code). De codecontroles zijn nog niet uitvoerbaar zolang de broncode en tests ontbreken.
 
 ### 20.3 Branchbeleid (voorstel)
 
@@ -917,7 +917,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
 - [x] pyproject.toml configureren en statisch valideren.
 - [ ] Volledige toolconfiguratie op de exacte Python/Core-baseline met implementatie en tests valideren; dependencyresolutie en installatie van de gelockte tooling zijn geslaagd.
-- [ ] Ontwikkelomgeving en pre-commit inrichten.
+- [ ] Ontwikkelomgeving en pre-commit inrichten: configuratie aanwezig; volledige hookuitvoering op GitHub wordt gevalideerd (BL-002).
+- [x] VS Code-workspace-instellingen, aanbevolen extensies en uv-taken configureren en JSON statisch valideren (BL-010; GUI niet getest).
 - [x] Basis-CI, Hassfest, Marketplace-validatie, baseline-watch en Dependabot configureren en statisch valideren.
 - [x] Baseline-CI op GitHub Actions uitvoeren; lockfile-kandidaat controleren, committen en volledige installatie verifiëren ([Baseline CI-run 45460571331](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45460571331); nog geen inhoudelijke integratietests).
 - [x] Main beschermen met een actieve ruleset, verplichte pull requests en de toepasselijke baseline- en Hassfest-checks (ruleset 28008175).
