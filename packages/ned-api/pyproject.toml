@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 dependencies = ["aiohttp>=3.14.5,<4", "yarl>=1.25.1,<2"]
 
 [project.optional-dependencies]
-test = ["pytest>=9,<10", "pytest-asyncio"]
+test = ["pytest>=9,<10", "pytest-asyncio", "cryptography>=50.0.2,<51"]
 
 [project.urls]
 Repository = "https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard"
