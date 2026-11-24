@@ -85,6 +85,8 @@ Deze backlog concretiseert de openstaande instellingen en vervolgstappen uit de 
 
 ## Volgende uitvoerbare prioriteit
 
+Op eigenaarsopdracht zijn de gevraagde integratiebestanden, gemaskeerde API-keyflow en afzonderlijke authenticatieclient als niet-vrijgegeven offline concept op een ontwikkelbranch uitgewerkt. De provider en authenticatiekoppeling falen gesloten; de geschreven tests en conceptmetadata zijn nog geen acceptatiebewijs. Geen BL-003-, fase- of releasevrijgave; geen live requests of publicatie.
+
 Eigenaarsopdracht 25 november 2026: de acht prioritaire nationale sensoren zijn vastgelegd in [integratieplan §11.1](INTEGRATION_PLAN.md#111-eerste-entities). De bestaande fasepoorten blijven gelden. Voor sensor 3 is op eigenaarsopdracht een expliciet gelabelde schattingsmethode vastgelegd (1/2/51/25 + 0.53 × 21 gedeeld door 27); de factor is gebaseerd op voorlopige CBS-jaarcijfers 2025. Type 26 en overige niet toegerekende bronnen zijn uitgesloten. Valideer aanvullend de datasets 21/25 en gemeenschappelijke intervaldekking, revisies en bronmix voordat de sensor wordt geïmplementeerd binnen de bestaande fasepoorten. De CO₂-forecast volgt fase 4. Geen sensorimplementatie of vrijgave op basis van de herhaalde semantiekprobe.
 
 De op 24 november 2026 expliciet vrijgegeven contractonafhankelijke fase-1-scope is geïmplementeerd en in CI gevalideerd. BL-003 blijft open: het leveranciersantwoord is nog niet vastgelegd; hervat contractafhankelijke ontwikkeling uitsluitend na toepasselijke bevestiging en volgens de fasepoorten. BL-017 blijft open voor de eerste geschikte echte Dependabot-PR. Geen volledige fase-1-acceptatie of releasevrijgave.
