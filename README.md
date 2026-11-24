@@ -29,7 +29,7 @@ Afhankelijk van de dataset zijn intervallen van 10 minuten, 15 minuten, een uur,
 - Historische, actuele en voorspelde energiedata, voor zover ondersteund door de API.
 - Correcte eenheden, tijdzonebewuste tijdstempels en passende sensorclassificaties.
 - Gebruik van energiedata in dashboards en automatiseringen.
-- Installatie via HACS.
+- HACS-compatibiliteit voor eigen gebruik, voor zover technisch mogelijk.
 
 ## API-sleutel
 
@@ -44,7 +44,7 @@ Het actuele API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit v
 
 ## Installatie en configuratie
 
-Installatie via HACS en handmatige installatie worden beoogd. Zodra een werkende release beschikbaar is, worden hier de installatieprocedure, minimale Home Assistant-versie, configuratieopties en ondersteunde entiteiten beschreven.
+Installatie via HACS en handmatige installatie worden beoogd voor eigen gebruik door de eigenaar. Er wordt geen publieke gebruikslicentie of toestemming voor installatie door derden verleend. Zodra een werkende interne versie beschikbaar is, worden hier de technische vereisten beschreven.
 
 ## Ontwikkeling en kwaliteit
 
@@ -70,6 +70,14 @@ Technische uitgangspunten:
 - [ ] HACS-compatibiliteit realiseren.
 - [ ] Eerste release publiceren en toepasselijke kwaliteitscriteria valideren.
 
+## Auteursrecht en gebruik
+
+**Geen licentie — All Rights Reserved.**
+
+Alle rechten voorbehouden. Dit project wordt zonder gebruikslicentie beschikbaar gesteld. De eigen broncode, documentatie en overige beschermde projectmaterialen mogen door derden niet zonder voorafgaande uitdrukkelijke toestemming van de rechthebbende worden gebruikt, gereproduceerd, gewijzigd, herverdeeld of in andere projecten verwerkt, behoudens wettelijke uitzonderingen en toepasselijke platformvoorwaarden. Dit beleid verandert de licenties en rechten van externe dependencies, Home Assistant, NED-data of andere materialen van derden niet. De GitHub-voorwaarden voor openbare repositories blijven gelden, waaronder het recht om de repository binnen GitHub te bekijken en te forken.
+
+Er wordt geen open-source- of andere algemene gebruikslicentie verleend. Publieke distributie via HACS, PyPI of andere kanalen is niet toegestaan zonder een nieuw expliciet besluit van de eigenaar.
+
 ## Ondersteuning en bijdragen
 
 Meld fouten en functievoorstellen via [GitHub Issues](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/issues). Vermeld waar relevant de Home Assistant-versie, integratieversie en stappen om het probleem te reproduceren. Verwijder persoonlijke gegevens en API-sleutels uit logbestanden.
@@ -85,4 +93,4 @@ Meld fouten en functievoorstellen via [GitHub Issues](https://github.com/HiDiHo0
 
 ## Disclaimer
 
-Dit is een onafhankelijk communityproject en geen officiële integratie van het Nationaal Energie Dashboard of Home Assistant. De beschikbaarheid, actualiteit en nauwkeurigheid van energiedata zijn afhankelijk van de bron en de betreffende dataset.
+Dit is een onafhankelijk project en geen officiële integratie van het Nationaal Energie Dashboard of Home Assistant. De beschikbaarheid, actualiteit en nauwkeurigheid van energiedata zijn afhankelijk van de bron en de betreffende dataset.
