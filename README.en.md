@@ -48,7 +48,7 @@ The intended API base URL is https://api.ned.nl/v1. Never disclose API keys in G
 
 **Minimum Home Assistant Core version: 2026.11.3.** Each new integration release targets the latest stable Core release as its minimum. Older releases and prereleases need not be supported. The current baseline is a development target, not a tested runtime compatibility claim.
 
-Home Assistant Marketplace is the intended distribution channel. GPL-3.0-only, an OSI-approved license, has been chosen to meet the [HACS license check](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection is confirmed; actual catalog admission still requires verification. Runtime distribution still requires validation. Local testing will take place during development. There is no installable release yet. Officially offered versions may be used in Home Assistant subject to the usage terms.
+Home Assistant Marketplace is the intended distribution channel. GPL-3.0-only, an OSI-approved license, has been chosen to meet the [HACS license check](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection is confirmed; actual catalog admission still requires verification. The runtime distribution strategy has been validated using a synthetic wheel; full production installation remains pending. Local testing will take place during development. There is no installable release yet. Officially offered versions may be used in Home Assistant subject to the usage terms.
 
 ## Development and quality
 
@@ -78,7 +78,7 @@ See the [prioritized backlog](docs/BACKLOG.md) for outstanding settings, depende
 - [ ] Add Dutch and English integration translations, diagnostics and error handling.
 - [x] Establish development tooling, pre-commit and baseline CI.
 - [ ] Complete substantive integration tests and full quality validation.
-- [ ] Confirm Marketplace admission requirements and runtime distribution strategy.
+- [x] Confirm Marketplace admission requirements and runtime distribution strategy (phase 0; actual catalog admission and installation remain pending).
 - [ ] Implement Marketplace compatibility, metadata, branding and installation/update tests.
 - [ ] Demonstrate successful HACS and Hassfest validation and applicable Platinum criteria.
 - [ ] After authorization, publish a complete GitHub release and submit a catalog PR to hacs/default.

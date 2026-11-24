@@ -4,7 +4,7 @@
 
 ### Nederlands
 
-- Gerichte dagaggregatieprobe voor TZ-002/TZ-003 met twee vaste aanvragen, intervalduur en afzonderlijke grensafwijkingen; live-verificatie blijft open.
+- Gerichte dagaggregatieprobe voor TZ-002/TZ-003 met twee vaste aanvragen, intervalduur en afzonderlijke grensafwijkingen; beide afwijkingen live bevestigd, oorzaakanalyse blijft open.
 
 - Nationale P0-datasets en paginering live gevalideerd voor de geteste queries; NL-kwartierdekking voor historische zon bevestigd, afwijkende recordtijdzone en twee dagaggregatie-afwijkingen vastgelegd. Verdere contractvalidatie blijft open.
 
@@ -16,13 +16,14 @@
 - Gelockte Python-ontwikkelomgeving, pre-commit, VS Code, Baseline CI en dependency-audits.
 - Branchbescherming en gecontroleerde Dependabot-auto-merge; echte botmergevalidatie staat nog open.
 - Nederlands en Engels als verplichte gebruikerstalen, beide README-versies en automatische documentatie- en vertaalcontroles.
-- Marketplace als beoogd distributiekanaal; GPL-3.0-only gekozen om aan de OSI-licentievoorwaarde te voldoen. GitHub-herkenning en catalogustoelating blijven te bevestigen.
+- Marketplace als beoogd distributiekanaal; GPL-3.0-only gekozen om aan de OSI-licentievoorwaarde te voldoen. GitHub-herkenning bevestigd; catalogustoelating blijft open.
+- Synthetische runtime-wheel via native Home Assistant requirements-manager gevalideerd; initiële ADR's vastgelegd. Volledige installatie blijft open.
 - Beperkte gebruikstoestemming vervangen door GPL-3.0-only; country NL toegevoegd aan hacs.json.
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
 
-- Focused daily aggregation probe for TZ-002/TZ-003 with two fixed requests, interval duration and separate boundary offsets; live verification remains pending.
+- Focused daily aggregation probe for TZ-002/TZ-003 with two fixed requests, interval duration and separate boundary offsets; both deviations confirmed live, root cause remains unresolved.
 
 - National P0 datasets and pagination validated live for the tested queries; Dutch quarter-hour coverage for historical solar data confirmed, differing record timezone and two daily aggregation discrepancies documented. Further contract validation remains pending.
 
@@ -34,6 +35,7 @@
 - Locked Python development environment, pre-commit, VS Code, baseline CI and dependency audits.
 - Branch protection and guarded Dependabot auto-merge; real bot merge validation remains open.
 - Dutch and English as required user languages, both README versions and automated documentation and translation checks.
-- Marketplace as the intended distribution channel; GPL-3.0-only chosen to meet the OSI license requirement. GitHub detection and catalog admission still require confirmation.
+- Marketplace as the intended distribution channel; GPL-3.0-only chosen to meet the OSI license requirement. GitHub detection confirmed; catalog admission remains pending.
+- Synthetic runtime wheel validated through the native Home Assistant requirements manager; initial ADRs recorded. Full installation remains pending.
 - Limited usage permission replaced by GPL-3.0-only; country NL added to hacs.json.
 - No installable integration, actual integration translations or public release yet.
