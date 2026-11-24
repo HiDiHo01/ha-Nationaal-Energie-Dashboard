@@ -1,0 +1,35 @@
+name: Hassfest
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check integration readiness
+        id: readiness
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          if [[ -f custom_components/nationaal_energie_dashboard/manifest.json ]]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          elif [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            echo '::error::Integration manifest is not implemented yet.'
+            exit 1
+          else
+            echo 'Hassfest not run: integration manifest is not implemented yet.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Validate integration
+        if: steps.readiness.outputs.ready == 'true'
+        uses: home-assistant/actions/hassfest@9e9565e68f5a70d874202871f4c4064d23814235

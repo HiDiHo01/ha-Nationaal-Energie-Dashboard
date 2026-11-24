@@ -194,6 +194,7 @@ ha-Nationaal-Energie-Dashboard/
 │   ├── ISSUE_TEMPLATE/
 │   ├── workflows/
 │   │   ├── ci.yaml
+│   │   ├── baseline-watch.yaml
 │   │   ├── python-next-smoke.yaml
 │   │   ├── hassfest.yaml
 │   │   ├── hacs.yaml
@@ -851,6 +852,8 @@ Reguliere CI gebruikt reproduceerbare fixtures en gemockte responses zonder pers
 
 Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → geautoriseerde release en Marketplace-catalogusaanmelding na geslaagde controles.
 
+De actieve workflows zijn beschreven in [.github/workflows/README.md](../.github/workflows/README.md) en AGENTS.md paragraaf 13.3. De productie-CI bevat ook afzonderlijke branchcoverage en modulespecifieke coveragecontroles; onderhoud deze met de daadwerkelijke module-indeling. De dagelijkse baseline-watch is een waarschuwingssignaal, geen automatische versie-upgrade. De Python-next-run is geslaagd, maar er was nog geen API-library om te testen. Baseline-uitvoering, volledige dependencyresolutie en officiële Hassfest/Marketplace-validaties blijven open.
+
 ### 20.2 Beoogde lokale commando's
 
 ```bash
@@ -903,9 +906,10 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] pyproject.toml configureren en statisch valideren.
 - [ ] Dependencyresolutie, lockfile en toolconfiguratie op de exacte Python/Core-baseline valideren.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
-- [ ] Basis-CI configureren.
+- [x] Basis-CI, Hassfest, Marketplace-validatie, baseline-watch en Dependabot configureren en statisch valideren.
+- [ ] Baseline-CI op GitHub Actions uitvoeren; lockfile-kandidaat controleren, committen en volledige installatie verifiëren.
 - [x] Afzonderlijke niet-blokkerende Python-next-smokeworkflow configureren en statisch valideren.
-- [ ] Python-next-workflow op GitHub Actions uitvoeren en resultaat verifiëren.
+- [x] Python-next-workflow op GitHub Actions uitvoeren en resultaat verifiëren (run 45447217991; Python-setup en baselinecontrole, nog geen librarycode/tests).
 - [ ] OpenAPI-contract valideren.
 - [x] Minimale Home Assistant-versie vaststellen: nieuwste stable, initiële baseline 2026.11.3.
 - [x] Python-baseline uit de bijbehorende Core-release vaststellen: 3.14, minimum 3.14.2, ontwikkelpin 3.14.10.

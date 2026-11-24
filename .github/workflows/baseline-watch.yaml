@@ -1,0 +1,36 @@
+name: Home Assistant baseline watch
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check upstream stable version
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --max-time 30 --retry 2 \
+            https://version.home-assistant.io/stable.json -o "$RUNNER_TEMP/ha-stable.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          feed = Path(os.environ['RUNNER_TEMP']) / 'ha-stable.json'
+          latest = json.loads(feed.read_text())['homeassistant']['default']
+          current = json.loads(Path('hacs.json').read_text())['homeassistant']
+          summary = Path(os.environ['GITHUB_STEP_SUMMARY'])
+          summary.write_text(f'Core baseline: {current}; upstream stable: {latest}\n')
+          if current != latest:
+              raise SystemExit('Review Core and Python baseline before the next integration release.')
+          PY

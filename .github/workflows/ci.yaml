@@ -1,0 +1,132 @@
+name: Baseline CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  UV_PYTHON_DOWNLOADS: never
+  PYTHONPATH: packages/ned-api/src
+
+jobs:
+  baseline:
+    name: Home Assistant production baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version-file: .python-version
+      - name: Check version consistency
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          import tomllib
+          from pathlib import Path
+
+          pin = Path('.python-version').read_text().strip()
+          core = json.loads(Path('hacs.json').read_text())['homeassistant']
+          config = tomllib.loads(Path('pyproject.toml').read_text())
+          version = '.'.join(map(str, sys.version_info[:2]))
+          assert '.'.join(map(str, sys.version_info[:3])) == pin
+          assert f'homeassistant=={core}' in config['dependency-groups']['dev']
+          assert f'pytest-homeassistant=={core}' in config['dependency-groups']['dev']
+          assert config['tool']['ruff']['target-version'] == f'py{version.replace(".", "")}'
+          assert config['tool']['mypy']['python_version'] == version
+          assert config['tool']['pylint']['main']['py-version'] == version
+          print(f'Core {core}; Python {pin}')
+          PY
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: '0.13.9'
+          enable-cache: false
+      - name: Resolve or verify dependency lock
+        id: lock
+        shell: bash
+        run: |
+          if [[ -f uv.lock ]]; then
+            uv lock --check --python "$(command -v python)"
+          else
+            uv lock --python "$(command -v python)"
+            echo 'candidate=true' >> "$GITHUB_OUTPUT"
+            echo '::warning::uv.lock is a generated candidate; review and commit it before implementation CI.'
+            echo 'Lockfile candidate generated; repository lockfile still missing.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Preserve generated lockfile candidate
+        if: steps.lock.outputs.candidate == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: uv-lock-candidate
+          path: uv.lock
+          retention-days: 7
+          if-no-files-found: error
+      - name: Install exact baseline and check dependencies
+        run: |
+          uv sync --locked --python "$(command -v python)"
+          uv pip check
+          uv run --no-sync python -c 'import homeassistant; from importlib.metadata import version; print(version("homeassistant"), version("pytest-homeassistant"))'
+          uv run --no-sync ruff --version
+          uv run --no-sync pylint --version
+          uv run --no-sync mypy --version
+          uv run --no-sync pytest --version
+      - name: Quality and offline tests
+        env:
+          LOCK_CANDIDATE: ${{ steps.lock.outputs.candidate }}
+        shell: bash
+        run: |
+          if [[ -z "$(find custom_components packages tests -type f -name '*.py' -print -quit)" ]]; then
+            echo 'Source quality and test coverage not evaluated: no Python implementation yet.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [[ "$LOCK_CANDIDATE" == true ]]; then
+            echo '::error::Commit a reviewed uv.lock before implementation CI.'
+            exit 1
+          fi
+          uv run --no-sync python -m compileall -q custom_components packages tests
+          uv run --no-sync ruff format --check .
+          uv run --no-sync ruff check .
+          for source in custom_components/nationaal_energie_dashboard packages/ned-api/src/ned_api; do
+            if [[ -n "$(find "$source" -type f -name '*.py' -print -quit)" ]]; then
+              uv run --no-sync pylint "$source"
+            fi
+          done
+          uv run --no-sync mypy
+          uv run --no-sync pytest --cov --cov-branch --cov-report=term-missing --cov-report=json
+          uv run --no-sync python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('coverage.json').read_text())
+          total = report['totals']
+          branches = total['num_branches']
+          if branches and 100 * total['covered_branches'] < 95 * branches:
+              raise SystemExit('Overall branch coverage below 95%')
+          for path, info in report['files'].items():
+              name = Path(path).name
+              if name in {'config_flow.py', 'diagnostics.py'} or name.startswith('forecast'):
+                  minimum = 100
+              elif name in {'client.py', 'parser.py', 'models.py', 'coordinator.py', 'sensor.py', 'binary_sensor.py', 'services.py'}:
+                  minimum = 95
+              else:
+                  continue
+              if info['summary']['percent_covered'] < minimum:
+                  raise SystemExit(f'{path}: coverage below {minimum}%')
+          PY
+      - name: Audit installed dependencies
+        if: ${{ !cancelled() && steps.lock.outcome == 'success' }}
+        run: |
+          if [[ -x .venv/bin/pip-audit ]]; then
+            uv run --no-sync pip-audit
+          else
+            echo '::error::Dependency audit not possible: development installation incomplete.'
+            exit 1
+          fi

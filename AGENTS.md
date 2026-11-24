@@ -237,6 +237,15 @@ pip-audit
 - Vereis geslaagde HACS- en Hassfest-validatie zonder genegeerde checks, volledige GitHub-release, installatie-/update-/verwijderingstests en catalogus-PR bij hacs/default (integration).
 - Claim catalogusopname pas na acceptatie en synchronisatie. Platinum blijft een afzonderlijk kwaliteitsdoel.
 
+### 13.3 CI-workflows en onderhoud
+
+- Baseline CI (ci.yaml) installeert de exacte .python-version, controleert de Core- en toolversies, gebruikt uv 0.13.9 en valideert dependencies. Zolang uv.lock ontbreekt, wordt een lockfile-kandidaat als tijdelijk workflow-artifact aangeboden. Review en commit die vóór implementatie-CI; bij aanwezige Python-broncode is een ontbrekende lockfile een fout. Voeg de zelfstandige API-library met testdependencies toe aan de gelockte ontwikkelomgeving zodra deze beschikbaar is.
+- Baseline CI bewaakt Ruff, Pylint, strict mypy, offline pytest, de gecombineerde coveragepoort, de afzonderlijke totale branchcoverage en de huidige modulecategorieën. Pas de coveragecontrole aan wanneer forecastberekeningen of andere kritieke modules andere bestandsnamen krijgen. Dependency-audit draait met pip-audit; kwetsbaarheden mogen niet stilzwijgend worden onderdrukt.
+- Hassfest draait automatisch zodra het manifest aanwezig is; vóór dat moment wordt de ontbrekende validatie expliciet gemeld. Handmatige Hassfest-validatie vereist een manifest. Marketplace-validatie (hacs.yaml) draait handmatig en na een geautoriseerde gepubliceerde release, zonder genegeerde HACS-checks of PR-commentaar. Een echte succesvolle validatie is vereist vóór catalogusaanmelding.
+- Baseline-watch controleert dagelijks de officiële Core-stablefeed en meldt afwijkingen zonder automatisch de versiegrens te wijzigen. Controleer bij de volgende release ook het upstream Python-contract. Dependabot stelt wekelijks updates voor GitHub Actions voor, zonder automatische merge.
+- Gebruik standaard contents: read, vastgepinde action-SHA's, geen persistente checkoutcredentials en geen secrets in gewone CI. Upstream Hassfest/HACS-actions gebruiken zelf containerimages met veranderlijke tags; de action-SHA alleen maakt hun uitvoering niet volledig reproduceerbaar.
+- De experimentele Python-next-job blijft afzonderlijk en niet-blokkerend. Geen automatische releases, packagepublicaties of live contractrequests. Voeg api-contract.yaml en releasevalidatie pas toe wanneer testcontract, veilige secret-injectie, distributiemethode en buildvereisten concreet beschikbaar zijn.
+
 ## 14. Definition of Done en opleverrapport
 
 Een onderdeel is pas gereed wanneer alle toepasselijke punten uit hoofdstuk 24 aantoonbaar zijn afgedekt:
