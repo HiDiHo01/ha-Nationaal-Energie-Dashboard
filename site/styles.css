@@ -1,0 +1,53 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  --bg: #f5f8f7;
+  --panel: #ffffff;
+  --ink: #132d2a;
+  --muted: #405c57;
+  --accent: #005e50;
+  --line: #c7d8d2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d201e;
+    --panel: #18302d;
+    --ink: #eef7f4;
+    --muted: #c5d8d2;
+    --accent: #8de2c7;
+    --line: #45635d;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); }
+.shell { max-width: 70rem; margin-inline: auto; padding-inline: 1.5rem; }
+.masthead {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 1rem; padding-block: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 800; text-decoration: none; }
+.brand span { color: var(--muted); font-size: .75rem; }
+nav { display: flex; gap: 1.25rem; }
+a { color: var(--accent); text-underline-offset: .2em; }
+a:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.hero { padding-block: clamp(3rem, 8vw, 6rem); }
+.eyebrow { font-size: .8rem; font-weight: 750; letter-spacing: .12em; color: var(--accent); }
+h1 { max-width: 18ch; font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.08; letter-spacing: -.035em; margin: .6rem 0; }
+.lead { max-width: 52ch; color: var(--muted); font-size: 1.2rem; }
+.primary {
+  display: inline-block; background: var(--accent); color: var(--bg);
+  border-radius: .5rem; padding: .85rem 1.25rem; font-weight: 700;
+  text-decoration: none;
+}
+.status, article { background: var(--panel); border: 1px solid var(--line); border-radius: .75rem; padding: 1.4rem; }
+.status { border-inline-start: .35rem solid var(--accent); }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.1rem; }
+.status h2, article h3 { margin-top: 0; }
+.status p, article p { margin-bottom: 0; color: var(--muted); }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; }
+main > section:not(.hero) { margin-bottom: 2.5rem; }
+.resources { max-width: 72ch; }
+footer { border-top: 1px solid var(--line); padding-block: 1.5rem; color: var(--muted); font-size: .875rem; }
