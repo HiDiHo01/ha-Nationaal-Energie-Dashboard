@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Offline ontwikkelconcept voor de acht sensoren, gemaskeerde Config Flow, vertalingen, en een begrensde afzonderlijke authenticatieclient; synthetische tests toegevoegd, CI en runtimevalidatie niet bevestigd. Geen live koppeling, fasevrijgave of publicatie.
+
 - Acht prioritaire nationale sensoren vastgelegd; CO₂-forecast volgt fase 4 en het geschatte hernieuwbare elektriciteitsaandeel krijgt een expliciete rekenmethode met voorlopige CBS-afvalfactor 0.53 en vereist aanvullende contractvalidatie. Geen sensorimplementatie of wijziging van de fasepoorten.
 
 - Contractonafhankelijke asynchrone HTTPS-transportlaag met sessie-injectie, responslimiet, time-outs en geschoonde exceptions; 38 nieuwe synthetische tests. NED-specifieke verwerking blijft geblokkeerd door BL-003.
@@ -27,9 +29,11 @@
 - Marketplace als beoogd distributiekanaal; GPL-3.0-only gekozen om aan de OSI-licentievoorwaarde te voldoen. GitHub-herkenning bevestigd; catalogustoelating blijft open.
 - Synthetische runtime-wheel via native Home Assistant requirements-manager gevalideerd; initiële ADR's vastgelegd. Volledige installatie blijft open.
 - Beperkte gebruikstoestemming vervangen door GPL-3.0-only; country NL toegevoegd aan hacs.json.
-- Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
+- Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- Offline development draft for the eight sensors, masked Config Flow, translations, and a bounded independent authentication client; synthetic tests added, CI and runtime validation unconfirmed. No live connection, phase acceptance or publication.
 
 - Eight priority national sensors specified; the CO₂ forecast follows phase 4 and estimated renewable electricity share has an explicit formula with provisional CBS waste factor 0.53 and requires additional contract validation. No sensor implementation or change to the phase gates.
 
@@ -54,4 +58,4 @@
 - Marketplace as the intended distribution channel; GPL-3.0-only chosen to meet the OSI license requirement. GitHub detection confirmed; catalog admission remains pending.
 - Synthetic runtime wheel validated through the native Home Assistant requirements manager; initial ADRs recorded. Full installation remains pending.
 - Limited usage permission replaced by GPL-3.0-only; country NL added to hacs.json.
-- No installable integration, actual integration translations or public release yet.
+- No installable production integration or public release yet.
