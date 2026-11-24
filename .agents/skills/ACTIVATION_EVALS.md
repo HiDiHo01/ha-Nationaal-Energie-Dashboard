@@ -58,3 +58,7 @@ Beoordeel de opgeslagen trace aan de hand van de scenariotabel: verwachte skill-
 ## Status
 
 De scenario's en runner zijn voorbereid; native activatie en proceduretrouw zijn nog niet empirisch geëvalueerd. Op 24 november 2026 is de runner syntactisch gecontroleerd met bash -n en getest met een gesimuleerde CLI (succes, foutcode, onbekend scenario, behoud van nieuwe en gecommitteerde testoutput); de ontbrekende echte CLI is correct gemeld. Dit zijn uitsluitend runnercontroles, geen native gedragsevaluaties. Er is geen Codex-sessietrace beschikbaar vanuit de huidige GitHub-connectoromgeving. Rapporteer native en directe activatie afzonderlijk.
+
+### Eigenaarsbesluit BL-012 — 24 november 2026
+
+De afzonderlijke taak voor installatie en authenticatie van een Codex CLI-evaluatieomgeving vervalt. Vraag de eigenaar niet opnieuw om deze omgeving in te richten. Behoud de runner en alle 23 scenario's voor een eventueel reeds beschikbare, geschikte en geautoriseerde native omgeving. BL-013 blijft niet uitgevoerd en geblokkeerd zolang native tracebewijs ontbreekt; directe selectie, statische validatie en reguliere CI zijn geen vervangend native bewijs. De bestaande kwaliteitsacceptatiecriteria zijn niet gewijzigd. Geen betaalde evaluaties of nieuwe credentials.
