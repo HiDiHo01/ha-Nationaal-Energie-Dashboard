@@ -59,7 +59,8 @@ Volg hoofdstukken 21 en 22 van het integratieplan. Werk per afgebakend onderdeel
 | Domain | `nationaal_energie_dashboard` |
 | Integration type | `service` |
 | IoT class | `cloud_polling` |
-| Python | 3.14, compatibel met ondersteunde HA-versies |
+| Python | 3.14, compatibel met de vastgelegde HA-baseline |
+| Minimale Home Assistant Core-versie | 2026.11.3 (nieuwste stable op 24 november 2026) |
 | Transport | aiohttp, HTTPS, gedeelde sessie |
 | Configuratie | Native config entry en UI-flows |
 | Data | DataUpdateCoordinator, getypeerde immutable snapshots |
@@ -73,6 +74,10 @@ Volg de directorystructuur en moduleverantwoordelijkheden in hoofdstuk 5. Gebrui
 - Gebruik één centrale datasetcatalogus en één bron voor constanten en enums. Geen verspreide magic numbers of dubbele requestlogica.
 - Introduceer modules pas bij concrete verantwoordelijkheid; geen lege placeholders, circulaire imports of speculatieve abstracties.
 - Leg afwijkingen van de ontwerpbaseline vast met motivatie, impact en migratiepad.
+
+### 4.1 Home Assistant-versiebeleid
+
+De minimale ondersteunde Home Assistant Core-versie is bij iedere nieuwe integratierelease de dan nieuwste stabiele Core-release, inclusief patchnummer. Controleer deze via https://version.home-assistant.io/stable.json en de officiële release-informatie. Gebruik een expliciete versie per release in hacs.json (homeassistant), documentatie en de reproduceerbare testomgeving; verhoog de grens pas voor een nieuwe integratierelease, niet met terugwerkende kracht. Oudere Core-versies, beta's en developmentversies hoeven niet ondersteund te worden. Valideer vóór publicatie installatie en tests tegen de vastgelegde baseline.
 
 ## 5. Python-programmeerstandaarden
 
@@ -239,6 +244,6 @@ Rapporteer bij iedere opdracht de gewijzigde bestanden, relevante technische keu
 
 ## 15. Startstatus en volgende acceptatiepoort
 
-Bij het opstellen van dit bestand bevatte de repository alleen README.md en docs/INTEGRATION_PLAN.md. Fase 0 is gestart, niet voltooid. AGENTS.md en AI_POLICY.md zijn aanwezig. De eigenaar heeft gekozen voor beperkte Home Assistant-gebruikstoestemming met voorbehouden overige rechten. De basismappenstructuur is aanwezig; Marketplace-readiness is nog niet aangetoond. Minimale Home Assistant-versie, API-contractvalidatie, distributiestrategie, tooling en CI zijn nog open.
+Bij het opstellen van dit bestand bevatte de repository alleen README.md en docs/INTEGRATION_PLAN.md. Fase 0 is gestart, niet voltooid. AGENTS.md en AI_POLICY.md zijn aanwezig. De eigenaar heeft gekozen voor beperkte Home Assistant-gebruikstoestemming met voorbehouden overige rechten. De basismappenstructuur is aanwezig; Marketplace-readiness is nog niet aangetoond. De minimale Home Assistant-versie is vastgesteld op 2026.11.3 (nieuwste stable op 24 november 2026). API-contractvalidatie, distributiestrategie, tooling, CI en runtimecompatibiliteitstests zijn nog open.
 
 Werk eerst de openstaande onderdelen van fase 0 af. Implementeer de API-client pas wanneer de noodzakelijke beleids-, contract- en toolingfundamenten gereed zijn. Als een externe afhankelijkheid (zoals een NED API-key) ontbreekt, meld de blokkade en voltooi alleen onafhankelijke werkzaamheden die verantwoord uitvoerbaar zijn.

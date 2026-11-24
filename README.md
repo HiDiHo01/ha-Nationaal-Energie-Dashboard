@@ -44,6 +44,8 @@ Het actuele API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit v
 
 ## Installatie en configuratie
 
+**Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
+
 Het distributiedoel is Home Assistant Marketplace (vanaf Home Assistant 2026.11). Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
 
 ## Ontwikkeling en kwaliteit

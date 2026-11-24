@@ -9,6 +9,7 @@
 | Doelarchitectuur | Home Assistant Custom Integration |
 | Kwaliteitsdoel | Platinum |
 | Python | 3.14, afhankelijk van Home Assistant-compatibiliteit |
+| Minimale Home Assistant Core-versie | 2026.11.3 (stable, 24 november 2026) |
 | Distributie | Home Assistant Marketplace (algemene catalogus) |
 
 > Dit document legt het integratieplan vast. Ontwerpkeuzes zijn voorstellen, geen gerealiseerde functionaliteit. API-waarden zijn werkhypothesen totdat de actuele OpenAPI-specificatie, datacatalogus en geauthenticeerde contracttests deze bevestigen. De toepasselijke AGENTS.md en AI_POLICY.md zijn leidend zodra deze bestaan.
@@ -42,6 +43,12 @@ Ontwikkel een robuuste, schaalbare, volledig asynchrone Home Assistant-integrati
 | Kwaliteitsnorm | Home Assistant Platinum |
 
 Platinum is vanaf het begin een ontwerpcriterium: asynchrone dependency, sessie-injectie, strikte typing en alle toepasselijke lagere kwaliteitscriteria. Er wordt geen officiële certificering geclaimd.
+
+### 1.2 Home Assistant-versiebeleid
+
+De minimale ondersteunde Home Assistant Core-versie is bij iedere nieuwe integratierelease de dan nieuwste stabiele Core-release, inclusief patchnummer. Controleer deze via https://version.home-assistant.io/stable.json en de officiële release-informatie. Gebruik een expliciete versie per release in hacs.json (homeassistant), documentatie en de reproduceerbare testomgeving; verhoog de grens pas voor een nieuwe integratierelease, niet met terugwerkende kracht. Oudere Core-versies, beta's en developmentversies hoeven niet ondersteund te worden. Valideer vóór publicatie installatie en tests tegen de vastgelegde baseline.
+
+De huidige baseline is 2026.11.3, uitgebracht op 23 november 2026, bevestigd via de [stable-versiefeed](https://version.home-assistant.io/stable.json) en [release-informatie](https://www.home-assistant.io/blog/2026/11/04/release-202611/). Python 3.14 blijft de doelversie; runtime- en dependencycompatibiliteit moeten in de ontwikkelomgeving worden gevalideerd.
 
 ## 2. Functionele scope
 
@@ -882,7 +889,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
 - [ ] Basis-CI configureren.
 - [ ] OpenAPI-contract valideren.
-- [ ] Minimale Home Assistant-versie vaststellen.
+- [x] Minimale Home Assistant-versie vaststellen: nieuwste stable, initiële baseline 2026.11.3.
 
 ### 21.2 Fase 1 — API-client
 
@@ -990,7 +997,7 @@ Semantic Versioning voor integratie en zelfstandige API-library.
 | Ontbrekende voorspellingen | Middel | Dekking en unavailable-status |
 | Historische revisies | Middel | Deduplicatie en revisieverwerking |
 | Recorder-databasegroei | Middel | Response actions |
-| Home Assistant breaking changes | Middel | CI tegen ondersteunde versies |
+| Home Assistant breaking changes | Middel | CI tegen de vastgelegde stable-baseline; release-updates controleren |
 | Te veel entities | Middel | Opt-in en disabled-by-default |
 | Onjuiste Platinum-claims | Middel | Aantoonbare criteria en uitzonderingen |
 
@@ -1052,7 +1059,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
 
-De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is nog niet vastgesteld. Het auteursrechtbeleid is aangepast: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden; toelatingscompatibiliteit nog niet definitief bevestigd.
+De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is vastgesteld op 2026.11.3. Bij iedere nieuwe integratierelease wordt de nieuwste stable opnieuw vastgesteld; runtimecompatibiliteit is nog niet getest. Het auteursrechtbeleid is aangepast: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden; toelatingscompatibiliteit nog niet definitief bevestigd.
 
 Domainnaam, pollingintervallen, intern requestbudget, packagearchitectuur, entitygroepering, testdoelen, branchbeleid en implementatiefasen zijn voorgestelde keuzes. Het plan is geen bewijs van werkende code of behaalde kwaliteitscriteria.
 
