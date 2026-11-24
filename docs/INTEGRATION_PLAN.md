@@ -74,7 +74,7 @@ Actuele gegevens dienen sensoren en automatiseringen; historische tijdreeksen di
 | Gascentrales | 18 | P1 |
 | Steenkool | 19 | P1 |
 | Kernenergie | 20 | P1 |
-| Gasverbruik huishoudens | 55 | P1 |
+| Gasverbruik lokale distributiebedrijven | 55 | P1 |
 | Totaal gasverbruik | 56 | P1 |
 | Gasverbruik industrie | 53 | P2 |
 | Gasverbruik elektriciteitscentrales | 54 | P2 |
@@ -94,6 +94,8 @@ P0 is essentieel voor de eerste release, P1 is uitbreiding, P2 is geavanceerde o
 De integratie levert gegevens en bestuurt geen apparaten. Nationale opwek is geen voorspelling van individuele zonnepanelen of een meting van huishoudelijk verbruik. Een lage CO₂-intensiteit impliceert geen lage stroomprijs.
 
 ## 3. API-architectuur
+
+Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden zijn geen live contractbewijs.
 
 ### 3.1 API-verbinding
 
@@ -167,7 +169,7 @@ Bied alleen geldige datasetcombinaties aan. Gebruik kwartierdata als MVP-uitgang
 
 ### 3.7 Geografische ondersteuning
 
-Nederland (point 0) is standaard. Provincies (voorgestelde point-ID's 1–12), windparken, grensstromen en gaslocaties worden uitsluitend aangeboden voor ondersteunde datasets. Valideer alle ID's en combinaties aan de hand van de catalogus.
+Nederland (point 0) is standaard. Provincies 1–12 zijn gedocumenteerd voor zon en wind op land. Offshore P0 gebruikt nationaal type 51; types 17 en 22 worden volgens changelog v1.28.0 uitgefaseerd. Bied geen individuele windparken aan zonder nieuw bewijs. Valideer overige locaties en combinaties vóór implementatie.
 
 ## 4. Softwarearchitectuur
 
@@ -581,7 +583,7 @@ Registreer nationale productie niet als huishoudelijk verbruik of eigen zonnepan
 
 ## 13. Forecast Engine
 
-De catalogus noemt voor bepaalde datasets een horizon tot zeven dagen. Gebruik de daadwerkelijk ontvangen tijdreeks en dekking; verifieer de horizon per dataset.
+De actuele productiecatalogus en changelog v1.23.0 documenteren voor de P0-datasets een horizon tot zeven dagen, inclusief productiemix en CO₂. Gebruik de daadwerkelijk ontvangen tijdreeks en dekking; verifieer de horizon per dataset.
 
 ### 13.1 Forecastfuncties
 
@@ -906,7 +908,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 ### 21.1 Fase 0 — Repository Foundation
 
-- [ ] Autonoom documentatiebeheer en NL/EN-taalbeleid vastleggen en automatische controles valideren (BL-007/BL-008; runtimevertalingen volgen per implementatiefase).
+- [x] Autonoom documentatiebeheer en NL/EN-taalbeleid vastleggen en automatische controles valideren (BL-007/BL-008; CI 45464616214; runtimevertalingen volgen per implementatiefase).
 
 - [x] AGENTS.md opstellen.
 - [x] Home Assistant-ontwikkelreferentie en repositoryskills opstellen; zelfstandig gebruik en onderhoud verplicht stellen.
