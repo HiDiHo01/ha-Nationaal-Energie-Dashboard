@@ -5,7 +5,7 @@ import json
 import os
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import patch
 
 from scripts import ned_contract_extended as extended
@@ -57,7 +57,7 @@ class ExtendedTests(unittest.TestCase):
             {(type_id, kind) for type_id in extended.DATASETS for kind in (1, 2)},
         )
         self.assertEqual(
-            [len(q.intervals()) for q in suite[11:]], [92, 100, 96, 1, 1, 0]
+            [len(q.intervals()) for q in suite[11:]], [92, 100, 96, 1, 1, 1]
         )
         self.assertTrue(
             all(q.dimensions()["activity"] == 2 for q in suite if q.type_id == 59)
@@ -188,6 +188,80 @@ class ExtendedTests(unittest.TestCase):
             self.assertIn('"response_timezone_ids": [0]', output.getvalue())
             self.assertIn('"timezone_matches_request": false', output.getvalue())
 
+    def test_daily_scope(self) -> None:
+        """Repeat exactly the two disputed historical day queries."""
+        suite = extended.select_suite(date(2027, 1, 1), "daily")
+        self.assertEqual(len(suite), 2)
+        self.assertEqual(
+            [q.day for q in suite], [date(2026, 10, 25), date(2026, 11, 22)]
+        )
+        self.assertEqual([q.timezone_id for q in suite], [1, 0])
+        self.assertTrue(all(q.type_id == 2 and q.granularity == 6 for q in suite))
+        self.assertTrue(all(q.classification == 2 for q in suite))
+        for query, hours in zip(suite, (25, 24), strict=True):
+            start, end = query.intervals()[0]
+            self.assertEqual(end - start, timedelta(hours=hours))
+
+    def test_daily_boundary_offsets(self) -> None:
+        """Distinguish wrong boundaries from a wrong interval duration."""
+        query = extended.select_suite(date(2026, 11, 24), "daily")[0]
+        expected_start, expected_end = query.intervals()[0]
+        cases = (
+            (0, 0, 90000, True),
+            (0, -3600, 86400, False),
+            (3600, 3600, 90000, False),
+        )
+        for start_offset, end_offset, duration, valid in cases:
+            document = self._response(query)
+            records = document["hydra:member"]
+            if not isinstance(records, list):
+                self.fail("Synthetic records missing")
+            records[0]["validfrom"] = (
+                expected_start + timedelta(seconds=start_offset)
+            ).isoformat()
+            records[0]["validto"] = (
+                expected_end + timedelta(seconds=end_offset)
+            ).isoformat()
+            with (
+                self.subTest(start=start_offset, end=end_offset),
+                patch.object(
+                    extended, "fetch_body", return_value=json.dumps(document).encode()
+                ),
+                redirect_stdout(io.StringIO()) as output,
+            ):
+                self.assertEqual(extended.observe("synthetic", query), valid)
+                summary = json.loads(output.getvalue().splitlines()[-1])
+                self.assertEqual(summary["expected_duration_seconds"], 90000)
+                self.assertEqual(summary["observed_duration_seconds"], duration)
+                self.assertEqual(summary["start_offset_seconds"], start_offset)
+                self.assertEqual(summary["end_offset_seconds"], end_offset)
+                self.assertNotIn(records[0]["validfrom"], output.getvalue())
+                self.assertNotIn(records[0]["validto"], output.getvalue())
+
+    def test_daily_utc_and_empty(self) -> None:
+        """Compare a UTC daily record against 24 hours; reject missing evidence."""
+        query = extended.select_suite(date(2026, 11, 24), "daily")[1]
+        document = self._response(query)
+        for empty in (False, True):
+            if empty:
+                document["hydra:member"] = []
+                document["hydra:totalItems"] = 0
+            with (
+                self.subTest(empty=empty),
+                patch.object(
+                    extended, "fetch_body", return_value=json.dumps(document).encode()
+                ),
+                redirect_stdout(io.StringIO()) as output,
+            ):
+                self.assertEqual(extended.observe("synthetic", query), not empty)
+                summary = json.loads(output.getvalue().splitlines()[-1])
+                self.assertEqual(summary["expected_duration_seconds"], 86400)
+                self.assertEqual(
+                    summary["observed_duration_seconds"], None if empty else 86400
+                )
+                self.assertEqual(summary["start_offset_seconds"], None if empty else 0)
+                self.assertEqual(summary["end_offset_seconds"], None if empty else 0)
+
     def test_main(self) -> None:
         """Enforce opt-in key injection, request budget and sanitized errors."""
         with (
@@ -212,3 +286,8 @@ class ExtendedTests(unittest.TestCase):
             os.environ["NED_CONTRACT_SCOPE"] = "timezone"
             self.assertEqual(extended.main(), 1)
             self.assertEqual(observe.call_count, 6)
+            observe.reset_mock()
+            observe.side_effect = [False, True]
+            os.environ["NED_CONTRACT_SCOPE"] = "daily"
+            self.assertEqual(extended.main(), 1)
+            self.assertEqual(observe.call_count, 2)
