@@ -1,7 +1,8 @@
 """Prepare bounded NED credential verification against the documented endpoint.
 
 Only a positive response to the fixed solar query is evidence of access.
-Unexpected statuses and empty collections do not prove an invalid key.
+HTTP 401 and 403 have distinct, conservative mappings based on AUTH-002/003.
+A 403 does not establish whether credentials or permissions caused denial.
 This client remains an offline-tested draft until contract release.
 """
 
@@ -10,7 +11,12 @@ from datetime import UTC, datetime, timedelta
 
 from aiohttp import ClientSession
 
-from .exceptions import NedResponseError, NedValidationError
+from .exceptions import (
+    NedAccessDeniedError,
+    NedAuthenticationError,
+    NedResponseError,
+    NedValidationError,
+)
 from .transport import NedTransport, TransportResponse
 
 _ORIGIN = "https://api.ned.nl"
@@ -27,7 +33,14 @@ _DIMENSIONS = {
 
 
 def _validate_response(response: TransportResponse) -> None:
-    """Require positive structural evidence without assigning error statuses."""
+    """Map observed denials, otherwise require positive structural evidence.
+
+    Never include or parse upstream error text, including for JSON error bodies.
+    """
+    if response.status == 401:
+        raise NedAuthenticationError("NED did not accept authentication (HTTP 401).")
+    if response.status == 403:
+        raise NedAccessDeniedError("NED denied access (HTTP 403).")
     if response.status != 200:
         raise NedResponseError(
             f"Credential verification returned HTTP {response.status}; "
@@ -37,7 +50,7 @@ def _validate_response(response: TransportResponse) -> None:
         raise NedResponseError("Unexpected credential verification media type.")
     try:
         document: object = json.loads(response.body)
-    except (ValueError, RecursionError):
+    except ValueError, RecursionError:
         document = None
     if not isinstance(document, dict):
         raise NedResponseError("Expected a JSON-LD collection object.")
@@ -59,6 +72,11 @@ class NedAuthenticationClient:
     def __init__(self, session: ClientSession) -> None:
         """Construct the transport without retaining credentials."""
         self._transport = NedTransport(session, _ORIGIN)
+
+    @property
+    def origin(self) -> str:
+        """Expose the fixed credential destination without exposing credentials."""
+        return _ORIGIN
 
     async def async_validate_api_key(self, api_key: str) -> None:
         """Perform one bounded historical solar request without retries.
