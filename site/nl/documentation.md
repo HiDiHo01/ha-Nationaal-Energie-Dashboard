@@ -14,6 +14,10 @@ De integratie is nog in ontwikkeling. Er is geen installeerbare release. De beoo
 
 Maak voor toekomstig gebruik een account aan bij [NED](https://ned.nl/), open Mijn account → API en genereer een persoonlijke API-sleutel. Bewaar deze veilig. Deel nooit sleutels in issues of logs.
 
+## Status van het API-contract
+
+De geteste nationale P0-kwartierqueries zijn structureel gevalideerd. De NED-handleiding noemt vermogen (kW), intervalenergie (kWh), CO₂-emissies (kg) en emissiefactoren (kg CO₂/kWh). De OpenAPI-beschrijving noemt voor emissies echter ton; de onderzochte type-27-kwartierrecords ondersteunen kg, maar de formele eenheid blijft onbevestigd. Vermogen en energie zijn niet altijd exact onderling afleidbaar. Voor lokale dagtotalen is aggregatie uit volledig gevalideerde UTC-kwartieren beoogd; API-dagaggregaten blijven uitgesloten zolang de kalenderafwijkingen openstaan. De integratie is nog niet geïmplementeerd. Zie het [contractonderzoek](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/blob/main/docs/API_REFERENCE.md).
+
 ## Meer informatie
 
 - [Nederlandse projectdocumentatie](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/blob/main/README.md)

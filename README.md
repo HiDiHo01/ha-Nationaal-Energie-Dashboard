@@ -12,7 +12,7 @@ Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.h
 
 ## Energiedata
 
-De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De exacte API-contracten en ondersteunde datasetcombinaties moeten nog worden gevalideerd; ondersteuning door de integratie moet nog worden geïmplementeerd.
+De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De geteste nationale P0-kwartierqueries zijn gevalideerd op structuur en dekking; verdere contract- en meetsemantiekvalidatie blijft open. Ondersteuning door de integratie moet nog worden geïmplementeerd.
 
 | Gegevens | Beschrijving |
 | --- | --- |
@@ -24,7 +24,7 @@ De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De
 | Historische gegevens | Voor bepaalde energiedragers beschikbaar vanaf 2016 |
 | Voorspellingen | Voor geselecteerde datasets tot een week vooruit |
 
-Afhankelijk van de dataset zijn intervallen van 10 minuten, 15 minuten, een uur, een dag, een maand of een jaar beschikbaar. De API biedt onder andere vermogen (kW), energie (kWh), CO₂-emissies (kg) en emissiefactoren (kg CO₂/kWh).
+Afhankelijk van de dataset zijn intervallen van 10 minuten, 15 minuten, een uur, een dag, een maand of een jaar beschikbaar. De NED-handleiding noemt vermogen (kW), intervalenergie (kWh), CO₂-emissies (kg) en emissiefactoren (kg CO₂/kWh). De OpenAPI-beschrijving noemt voor emissies echter ton; de onderzochte type-27-kwartierrecords ondersteunen kg, maar de formele eenheid blijft onbevestigd. Vermogen en energie zijn niet altijd exact onderling afleidbaar. Voor lokale dagtotalen is aggregatie uit volledig gevalideerde UTC-kwartieren beoogd; API-dagaggregaten blijven uitgesloten zolang de kalenderafwijkingen openstaan. Zie het [contractonderzoek](docs/API_REFERENCE.md).
 
 ## Beoogde functionaliteit
 

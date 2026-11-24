@@ -12,7 +12,7 @@ This project develops a custom integration for [Home Assistant](https://www.home
 
 ## Energy data
 
-According to the source description, the NED API provides the data below. The exact API contracts and supported dataset combinations still require validation; integration support is not implemented yet.
+According to the source description, the NED API provides the data below. The tested national P0 quarter-hour queries have been validated for structure and coverage; further contract and measurement semantics validation remains pending. Integration support is not implemented yet.
 
 | Data | Description |
 | --- | --- |
@@ -24,7 +24,7 @@ According to the source description, the NED API provides the data below. The ex
 | Historical data | Available from 2016 for selected energy sources |
 | Forecasts | Up to one week ahead for selected datasets |
 
-Depending on the dataset, available intervals include 10 minutes, 15 minutes, one hour, one day, one month or one year. API measurements include power (kW), energy (kWh), CO₂ emissions (kg) and emission factors (kg CO₂/kWh).
+Depending on the dataset, available intervals include 10 minutes, 15 minutes, one hour, one day, one month or one year. The NED manual describes power (kW), interval energy (kWh), CO₂ emissions (kg) and emission factors (kg CO₂/kWh). However, the OpenAPI description specifies tonnes for emissions; the examined type-27 quarter-hour records support kg, but the formal unit remains unconfirmed. Power and energy cannot always be derived exactly from each other. Local daily totals are intended to be calculated from fully validated UTC quarter-hour intervals; API daily aggregates remain excluded while the calendar discrepancies are unresolved. See the [contract investigation](docs/API_REFERENCE.md).
 
 ## Planned functionality
 
