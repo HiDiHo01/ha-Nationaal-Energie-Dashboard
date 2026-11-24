@@ -8,7 +8,7 @@ other_url: /en/documentation/
 ---
 ## Installatie en vereisten
 
-De integratie is nog in ontwikkeling. Er is geen installeerbare release. De beoogde distributie verloopt via Home Assistant Marketplace; toelating en runtimecompatibiliteit moeten nog worden aangetoond.
+De integratie is nog in ontwikkeling. Er is geen installeerbare release. De beoogde distributie verloopt via Home Assistant Marketplace. Algemene catalogustoelating is geblokkeerd door de [HACS-licentievoorwaarde](https://www.hacs.xyz/docs/publish/include/#check-license); het project verleent beperkte gebruikstoestemming. Runtimecompatibiliteit moet nog worden aangetoond.
 
 ## NED API-sleutel
 

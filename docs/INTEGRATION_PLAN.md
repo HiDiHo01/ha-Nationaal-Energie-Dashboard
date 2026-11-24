@@ -929,7 +929,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] Skills in concrete implementatietaken toepassen en gedrag verifiëren, inclusief native activatie met tracebewijs (geblokkeerd: Codex CLI en authenticatie ontbreken in de huidige omgeving).
 - [x] AI_POLICY.md opstellen.
 - [x] Auteursrechtbeleid vastleggen: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden.
-- [ ] Actuele Marketplace-toelatingsvoorwaarden, waaronder eventuele licentievereisten, definitief bevestigen.
+- [ ] Marketplace-toelatingscompatibiliteit bevestigen (BL-005: licentievoorwaarde vastgesteld; huidige gebruikstoestemming niet compatibel met de reguliere cataloguscontrole; geblokkeerd op eigenaar/vooraf overeengekomen uitzondering, zie §26.3).
 - [ ] Reproduceerbare Marketplace-compatibele runtime-distributiestrategie valideren.
 - [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
 - [x] pyproject.toml configureren en statisch valideren.
@@ -1109,7 +1109,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | AI_POLICY.md | Aanwezig |
 | Auteursrechtbeleid | Beperkte Home Assistant-gebruikstoestemming; overige rechten voorbehouden |
 | Repositorystructuur | Basismappen en ondersteunende bestanden aanwezig |
-| Marketplace | Doel vastgelegd; niet aangemeld |
+| Marketplace | Algemene catalogus als doel; licentiecompatibiliteit geblokkeerd (BL-005); niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
 | Live API-contracttests | Nationale UTC-P0-queries, paginering en NL-kwartierdekking voor historische zon bevestigd; twee dagaggregatie-afwijkingen, semantiek en volledige contractvalidatie open |
 | CI/CD | Basis-CI, pre-commit, dependency-audit en branchbescherming operationeel; inhoudelijke integratievalidatie nog niet uitgevoerd |
@@ -1128,7 +1128,7 @@ AGENTS.md en AI_POLICY.md zijn aanwezig. Rond de resterende fase-0-werkzaamheden
 
 De eigenaar kiest de Home Assistant Marketplace als distributiedoel en staat gebruik van officieel aangeboden versies binnen Home Assistant toe. Zie [USAGE_TERMS.md](../USAGE_TERMS.md) voor de beperkte gebruikstoestemming en voorbehouden rechten. Er wordt geen open-sourcelicentie verleend. Publieke releases en catalogusaanmelding vereisen afzonderlijke toestemming. De repository blijft openbaar; de toepasselijke GitHub-voorwaarden en rechten van derden blijven gelden.
 
-De actuele [Marketplace-repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/) noemen openbare GitHub-repositories, hacs.json, een geldig manifest, branding, HACS- en Hassfest-validatie en volledige releases. De geraadpleegde checklist noemt geen expliciete open-sourcelicentie, maar toelating onder deze gebruiksvoorwaarden is nog niet bevestigd. Verifieer dit vóór publicatie.
+De actuele [Marketplace-repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/) noemen openbare GitHub-repositories, hacs.json, een geldig manifest, branding, HACS- en Hassfest-validatie en volledige releases. De Home Assistant-cataloguspagina noemt de licentie niet expliciet in haar checklist, maar verwijst naar dezelfde hacs/default-catalogus. De actuele [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) vereist een door GitHub herkende, OSI-goedgekeurde licentie; niet-commerciële beperkingen falen. GitHub-repositorymetadata op 24 november 2026 geeft license=null. De huidige beperkte gebruikstoestemming is daarom niet compatibel met de reguliere cataloguscontrole. De HACS-reviewprocedure laat vooraf overeengekomen uitzonderingen toe; voor dit project is geen uitzondering bevestigd. BL-005 is geblokkeerd; BL-006 blijft afhankelijk. Verander geen gebruiksrechten zonder expliciete eigenaarsopdracht. Een [custom repository via link](https://www.home-assistant.io/integrations/marketplace/#custom-repositories) is technisch een afzonderlijke installatieroute, geen catalogusopname; daadwerkelijke installatie en geschiktheid onder de huidige voorwaarden zijn nog niet bewezen. Geen release of catalogus-PR zolang de toepasselijke acceptatiepoorten niet zijn behaald.
 
 ### 26.4 Vastleggingsnotitie
 

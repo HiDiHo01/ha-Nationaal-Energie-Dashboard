@@ -48,7 +48,7 @@ Het beoogde API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit v
 
 **Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
 
-Het distributiedoel is Home Assistant Marketplace; toelating en runtime-distributie moeten nog worden gevalideerd. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
+Het distributiedoel is Home Assistant Marketplace. Algemene catalogustoelating is momenteel geblokkeerd: de [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) vereist een OSI-goedgekeurde licentie, terwijl dit project beperkte gebruikstoestemming verleent. Runtime-distributie moet nog worden gevalideerd. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
 
 ## Ontwikkeling en kwaliteit
 

@@ -16,7 +16,7 @@
 - Gelockte Python-ontwikkelomgeving, pre-commit, VS Code, Baseline CI en dependency-audits.
 - Branchbescherming en gecontroleerde Dependabot-auto-merge; echte botmergevalidatie staat nog open.
 - Nederlands en Engels als verplichte gebruikerstalen, beide README-versies en automatische documentatie- en vertaalcontroles.
-- Marketplace als beoogd distributiekanaal.
+- Marketplace als beoogd distributiekanaal; reguliere catalogustoelating geblokkeerd door licentievoorwaarde, gebruiksrechten ongewijzigd.
 - Beperkte toestemming voor officieel aangeboden Home Assistant-versies.
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
@@ -34,6 +34,6 @@
 - Locked Python development environment, pre-commit, VS Code, baseline CI and dependency audits.
 - Branch protection and guarded Dependabot auto-merge; real bot merge validation remains open.
 - Dutch and English as required user languages, both README versions and automated documentation and translation checks.
-- Marketplace as the intended distribution channel.
+- Marketplace as the intended distribution channel; regular catalog admission blocked by the license requirement, usage rights unchanged.
 - Limited permission for officially offered Home Assistant versions.
 - No installable integration, actual integration translations or public release yet.
