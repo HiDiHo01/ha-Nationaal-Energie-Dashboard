@@ -10,6 +10,8 @@ other_url: /nl/documentation/
 
 The integration is still in development. No installable release is available. Distribution through Home Assistant Marketplace is intended. GPL-3.0-only has been chosen to meet the [HACS license requirement](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection is confirmed; actual catalog admission remains pending. The runtime distribution strategy has been validated using a synthetic wheel; full production installation still requires verification.
 
+This development branch contains the nine requested integration files, eight sensor descriptions, a masked API-key flow and a separate authentication client. This is an offline draft: the provider factory and authentication connection block real configuration and live data requests; no working integration or release. Existing phase gates remain in effect.
+
 ## NED API key
 
 For future use, create an account at [NED](https://ned.nl/), open Mijn account (My account) → API and generate a personal API key. Store it securely. Never disclose keys in issues or logs.
