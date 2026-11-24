@@ -1,0 +1,33 @@
+# Python and local development
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# Local Home Assistant data
+/config/
+/.ha-test/
+.storage/
+secrets.yaml
+home-assistant_v2.db*
+home-assistant.log*
+
+# Local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store

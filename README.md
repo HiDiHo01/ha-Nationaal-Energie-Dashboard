@@ -29,7 +29,7 @@ Afhankelijk van de dataset zijn intervallen van 10 minuten, 15 minuten, een uur,
 - Historische, actuele en voorspelde energiedata, voor zover ondersteund door de API.
 - Correcte eenheden, tijdzonebewuste tijdstempels en passende sensorclassificaties.
 - Gebruik van energiedata in dashboards en automatiseringen.
-- HACS-compatibiliteit voor eigen gebruik, voor zover technisch mogelijk.
+- Opname in de algemene Home Assistant Marketplace-catalogus.
 
 ## API-sleutel
 
@@ -44,7 +44,7 @@ Het actuele API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit v
 
 ## Installatie en configuratie
 
-Installatie via HACS en handmatige installatie worden beoogd voor eigen gebruik door de eigenaar. Er wordt geen publieke gebruikslicentie of toestemming voor installatie door derden verleend. Zodra een werkende interne versie beschikbaar is, worden hier de technische vereisten beschreven.
+Het distributiedoel is Home Assistant Marketplace (vanaf Home Assistant 2026.11). Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
 
 ## Ontwikkeling en kwaliteit
 
@@ -61,22 +61,23 @@ Technische uitgangspunten:
 
 ## Roadmap
 
-- [ ] Repositorystructuur en ontwikkelrichtlijnen vastleggen.
+- [x] Repositorystructuur en ontwikkelrichtlijnen vastleggen.
 - [ ] NED API-client en datamodellen implementeren.
 - [ ] Configuratieflow en gegevenscoördinator implementeren.
 - [ ] Sensoren en voorspellingen beschikbaar maken.
 - [ ] Vertalingen, diagnostiek en foutafhandeling toevoegen.
 - [ ] Tests en GitHub Actions inrichten.
-- [ ] HACS-compatibiliteit realiseren.
-- [ ] Eerste release publiceren en toepasselijke kwaliteitscriteria valideren.
+- [ ] Marketplace-toelatingsvoorwaarden en runtime-distributiestrategie bevestigen.
+- [ ] Marketplace-compatibiliteit, metadata, branding en installatie-/updatetests realiseren.
+- [ ] HACS- en Hassfest-validatie en Platinum-criteria aantoonbaar afronden.
+- [ ] Na toestemming een volledige GitHub-release publiceren en een catalogus-PR bij hacs/default indienen.
+- [ ] Catalogusopname na acceptatie verifiëren.
 
 ## Auteursrecht en gebruik
 
-**Geen licentie — All Rights Reserved.**
+**Alle rechten voorbehouden, met beperkte gebruikstoestemming voor Home Assistant volgens [USAGE_TERMS.md](USAGE_TERMS.md). Geen open-sourcelicentie.**
 
-Alle rechten voorbehouden. Dit project wordt zonder gebruikslicentie beschikbaar gesteld. De eigen broncode, documentatie en overige beschermde projectmaterialen mogen door derden niet zonder voorafgaande uitdrukkelijke toestemming van de rechthebbende worden gebruikt, gereproduceerd, gewijzigd, herverdeeld of in andere projecten verwerkt, behoudens wettelijke uitzonderingen en toepasselijke platformvoorwaarden. Dit beleid verandert de licenties en rechten van externe dependencies, Home Assistant, NED-data of andere materialen van derden niet. De GitHub-voorwaarden voor openbare repositories blijven gelden, waaronder het recht om de repository binnen GitHub te bekijken en te forken.
-
-Er wordt geen open-source- of andere algemene gebruikslicentie verleend. Publieke distributie via HACS, PyPI of andere kanalen is niet toegestaan zonder een nieuw expliciet besluit van de eigenaar.
+Installatie, updates en eigen niet-commercieel gebruik van officieel aangeboden versies binnen Home Assistant zijn toegestaan. De overige auteursrechten, waaronder hergebruik van broncode in andere projecten, onafhankelijke herdistributie en commerciële exploitatie, blijven voorbehouden. Raadpleeg de volledige [gebruiksvoorwaarden](USAGE_TERMS.md). Er is nog geen toestemming voor een concrete publieke release verleend.
 
 ## Ondersteuning en bijdragen
 
@@ -89,7 +90,8 @@ Meld fouten en functievoorstellen via [GitHub Issues](https://github.com/HiDiHo0
 - [NED API](https://api.ned.nl/v1)
 - [Home Assistant](https://www.home-assistant.io/)
 - [Home Assistant Integration Quality Scale](https://contributors.home-assistant.io/core/quality-scale/)
-- [HACS](https://www.hacs.xyz/)
+- [Home Assistant Marketplace](https://contributors.home-assistant.io/marketplace/)
+- [Catalogusopname](https://contributors.home-assistant.io/marketplace/guides/catalog/)
 
 ## Disclaimer
 

@@ -37,14 +37,14 @@ Volg hoofdstukken 21 en 22 van het integratieplan. Werk per afgebakend onderdeel
 
 | Fase | Verplichte oplevering | Acceptatiepoort |
 | --- | --- | --- |
-| 0 — Foundation | AGENTS.md, AI_POLICY.md, auteursrechtbeleid (geen licentie), repositorystructuur, pyproject.toml, tooling, basis-CI, gevalideerd API-contract en minimale HA-versie | Beleid, contract en tooling aantoonbaar gereed |
+| 0 — Foundation | AGENTS.md, AI_POLICY.md, auteursrechtbeleid (beperkte gebruikstoestemming), repositorystructuur, pyproject.toml, tooling, basis-CI, gevalideerd API-contract en minimale HA-versie | Beleid, contract en tooling aantoonbaar gereed |
 | 1 — API-client | Zelfstandig async ned_api-package, enums, catalogus, modellen, parser, rate limiter, fixtures | Clienttests en contractvalidatie geslaagd |
 | 2 — Integration Core | Manifest, config/ options/ reauth/ reconfigure flows, typed runtime data, coordinators, lifecycle en migraties | Setup, reload, unload en flowtests geslaagd |
 | 3 — Sensors | P0-datasets, declaratieve entities, device registry, unique IDs, eenheden, vertalingen | Sensortests en semantische datavalidatie geslaagd |
 | 4 — Forecast en historie | Forecastsamenvattingen, begrensde response actions, optimale tijdvensters, documentatie | Dekking, DST, revisies en algoritmen getest |
 | 5 — Robustness | Diagnostics, relevante repairs, gedeeltelijke uitval, staleness, logging, beveiliging | Fout- en securitytests geslaagd |
 | 6 — Platinum | Alle toepasselijke Bronze/Silver/Gold/Platinum-criteria, strict typing, CI en kwaliteitsbestand | Alle toepasselijke releaseblokkades opgelost |
-| 7 — Release | Interne packagebuild, gepinde dependency, installatie/upgrade/verwijdering, changelog | Gevalideerde interne release; publieke publicatie geblokkeerd |
+| 7 — Release en Marketplace | Installeerbare build, branding, metadata, installatie/upgrade/verwijdering, changelog en catalogusaanmelding | Gevalideerde release, actuele catalogusvoorwaarden en expliciete publicatietoestemming |
 
 - Gebruik de volledige checklists in hoofdstuk 21 en de Definition of Done in hoofdstuk 24 als acceptatiecriteria.
 - Werk voortgang bij in het integratieplan en relevante README-roadmap zodra een taak aantoonbaar is voltooid. Laat niet-geteste onderdelen open staan.
@@ -63,13 +63,13 @@ Volg hoofdstukken 21 en 22 van het integratieplan. Werk per afgebakend onderdeel
 | Transport | aiohttp, HTTPS, gedeelde sessie |
 | Configuratie | Native config entry en UI-flows |
 | Data | DataUpdateCoordinator, getypeerde immutable snapshots |
-| Distributie | Eigen gebruik; HACS-compatibiliteit waar mogelijk, geen publieke distributie |
+| Distributie | Home Assistant Marketplace (publieke catalogus als einddoel) |
 | Kwaliteitsdoel | Home Assistant Platinum |
 
 Volg de directorystructuur en moduleverantwoordelijkheden in hoofdstuk 5. Gebruik `custom_components/nationaal_energie_dashboard/` voor Home Assistant-code en `packages/ned-api/src/ned_api/` voor de zelfstandige API-client. Tests worden georganiseerd onder `tests/api/`, `tests/integration/` en `tests/fixtures/`. Ontwerpdocumentatie staat onder `docs/`.
 
 - Scheid transport, parsing, domeinlogica, coordinators, entities en actions. Pas SRP, dependency injection en composition toe.
-- De API-library is onafhankelijk van Home Assistant. Bouw en test de library voor eigen gebruik; pin de dependency met een reproduceerbare, geautoriseerde installatiemethode. Publieke packagepublicatie is geblokkeerd.
+- De API-library is onafhankelijk van Home Assistant. Bouw en test de library onafhankelijk; valideer in fase 0 een reproduceerbare Marketplace-compatibele runtime-installatiemethode. Publieke packagepublicatie vereist expliciete toestemming.
 - Gebruik één centrale datasetcatalogus en één bron voor constanten en enums. Geen verspreide magic numbers of dubbele requestlogica.
 - Introduceer modules pas bij concrete verantwoordelijkheid; geen lege placeholders, circulaire imports of speculatieve abstracties.
 - Leg afwijkingen van de ontwerpbaseline vast met motivatie, impact en migratiepad.
@@ -197,18 +197,24 @@ pip-audit
 
 - Werk in kleine, logisch samenhangende wijzigingen. Volg het voorgestelde branchbeleid (feature/*, fix/*, docs/*) voor reguliere ontwikkeling zodra fase 0 dit heeft ingericht. Respecteer de actuele branchbescherming en gebruikersopdracht.
 - Gebruik betekenisvolle commitberichten, bij voorkeur Conventional Commits. Verifieer de diff vóór commit; voer geen force-push of destructieve reset uit.
-- Richt CI in volgens hoofdstuk 20: Ruff, Pylint, strict mypy, pytest met branch coverage, dependency scanning, Hassfest, HACS en releasevalidatie. Publieke publicatie is geblokkeerd zolang het huidige auteursrechtbeleid geldt.
+- Richt CI in volgens hoofdstuk 20: Ruff, Pylint, strict mypy, pytest met branch coverage, dependency scanning, Hassfest, HACS en releasevalidatie. Publieke publicatie vereist expliciete toestemming en bevestigde catalogusvoorwaarden.
 - Werk relevante README, changelog, architectuur-, API-, dataset-, installatie-, configuratie-, entiteits-, automatiserings-, troubleshooting- en ontwikkelaarsdocumentatie bij.
 - Documenteer publieke API-contracten, configuratieopties, eenheden, beperkingen, breaking changes en migratiepaden.
 - Houd AGENTS.md voor technische standaarden, AI_POLICY.md voor beleid en INTEGRATION_PLAN.md voor ontwerp en fasevoortgang. Vermijd dubbele of tegenstrijdige bronnen.
 
 ### 13.1 Auteursrecht en distributie
 
-- Geen gebruikslicentie: alle rechten voorbehouden. Voeg geen LICENSE-bestand met licentietekst of licentieverlenende metadata toe. Gebruik, waar technisch vereist en ondersteund, uitsluitend correcte metadata die geen rechten verleent.
-- De eigen projectmaterialen zijn uitsluitend bestemd voor de eigenaar en diens uitdrukkelijk gemachtigden. Geen toestemming aan derden voor gebruik, kopiëren, wijziging, herdistributie of afgeleide projecten, behoudens toepasselijke wettelijke en platformrechten.
-- Respecteer licenties en voorwaarden van alle externe materialen en dependencies. Claim daarop geen eigen exclusieve rechten.
-- Behoud HACS-compatibiliteit als technisch doel voor eigen gebruik, indien haalbaar. Publicatie naar publieke package-indexen, HACS-defaultdistributie of andere publieke distributiekanalen is geblokkeerd totdat de eigenaar expliciet een ander beleid vaststelt.
-- De repositoryzichtbaarheid wordt niet automatisch gewijzigd. Een openbare repository blijft onderworpen aan de GitHub-voorwaarden voor bekijken en forken.
+- Alle rechten voorbehouden, met beperkte gebruikstoestemming voor Home Assistant volgens [USAGE_TERMS.md](USAGE_TERMS.md). Geen open-sourcelicentie. Verleen geen aanvullende rechten aan derden zonder toestemming.
+- Respecteer wettelijke uitzonderingen, GitHub-voorwaarden en licenties van externe materialen.
+- Marketplace-distributie van officiële versies is het doel. Publicatie van releases, packages of catalogusaanmelding vereist expliciete toestemming. Wijzig repositoryzichtbaarheid niet zelfstandig.
+
+### 13.2 Marketplace-readiness
+
+- Volg [repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/).
+- Bevestig in fase 0 of de beperkte gebruikstoestemming voldoet aan de actuele toelatingsvoorwaarden; vraag de eigenaar bij een vereiste beleidswijziging.
+- Eén integratie in custom_components/nationaal_energie_dashboard; root-hacs.json, geldig manifest, branding, README, beschrijving, topics en ingeschakelde issues. Alle runtime-dependencies zijn beschikbaar bij een schone installatie.
+- Vereis geslaagde HACS- en Hassfest-validatie zonder genegeerde checks, volledige GitHub-release, installatie-/update-/verwijderingstests en catalogus-PR bij hacs/default (integration).
+- Claim catalogusopname pas na acceptatie en synchronisatie. Platinum blijft een afzonderlijk kwaliteitsdoel.
 
 ## 14. Definition of Done en opleverrapport
 
@@ -233,6 +239,6 @@ Rapporteer bij iedere opdracht de gewijzigde bestanden, relevante technische keu
 
 ## 15. Startstatus en volgende acceptatiepoort
 
-Bij het opstellen van dit bestand bevatte de repository alleen README.md en docs/INTEGRATION_PLAN.md. Fase 0 is gestart, niet voltooid. AGENTS.md en AI_POLICY.md zijn aanwezig. De eigenaar heeft gekozen voor geen gebruikslicentie (alle rechten voorbehouden). Minimale Home Assistant-versie, API-contractvalidatie, repositoryfundament, tooling en CI zijn nog open.
+Bij het opstellen van dit bestand bevatte de repository alleen README.md en docs/INTEGRATION_PLAN.md. Fase 0 is gestart, niet voltooid. AGENTS.md en AI_POLICY.md zijn aanwezig. De eigenaar heeft gekozen voor beperkte Home Assistant-gebruikstoestemming met voorbehouden overige rechten. De basismappenstructuur is aanwezig; Marketplace-readiness is nog niet aangetoond. Minimale Home Assistant-versie, API-contractvalidatie, distributiestrategie, tooling en CI zijn nog open.
 
 Werk eerst de openstaande onderdelen van fase 0 af. Implementeer de API-client pas wanneer de noodzakelijke beleids-, contract- en toolingfundamenten gereed zijn. Als een externe afhankelijkheid (zoals een NED API-key) ontbreekt, meld de blokkade en voltooi alleen onafhankelijke werkzaamheden die verantwoord uitvoerbaar zijn.

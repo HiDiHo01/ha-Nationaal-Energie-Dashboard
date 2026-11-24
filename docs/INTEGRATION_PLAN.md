@@ -9,7 +9,7 @@
 | Doelarchitectuur | Home Assistant Custom Integration |
 | Kwaliteitsdoel | Platinum |
 | Python | 3.14, afhankelijk van Home Assistant-compatibiliteit |
-| Distributie | Eigen gebruik; HACS-compatibiliteit waar mogelijk, geen publieke distributie |
+| Distributie | Home Assistant Marketplace (algemene catalogus) |
 
 > Dit document legt het integratieplan vast. Ontwerpkeuzes zijn voorstellen, geen gerealiseerde functionaliteit. API-waarden zijn werkhypothesen totdat de actuele OpenAPI-specificatie, datacatalogus en geauthenticeerde contracttests deze bevestigen. De toepasselijke AGENTS.md en AI_POLICY.md zijn leidend zodra deze bestaan.
 
@@ -38,7 +38,7 @@ Ontwikkel een robuuste, schaalbare, volledig asynchrone Home Assistant-integrati
 | Linting | Ruff en Pylint |
 | Typecontrole | mypy strict |
 | CI/CD | GitHub Actions |
-| Distributie | Eigen gebruik; HACS-compatibiliteit waar mogelijk, geen publieke distributie |
+| Distributie | Home Assistant Marketplace (algemene catalogus) |
 | Kwaliteitsnorm | Home Assistant Platinum |
 
 Platinum is vanaf het begin een ontwerpcriterium: asynchrone dependency, sessie-injectie, strikte typing en alle toepasselijke lagere kwaliteitscriteria. Er wordt geen officiële certificering geclaimd.
@@ -171,7 +171,7 @@ flowchart TD
 
 Single Responsibility, Separation of Concerns, Dependency Injection, composition over inheritance, immutable datamodellen waar mogelijk. Geen netwerkverzoeken in entity-properties, geen circulaire imports, geen blokkerende I/O en één centrale datasetcatalogus.
 
-De API-client is een zelfstandig Python-package zonder Home Assistant-afhankelijkheid. Ontwikkel, bouw en test het onafhankelijk voor eigen gebruik; pin de dependency met een reproduceerbare, geautoriseerde installatiemethode. Publieke packagepublicatie is niet toegestaan onder het huidige auteursrechtbeleid. Valideer de private of lokale installatiemethode in fase 0.
+De API-client is een zelfstandig Python-package zonder Home Assistant-afhankelijkheid. Ontwikkel, bouw en test het onafhankelijk. Valideer in fase 0 een reproduceerbare Marketplace-compatibele runtime-installatiemethode; eindgebruikers mogen geen ontwikkelaarscheckout nodig hebben. Publieke packagepublicatie vereist toestemming.
 
 ## 5. Voorgestelde repositorystructuur
 
@@ -206,6 +206,8 @@ ha-Nationaal-Energie-Dashboard/
 │       ├── quality_scale.yaml
 │       ├── icons.json
 │       ├── strings.json
+│       ├── brand/
+│       │   └── icon.png
 │       └── translations/
 │           ├── en.json
 │           └── nl.json
@@ -240,6 +242,7 @@ ha-Nationaal-Energie-Dashboard/
 │   ├── AUTOMATIONS.md
 │   ├── TROUBLESHOOTING.md
 │   └── DEVELOPMENT.md
+├── USAGE_TERMS.md
 ├── AGENTS.md
 ├── AI_POLICY.md
 ├── CONTRIBUTING.md
@@ -823,7 +826,7 @@ Reguliere CI gebruikt reproduceerbare fixtures en gemockte responses zonder pers
 
 ### 20.1 GitHub Actions
 
-Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → interne oplevering na goedgekeurde release; geen publieke publicatie.
+Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → geautoriseerde release en Marketplace-catalogusaanmelding na geslaagde controles.
 
 ### 20.2 Beoogde lokale commando's
 
@@ -864,15 +867,17 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 | 4. Forecast | 5 werkdagen | Voorspellingen en actions |
 | 5. Robustness | 4 werkdagen | Diagnostics, repairs en fouten |
 | 6. Quality & CI | 5 werkdagen | Tests, typing en validatie |
-| 7. Release | 2 werkdagen | HACS en documentatie |
+| 7. Release en Marketplace | 2 werkdagen (interne voorbereiding; review niet inbegrepen) | Release, catalogusaanmelding en documentatie |
 | Totaal | 32 werkdagen | Indicatieve inspanning |
 
 ### 21.1 Fase 0 — Repository Foundation
 
 - [x] AGENTS.md opstellen.
 - [x] AI_POLICY.md opstellen.
-- [x] Auteursrechtbeleid vastleggen: geen gebruikslicentie, alle rechten voorbehouden.
-- [ ] Repositorystructuur aanmaken.
+- [x] Auteursrechtbeleid vastleggen: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden.
+- [ ] Actuele Marketplace-toelatingsvoorwaarden, waaronder eventuele licentievereisten, definitief bevestigen.
+- [ ] Reproduceerbare Marketplace-compatibele runtime-distributiestrategie valideren.
+- [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
 - [ ] pyproject.toml configureren.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
 - [ ] Basis-CI configureren.
@@ -940,15 +945,21 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] quality_scale.yaml voltooien.
 - [ ] Alle releaseblokkerende tests laten slagen.
 
-### 21.8 Fase 7 — Release
+### 21.8 Fase 7 — Release en Marketplace
 
-- [ ] Python-package intern bouwen en de geautoriseerde installatiemethode valideren.
+- [ ] Python-package bouwen en de geautoriseerde Marketplace-compatibele installatiemethode valideren.
 - [ ] Dependencyversie vastleggen.
 - [ ] HACS-validatie uitvoeren.
 - [ ] Installatieprocedure testen.
 - [ ] Upgrade en verwijdering testen.
 - [ ] README en changelog actualiseren.
-- [ ] Eerste stabiele interne release voor eigen gebruik opleveren.
+- [ ] Eerste stabiele release voorbereiden.
+- [ ] Root-hacs.json, manifest, branding, README, beschrijving, topics en ingeschakelde issues verifiëren.
+- [ ] HACS en Hassfest zonder genegeerde checks laten slagen.
+- [ ] Installatie, update en verwijdering in een schone ondersteunde Home Assistant-omgeving testen.
+- [ ] Na bevestigde toelatingsvoorwaarden en expliciete toestemming een volledige GitHub-release publiceren.
+- [ ] Marketplace-installatielink toevoegen en catalogus-PR bij hacs/default (integration) indienen via een bevoegde account.
+- [ ] Reviewfeedback verwerken en catalogusopname na synchronisatie verifiëren.
 
 ## 22. Versiestrategie
 
@@ -962,7 +973,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 | 0.6.0 | Diagnostics, repairs en robuustheid |
 | 0.9.0 | Feature-complete beta |
 | 1.0.0-rc.1 | Release candidate |
-| 1.0.0 | Eerste stabiele interne release |
+| 1.0.0 | Eerste stabiele Marketplace-release (na acceptatiepoort) |
 
 Semantic Versioning voor integratie en zelfstandige API-library.
 
@@ -1019,6 +1030,8 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Coordinators | [Fetching data](https://developers.home-assistant.io/docs/integration_fetching_data/) |
 | Sensors | [Sensor entity](https://developers.home-assistant.io/docs/core/entity/sensor/) |
 | HACS | [HACS-documentatie](https://www.hacs.xyz/) |
+| Marketplace | [Home Assistant Contributors](https://contributors.home-assistant.io/marketplace/) |
+| Catalogus | [Get into the catalog](https://contributors.home-assistant.io/marketplace/guides/catalog/) |
 | Python | [Python 3.14-documentatie](https://docs.python.org/3.14/) |
 
 ## 26. Projectstatus en vervolgstap
@@ -1030,14 +1043,16 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Integratieplan | Vastgelegd in dit document |
 | AGENTS.md | Aanwezig |
 | AI_POLICY.md | Aanwezig |
-| Auteursrechtbeleid | Geen licentie — alle rechten voorbehouden |
+| Auteursrechtbeleid | Beperkte Home Assistant-gebruikstoestemming; overige rechten voorbehouden |
+| Repositorystructuur | Basismappen en ondersteunende bestanden aanwezig |
+| Marketplace | Doel vastgelegd; niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
 | Live API-contracttests | Niet uitgevoerd |
 | CI/CD | Niet ingericht |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
 
-De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is nog niet vastgesteld. Het auteursrechtbeleid is vastgesteld: geen gebruikslicentie, alle rechten voorbehouden.
+De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is nog niet vastgesteld. Het auteursrechtbeleid is aangepast: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden; toelatingscompatibiliteit nog niet definitief bevestigd.
 
 Domainnaam, pollingintervallen, intern requestbudget, packagearchitectuur, entitygroepering, testdoelen, branchbeleid en implementatiefasen zijn voorgestelde keuzes. Het plan is geen bewijs van werkende code of behaalde kwaliteitscriteria.
 
@@ -1047,9 +1062,9 @@ AGENTS.md en AI_POLICY.md zijn aanwezig. Rond de resterende fase-0-werkzaamheden
 
 ### 26.3 Auteursrecht en distributiebesluit
 
-De eigenaar heeft bepaald dat het project geen gebruikslicentie krijgt. Alle rechten voorbehouden. Dit project wordt zonder gebruikslicentie beschikbaar gesteld. De eigen broncode, documentatie en overige beschermde projectmaterialen mogen door derden niet zonder voorafgaande uitdrukkelijke toestemming van de rechthebbende worden gebruikt, gereproduceerd, gewijzigd, herverdeeld of in andere projecten verwerkt, behoudens wettelijke uitzonderingen en toepasselijke platformvoorwaarden. Dit beleid verandert de licenties en rechten van externe dependencies, Home Assistant, NED-data of andere materialen van derden niet. De GitHub-voorwaarden voor openbare repositories blijven gelden, waaronder het recht om de repository binnen GitHub te bekijken en te forken.
+De eigenaar kiest de Home Assistant Marketplace als distributiedoel en staat gebruik van officieel aangeboden versies binnen Home Assistant toe. Zie [USAGE_TERMS.md](../USAGE_TERMS.md) voor de beperkte gebruikstoestemming en voorbehouden rechten. Er wordt geen open-sourcelicentie verleend. Publieke releases en catalogusaanmelding vereisen afzonderlijke toestemming. De repository blijft openbaar; de toepasselijke GitHub-voorwaarden en rechten van derden blijven gelden.
 
-HACS-compatibiliteit blijft een technisch doel voor eigen gebruik, voor zover haalbaar. Publieke releases, publicatie naar PyPI en publieke HACS-distributie zijn niet toegestaan onder dit beleid. Valideer in fase 0 hoe de zelfstandige API-library en integratie reproduceerbaar voor eigen gebruik worden geïnstalleerd. Er wordt geen LICENSE-bestand of licentieverlenende metadata toegevoegd. De repositoryzichtbaarheid blijft een afzonderlijke beslissing van de eigenaar.
+De actuele [Marketplace-repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/) noemen openbare GitHub-repositories, hacs.json, een geldig manifest, branding, HACS- en Hassfest-validatie en volledige releases. De geraadpleegde checklist noemt geen expliciete open-sourcelicentie, maar toelating onder deze gebruiksvoorwaarden is nog niet bevestigd. Verifieer dit vóór publicatie.
 
 ### 26.4 Vastleggingsnotitie
 
