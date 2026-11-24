@@ -1,0 +1,113 @@
+{
+  "config": {
+    "abort": {
+      "contract_pending": "De NED API-client is nog niet vrijgegeven. Configuratie is geblokkeerd totdat de contractvalidatie en runtime-distributie zijn afgerond."
+    }
+  },
+  "exceptions": {
+    "contract_pending": {
+      "message": "De NED API-client is nog niet vrijgegeven. Configuratie is geblokkeerd totdat de contractvalidatie en runtime-distributie zijn afgerond."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "co2_intensity": {
+        "name": "CO₂-intensiteit",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "co2_intensity_forecast": {
+        "name": "Voorspelde CO₂-intensiteit",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "renewable_electricity_share": {
+        "name": "Geschat aandeel hernieuwbare elektriciteit",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "method_version": {
+            "name": "Methodeversie"
+          },
+          "waste_renewable_factor": {
+            "name": "Hernieuwbare afvalfactor"
+          },
+          "waste_factor_year": {
+            "name": "Bronjaar afvalfactor"
+          }
+        }
+      },
+      "solar_power": {
+        "name": "Zonne-energieproductie",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "wind_onshore_power": {
+        "name": "Windenergieproductie op land",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "wind_offshore_power": {
+        "name": "Windenergieproductie op zee",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "electricity_consumption": {
+        "name": "Elektriciteitsverbruik",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "electricity_production": {
+        "name": "Elektriciteitsproductie",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      }
+    }
+  }
+}
