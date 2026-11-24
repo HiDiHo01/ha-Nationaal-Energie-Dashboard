@@ -16,6 +16,6 @@ Deze map bevat projectgebonden, herbruikbare Agent Skills. Elke skill heeft een 
 
 De zeven repositoryskills staan in de door Codex ondersteunde locatie .agents/skills. Native impliciete activatie is standaard toegestaan en expliciet ingesteld in iedere agents/openai.yaml. Zie de [officiële skilldocumentatie](https://developers.openai.com/codex/skills). De agent kiest relevante skills op basis van de opdracht; een expliciete skillnaam is niet vereist. Bij ontbrekende native discovery leest de agent zelf de passende SKILL.md-bestanden via deze index. Dit is directe selectie, geen bewijs van native activatie.
 
-Gebruik de [activatie-evaluaties](ACTIVATION_EVALS.md) om selectie en proceduretrouw in het Nederlands en Engels te toetsen. Bewaar daadwerkelijke resultaten, geen verzonnen traces.
+De [activatie-evaluaties](ACTIVATION_EVALS.md) blijven optioneel beschikbaar om selectie en proceduretrouw in het Nederlands en Engels te toetsen, uitsluitend na nieuwe expliciete toestemming. BL-012 en BL-013 zijn ingetrokken; geen native evaluatiepoort. Bewaar daadwerkelijke resultaten, geen verzonnen traces.
 
 Lees de relevante skills bij aanvang, combineer ze waar nodig en onderhoud ze volgens [AGENTS.md](../../AGENTS.md) en [project-knowledge-maintenance](project-knowledge-maintenance/SKILL.md). Geen automatische installatie van externe skills, geen duplicatie van beleid en geen secrets in skills. Nieuwe skills worden pas toegevoegd aan deze index na validatie.

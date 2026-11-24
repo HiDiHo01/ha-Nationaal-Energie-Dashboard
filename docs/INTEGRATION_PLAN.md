@@ -926,8 +926,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] AGENTS.md opstellen.
 - [x] Home Assistant-ontwikkelreferentie en repositoryskills opstellen; zelfstandig gebruik en onderhoud verplicht stellen.
 - [x] Impliciete skillactivatie expliciet configureren en NL/EN-activatie-evaluaties voorbereiden.
-- [x] Native evaluaties verplicht stellen en een geïsoleerde opt-in runner inrichten; runner statisch en met een gesimuleerde CLI controleren.
-- [ ] Skills in concrete implementatietaken toepassen en gedrag verifiëren, inclusief native activatie met tracebewijs (BL-013: niet uitgevoerd, geen geschikte geautoriseerde omgeving). De eigenaar heeft op 24 november 2026 BL-012 ingetrokken: geen afzonderlijke Codex CLI-omgeving inrichten. Directe skillselectie blijft verplicht; native tracebewijs is niet geleverd en de bestaande kwaliteitsvoorwaarde is niet vrijgesteld.
+- [x] Geïsoleerde opt-in runner en 23 native evaluatiescenario's voorbereiden; runner statisch en met een gesimuleerde CLI controleren (historisch voorbereidingsbewijs; geen native gedragsevaluatie).
+- Vervallen (eigenaarsbesluit, 24 november 2026): BL-012 en BL-013. Geen afzonderlijke Codex CLI-omgeving en geen verplichte native gedragsevaluaties. Native gedrag niet uitgevoerd of bewezen; geen fase- of releasepoort. Pas skills verplicht toe in concrete implementatietaken, via native ontdekking waar beschikbaar of directe selectie, en valideer metadata en resultaten met reguliere kwaliteitscontroles. Runner en scenario's blijven beschikbaar voor optioneel gebruik na nieuwe expliciete toestemming. Alle overige acceptatiecriteria blijven ongewijzigd.
 - [x] AI_POLICY.md opstellen.
 - [x] Auteursrechtbeleid vastleggen: GPL-3.0-only op expliciete eigenaarsopdracht; auteursrecht en rechten van derden behouden.
 - [x] Marketplace-toelatingsvoorwaarden bevestigd (BL-005: GPL-3.0-only, GitHub-herkenning op main en geslaagde CI; daadwerkelijke opname blijft fase 7).
