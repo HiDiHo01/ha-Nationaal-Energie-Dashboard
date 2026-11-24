@@ -19,3 +19,7 @@ Lees eerst [AGENTS.md](../../../AGENTS.md), [AI_POLICY.md](../../../AI_POLICY.md
 ## Dependabot: test de bestaande beleidslogica
 
 Gebruik [scripts/test_dependabot_automerge.sh](../../../scripts/test_dependabot_automerge.sh) en de baseline-CI voor synthetische classificatie- en mergescenario's. Test de daadwerkelijke inline Bash-stappen met echte jq-filters en een gemockte gh, niet een tweede beleidsimplementatie. Laat de subprocessomgeving geen credentials erven; gebruik een beperkte PATH, gesimuleerde sleep en een merge-spy. Controleer positieve en negatieve uitkomsten, exacte revisie en verplichte checks. De test bewijst geen native GitHub-expressions, metadata-action, bottrigger of server-side branchregels; houd echte end-to-end-validatie open.
+
+## GitHub Pages: publicatie en bereikbaarheid afzonderlijk bewijzen
+
+Een groene build, artifact-upload en deploy bewijzen niet zelfstandig publieke bereikbaarheid. Gebruik de [Pages-workflow](../../../.github/workflows/pages.yaml) met een afzonderlijke verify-public-site-job na een geslaagde deployment, zonder checkout, secrets of tokenrechten. Controleer vaste publieke HTTPS-routes, TLS, HTTP 200 en verwacht content-type; geen redirects, begrensde retries, time-outs en responsegrootte, geen responsebody in logs. Test foutpaden offline met gesimuleerde curl. Laat BL-018 open totdat de werkelijke publieke verificatie slaagt; geen claim van browserweergave of exacte inhoud op basis van status en MIME-type alleen.

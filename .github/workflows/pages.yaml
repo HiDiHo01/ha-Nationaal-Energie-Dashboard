@@ -142,3 +142,36 @@ jobs:
       - name: Deploy public documentation
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  verify-public-site:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions: {}
+    steps:
+      - name: Verify public HTTPS routes after deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://hidiho01.github.io/ha-Nationaal-Energie-Dashboard/'
+          for path in '' 'nl/' 'nl/documentation/' 'en/' 'en/documentation/' 'en.html' 'assets/css/style.css'; do
+              expected='text/html'
+              if [[ $path == 'assets/css/style.css' ]]; then
+                  expected='text/css'
+              fi
+              if ! response=$(curl --disable --silent --show-error --fail \
+                  --proto '=https' --connect-timeout 5 --max-time 10 \
+                  --retry 3 --retry-delay 3 --retry-max-time 40 --retry-all-errors \
+                  --max-filesize 1048576 --output /dev/null \
+                  --write-out '%{http_code} %{content_type}' "${base}${path}"); then
+                  printf 'HTTPS request failed: %s\n' "${path:-/}" >&2
+                  exit 1
+              fi
+              case "$response" in
+                  "200 $expected"|"200 $expected;"*)
+                      printf 'Verified %s: HTTP 200 (%s)\n' "${path:-/}" "$expected" ;;
+                  *)
+                      printf 'Unexpected HTTP status or content type: %s\n' "${path:-/}" >&2
+                      exit 1 ;;
+              esac
+          done
