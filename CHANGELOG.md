@@ -4,7 +4,7 @@
 
 ### Nederlands
 
-- Nationale P0-datasets en paginering live gevalideerd voor de geteste queries; aparte tijdzoneprobe voor de vastgestelde afwijking, verdere contractvalidatie blijft open.
+- Nationale P0-datasets en paginering live gevalideerd voor de geteste queries; NL-kwartierdekking voor historische zon bevestigd, afwijkende recordtijdzone en twee dagaggregatie-afwijkingen vastgelegd. Verdere contractvalidatie blijft open.
 
 - Tweetalige projectsite gemigreerd naar Jekyll met gedeelde layouts, gelockte gems en gecontroleerde Pages-deployment.
 
@@ -20,7 +20,7 @@
 
 ### English
 
-- National P0 datasets and pagination validated live for the tested queries; dedicated timezone probe for the observed mismatch, further contract validation remains pending.
+- National P0 datasets and pagination validated live for the tested queries; Dutch quarter-hour coverage for historical solar data confirmed, differing record timezone and two daily aggregation discrepancies documented. Further contract validation remains pending.
 
 - Bilingual project site migrated to Jekyll with shared layouts, locked gems and guarded Pages deployment.
 
