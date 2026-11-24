@@ -78,7 +78,7 @@ De oorspronkelijke index-exportlinks faalden: webtoegang ondersteunt het mediaty
 | emissionfactor | number of null | Handleiding kg/kWh |
 | validfrom, validto, lastupdate | date-time string | UTC, inclusiviteit en revisies live toetsen |
 
-De schemaomschrijvingen voor activity, classification en granularity lijken achter te lopen op de productiehandleiding/catalogus. Gebruik geen verouderde beperkingen als feit. Voor deze collectie noemt het schema alleen HTTP 200 en 403; betekenis van 401/403, 429 en Retry-After blijft open. Geen opzettelijke fout- of belastingtests tegen productie.
+De schemaomschrijvingen voor activity, classification en granularity lijken achter te lopen op de productiehandleiding/catalogus. Gebruik geen verouderde beperkingen als feit. Voor deze collectie noemt het schema alleen HTTP 200 en 403; betekenis van 401/403, 429 en Retry-After blijft open. Geen nieuwe opzettelijke fout- of belastingtests tegen productie; zie de afzonderlijk gerapporteerde handmatige authenticatieobservaties.
 
 ## Eerste live-waarnemingen — 24 november 2026
 
@@ -256,6 +256,23 @@ De gerapporteerde vorm bevestigt bereikbaarheid en toegang voor de uitgevoerde v
 
 Het [conceptverzoek aan NED](NED_CONTRACT_QUESTIONS.md) bundelt SEM-001, SEM-002, TZ-001/002/003 en de resterende contractvragen. Status: verzending per e-mail op 24 november 2026 door eigenaar bevestigd; in afwachting van leveranciersantwoord. Geen nieuwe live-observatie. De verzonden tekst en aflevering zijn niet onafhankelijk gecontroleerd. De officiële [handleiding](https://ned.nl/nl/handleiding-api) bevestigt bovendien dat lastupdate kan wijzigen door herberekening zonder wijziging van de intervalwaarde; behandel een gewijzigde timestamp niet automatisch als gewijzigde energie-inhoud. Stabiele revisiesleutel, selectievolgorde, verwijdering en herkomst blijven te bevestigen.
 
+## Handmatige authenticatieobservaties — 25 november 2026
+
+Bron: drie door de eigenaar aangeleverde, geschoonde JSONL-uitvoeren van het zelfstandige script ned_api_auth_test.py, buiten CI. Starttijdstempels UTC: 2026-11-24T23:49:23.391223+00:00, 2026-11-24T23:51:04.284524+00:00 en 2026-11-24T23:51:33.869565+00:00 (25 november 00:49–00:51 CET). Geen eigen heruitvoering, geen verificatie van de precieze uitgevoerde scriptversie of sleutelrechten. De eerste twee opdrachtregels bevatten geen --limited terwijl de uitvoer vier scenario's bevat; bij de derde opdrachtregel staat --limited wel expliciet. Alle uitvoerregels melden negative_tests_authorized_by_operator=true; toestemming van NED is niet onafhankelijk vastgesteld.
+
+Vaste scope: GET https://api.ned.nl/v1/utilizations, page=1, itemsPerPage=100, order[validfrom]=asc, point=0, type=2, activity=1, classification=2, granularity=4, granularitytimezone=0, validfrom[after]=2026-11-22, validfrom[strictly_before]=2026-11-23. Alle drie runs rapporteren vier geplande en vier waargenomen requests; twaalf HTTP-responses, geen transportfouten. Het gaat om herhaalde waarnemingen voor één query, niet twaalf onafhankelijke contractscenario's.
+
+| Referentie | Scenario | Status (runs 1/2/3) | Mediatype | Bytes | Responstijd ms (1/2/3) |
+| --- | --- | --- | --- | ---: | --- |
+| AUTH-001 | Geldige controle | 200/200/200 | application/ld+json | 50931 | 3283/188/128 |
+| AUTH-002 | Ontbrekende header | 401/401/401 | application/ld+json | 171 | 85/104/112 |
+| AUTH-003 | Ongeldige key | 403/403/403 | application/json | 80 | 110/109/129 |
+| AUTH-004 | Verondersteld beperkte key | 200/200/200 | application/ld+json | 50931 | 167/162/102 |
+
+AUTH-001 en AUTH-004: collecties bevatten elk 96 records met overeenkomende dimensies. AUTH-002: JSON-object met hydra:title en hydra:description; AUTH-003: JSON-object met message. Geen ruwe foutteksten, sleutelgegevens of accountgegevens beschikbaar of opgeslagen. AUTH-005: bij alle twaalf responses ontbreken WWW-Authenticate, Retry-After en Location; dit bewijst niets over headers bij andere statussen. Alle drie samenvattingen melden completed=false, contract_confirmed=false, limited_key_tested=true, stop_reason=unexpected_data_access. AUTH-004 bevestigt toegang tot de geteste query, niet het bestaan of ontbreken van rechtenbeperkingen. De gelijke responsomvang bewijst geen identieke inhoud. De operatorgerapporteerde 12 observaties bevestigen geen algemene statusgarantie of formeel leverancierscontract.
+
+**Implementatiebesluit (eigenaarsopdracht 25 november 2026):** in PR #39 krijgt de conceptauthenticatieclient voor HTTP 401 de specifieke NedAuthenticationError en voor 403 de onafhankelijke NedAccessDeniedError (geen subklasse van NedAuthenticationError of NedPermissionError). Classificeer de geobserveerde HTTP-status vóór validatie van het success-mediatype; parse of log geen fouttekst. Een 403 kan ook ongeldige credentials betekenen; geen automatische reauth bij 403. De Config Flow toont invalid_auth respectievelijk access_denied; de laatstgenoemde vraagt om controle van zowel sleutel als rechten. Onbekende statussen, lege collecties en ongeldige responses blijven inconclusief; 429/5xx-contractmapping en Retry-After blijven open. De feitelijke Config Flow-koppeling blijft fail-closed zolang de toepasselijke fase- en distributievoorwaarden niet zijn vervuld. Synthetische tests zijn geen live bewijs. Herhaal deze identieke negatieve probes niet; verder autorisatieonderzoek vereist een aantoonbaar beperkte key of leveranciersinformatie, een nieuwe hypothese en expliciete toestemming. Geen opzettelijke rate-limitproeven.
+
 ## Openstaande verificatie
 
 - [x] OpenAPI-export ophalen, parsen en relevante schema's, filters, responses en security scheme inspecteren; verschillen vastgelegd.
@@ -267,7 +284,8 @@ Het [conceptverzoek aan NED](NED_CONTRACT_QUESTIONS.md) bundelt SEM-001, SEM-002
 - [ ] Verklaar TZ-002/TZ-003 met leveranciersinformatie; verifieer lege resultaten, overige datumfilters en dagaggregatiesemantiek.
 - [x] Gerichte scope semantics uitgevoerd en beoordeeld: 576 records, 32 afwijkingen buiten 3 kW, 192 kg-hypotheseovereenkomsten.
 - [ ] Verklaar SEM-001 en bevestig SEM-002 formeel, afronding, null versus nul, percentage-schaal, volledige forecastdekking en revisies.
-- [ ] Bevestig authenticatie-/autorisatiefouten, rate-limit-scope en Retry-After indien gedocumenteerd of normaal waargenomen. Geen opzettelijke limietoverschrijding.
+- [x] Handmatig gerapporteerde authenticatieobservaties AUTH-001/002/003/005 voor één vaste query vastgelegd; drie herhalingen, geen eigen live uitvoering.
+- [ ] AUTH-004: bevestig autorisatie-/rechtensemantiek, algemene authenticatiestatusmapping, rate-limit-scope en Retry-After met leveranciersinformatie of normaal waargenomen gedrag. Geen herhaling van identieke negatieve tests of opzettelijke limietoverschrijding.
 - [ ] Leg geschoonde fixtures en concrete verificatieresultaten vast; onderscheid synthetische tests van live bewijs.
 
 ## Veilige toegang (BL-004)
