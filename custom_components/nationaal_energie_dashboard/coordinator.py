@@ -45,7 +45,10 @@ class NedReading:
         if (
             self.valid_from.utcoffset() != timedelta(0)
             or self.valid_to.utcoffset() != timedelta(0)
-            or self.valid_from.minute % 15
+        ):
+            raise ValueError("Expected a complete, aligned UTC quarter-hour.")
+        if (
+            self.valid_from.minute % 15
             or self.valid_from.second
             or self.valid_from.microsecond
             or self.valid_to - self.valid_from != QUARTER
