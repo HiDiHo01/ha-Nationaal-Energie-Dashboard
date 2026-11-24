@@ -4,7 +4,7 @@
 
 ### Nederlands
 
-- Acht prioritaire nationale sensoren vastgelegd; CO₂-forecast volgt fase 4 en het hernieuwbare elektriciteitsaandeel vereist aanvullend bronmixbewijs. Geen sensorimplementatie of wijziging van de fasepoorten.
+- Acht prioritaire nationale sensoren vastgelegd; CO₂-forecast volgt fase 4 en het geschatte hernieuwbare elektriciteitsaandeel krijgt een expliciete rekenmethode met voorlopige CBS-afvalfactor 0.53 en vereist aanvullende contractvalidatie. Geen sensorimplementatie of wijziging van de fasepoorten.
 
 - Contractonafhankelijke asynchrone HTTPS-transportlaag met sessie-injectie, responslimiet, time-outs en geschoonde exceptions; 38 nieuwe synthetische tests. NED-specifieke verwerking blijft geblokkeerd door BL-003.
 
@@ -31,7 +31,7 @@
 
 ### English
 
-- Eight priority national sensors specified; the CO₂ forecast follows phase 4 and renewable electricity share requires further source-mix evidence. No sensor implementation or change to the phase gates.
+- Eight priority national sensors specified; the CO₂ forecast follows phase 4 and estimated renewable electricity share has an explicit formula with provisional CBS waste factor 0.53 and requires additional contract validation. No sensor implementation or change to the phase gates.
 
 - Contract-independent asynchronous HTTPS transport with session injection, response size limit, timeouts and sanitized exceptions; 38 new synthetic tests. NED-specific processing remains blocked by BL-003.
 
