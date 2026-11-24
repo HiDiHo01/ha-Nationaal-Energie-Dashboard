@@ -266,9 +266,7 @@ class ExtendedTests(unittest.TestCase):
         """Select six national UTC quarters without repeating daily probes."""
         suite = extended.select_suite(date(2026, 11, 24), "semantics")
         self.assertEqual(len(suite), 6)
-        self.assertEqual(
-            [query.type_id for query in suite], [1, 2, 51, 27, 59, 27]
-        )
+        self.assertEqual([query.type_id for query in suite], [1, 2, 51, 27, 59, 27])
         self.assertEqual([query.classification for query in suite], [2] * 5 + [1])
         self.assertEqual([query.day for query in suite[:5]], [date(2026, 11, 22)] * 5)
         self.assertEqual(suite[-1].day, date(2026, 11, 25))
