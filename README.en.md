@@ -41,6 +41,8 @@ The first eight priority national sensors are CO₂ intensity, forecast CO₂ in
 
 ## API key
 
+Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The draft client and Config Flow distinguish 401 from 403 without logging error payloads; the live connection remains blocked.
+
 Access to the NED API requires a personal API key.
 
 1. Create an account at [ned.nl](https://ned.nl/).
