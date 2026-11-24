@@ -1,7 +1,37 @@
 {
   "config": {
+    "step": {
+      "user": {
+        "title": "Set up Nationaal Energie Dashboard",
+        "description": "Enter your personal NED API key. The key is saved only after authentication has been validated.",
+        "data": {
+          "api_key": "API key"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Renew API key",
+        "description": "Enter your personal NED API key. The key is saved only after authentication has been validated.",
+        "data": {
+          "api_key": "API key"
+        }
+      },
+      "reconfigure": {
+        "title": "Change API key",
+        "description": "Enter your personal NED API key. The key is saved only after authentication has been validated.",
+        "data": {
+          "api_key": "API key"
+        }
+      }
+    },
+    "error": {
+      "contract_pending": "The NED API client is not ready for use. Configuration is blocked until contract validation and runtime distribution have been completed.",
+      "invalid_key_format": "Enter a non-empty API key without whitespace or control characters."
+    },
     "abort": {
-      "contract_pending": "The NED API client is not ready for use. Configuration is blocked until contract validation and runtime distribution have been completed."
+      "already_configured": "Nationaal Energie Dashboard is already configured.",
+      "already_in_progress": "A configuration flow is already in progress.",
+      "reauth_successful": "The API key has been renewed.",
+      "reconfigure_successful": "The API key has been changed."
     }
   },
   "exceptions": {
