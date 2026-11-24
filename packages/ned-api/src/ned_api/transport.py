@@ -22,6 +22,7 @@ class TransportResponse:
 
     status: int
     body: bytes = field(repr=False)
+    media_type: str = field(default="", repr=False)
 
 
 def _parse_origin(origin: str) -> URL:
@@ -78,12 +79,18 @@ class NedTransport:
         return self._origin
 
     async def async_get(
-        self, path: str, *, params: Mapping[str, str] | None = None
+        self,
+        path: str,
+        *,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, str] | None = None,
     ) -> TransportResponse:
         """Fetch one path with non-secret query parameters, without redirects.
 
         Return all HTTP statuses without assigning NED-specific meaning. Reject
         encoded bodies and oversized responses. Never close the borrowed session.
+        Headers are supplied by trusted callers for this fixed origin only;
+        redirects remain disabled and credentials must never be query parameters.
         """
         if any(
             (
@@ -100,6 +107,12 @@ class NedTransport:
         if self._session.closed:
             raise NedConnectionError("The borrowed HTTP session is closed.")
         url = self._origin.with_path(path)
+        request_headers = {
+            name: value
+            for name, value in (headers or {}).items()
+            if name.lower() != "accept-encoding"
+        }
+        request_headers[hdrs.ACCEPT_ENCODING] = "identity"
         failure: NedApiError
         try:
             async with self._session.get(
@@ -110,7 +123,7 @@ class NedTransport:
                 raise_for_status=False,
                 ssl=True,
                 auto_decompress=False,
-                headers={hdrs.ACCEPT_ENCODING: "identity"},
+                headers=request_headers,
             ) as response:
                 encoding = response.headers.get(hdrs.CONTENT_ENCODING, "identity")
                 if encoding.lower() != "identity":
@@ -122,7 +135,15 @@ class NedTransport:
                     if len(body) + len(chunk) > self._max_response_bytes:
                         raise NedResponseError("HTTP response exceeds the byte limit.")
                     body.extend(chunk)
-                return TransportResponse(status=response.status, body=bytes(body))
+                media_type = (
+                    response.headers.get(hdrs.CONTENT_TYPE, "")
+                    .partition(";")[0]
+                    .strip()
+                    .lower()
+                )
+                return TransportResponse(
+                    status=response.status, body=bytes(body), media_type=media_type
+                )
         except TimeoutError:
             failure = NedTimeoutError("HTTP request exceeded its time budget.")
         except ClientPayloadError:
