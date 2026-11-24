@@ -114,9 +114,7 @@ async def test_inconclusive_response(response: TransportResponse) -> None:
             NedAuthenticationError,
         ),
         (
-            TransportResponse(
-                403, b'{"message":"synthetic-key"}', "application/json"
-            ),
+            TransportResponse(403, b'{"message":"synthetic-key"}', "application/json"),
             NedAccessDeniedError,
         ),
         (TransportResponse(401, b"not-json", "text/html"), NedAuthenticationError),
