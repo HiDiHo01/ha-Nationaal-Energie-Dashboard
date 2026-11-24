@@ -512,7 +512,24 @@ Gebruik declaratieve SensorEntityDescription-definities met een gedeelde sensork
 
 ### 11.1 Eerste entities
 
-Zonne-energie, windenergie op land, windenergie op zee, elektriciteitsproductie, elektriciteitsconsumptie en CO₂-emissiefactor. Gebruik bronwaarden en correcte eenheden; voorbeelden zijn geen actuele data.
+Op eigenaarsopdracht van 25 november 2026 krijgen de volgende acht nationale sensoren voorrang. Dit is een functionele scope en geen vrijgave van de fasepoorten of bevestiging van onbewezen contractgedrag. Andere geplande sensoren blijven latere uitbreidingen volgens hun fase en prioriteit.
+
+| Prioriteit | Sensor | Type / activity / classification | Bronmetriek | Native eenheid / weergave | Fase |
+| ---: | --- | --- | --- | --- | ---: |
+| 1 | CO₂-intensiteit | 27 / 1 / 2 | emissionfactor | g/kWh | 3 |
+| 2 | CO₂-intensiteit voorspelling | 27 / 1 / 1 | emissionfactor | g/kWh | 4 |
+| 3 | Aandeel hernieuwbare elektriciteitsproductie | Samenstelling nog te bevestigen | volume, zelfde interval | % | 3, na aanvullend contractbewijs |
+| 4 | Zonne-energieproductie | 2 / 1 / 2 | capacity | kW / MW | 3 |
+| 5 | Windenergieproductie op land | 1 / 1 / 2 | capacity | kW / MW | 3 |
+| 6 | Windenergieproductie op zee | 51 / 1 / 2 | capacity | kW / MW | 3 |
+| 7 | Nationaal elektriciteitsverbruik | 59 / 2 / 2 | capacity | kW / MW | 3 |
+| 8 | Nationale elektriciteitsproductie | 27 / 1 / 2 | capacity | kW / MW | 3 |
+
+Gebruik point 0, granularity 4 en granularitytimezone 0 voor de vijf huidige P0-datasets; alle metrieken zijn onderworpen aan de toepasselijke contractacceptatie. Deel de type-27-current-snapshot tussen productie en CO₂-intensiteit. Gebruik een afzonderlijke forecastcoordinator. Als ontwerpkeuze is de forecastsensor de intensiteit van het eerstvolgende volledige kwartier vanaf nu; accepteer uitsluitend het exacte toekomstige doelinterval met classification 1. Publiceer de geldigheidsgrenzen als kleine attributen; de volledige tijdreeks blijft een begrensde response action. Geen state class voor forecast en geen fallback naar current. Ontbrekende of ongeldige data leiden tot unavailable, niet tot nul of een ongeoorloofde interpolatie. Bij de huidige sensoren is current geen garantie op gemeten waarden. Gebruik de vastgelegde stale-dataregels.
+
+Voor het hernieuwbare aandeel is de doeldefinitie 100 × hernieuwbaar elektriciteitsvolume / totaal elektriciteitsvolume (type 27) voor exact hetzelfde geldige kwartier. De [productiedatacatalogus](https://ned.nl/nl/datacatalogus) (geraadpleegd 25 november 2026) toont onder meer biomassa (25), afval (21) en overige elektriciteit (26); type 0 omvat warmte en elektriciteit en is dus ongeschikt als teller. Verifieer een volledige, niet-overlappende hernieuwbare elektriciteitsmix inclusief de relevante hernieuwbare fracties en brondefinities voordat de sensor wordt vrijgegeven. Tel geen gemengde categorieën volledig als hernieuwbaar en presenteer zon plus wind niet als het totale hernieuwbare aandeel. Vereis geldige gelijktijdige records, een strikt positieve noemer, een geldige uitkomst en bewezen revisiesemantiek; ontbrekende bijdragen niet op nul zetten, uitkomsten niet afkappen. Geen hergebruik van percentage (benuttingsgraad) als productieaandeel. Als dit bewijs ontbreekt, blijft de sensor geblokkeerd.
+
+De [herhaalde semantiekprobe van 25 november](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45507580188/job/138846666702) ondersteunt de eerdere waarnemingen voor dezelfde tijdvakken; de open voorwaarden in [API_REFERENCE.md](API_REFERENCE.md) blijven gelden. Geen live-aanroepen of publicatie zonder toepasselijke autorisatie.
 
 ### 11.2 Sensorclassificaties
 
@@ -524,6 +541,7 @@ Zonne-energie, windenergie op land, windenergie op zee, elektriciteitsproductie,
 | CO₂-uitstoot per interval | kg | WEIGHT | Geen |
 | CO₂-intensiteit | g/kWh | Geen | MEASUREMENT |
 | Benuttingsgraad | % | Geen | MEASUREMENT |
+| Aandeel hernieuwbare elektriciteitsproductie | % | Geen | MEASUREMENT |
 | Voorspeld vermogen | kW | POWER | Geen |
 | Voorspelde energie | kWh | ENERGY | Geen |
 | Voorspelde CO₂-intensiteit | g/kWh | Geen | Geen |
@@ -544,6 +562,7 @@ sensor.ned_nederland_electricity_production
 sensor.ned_nederland_electricity_consumption
 sensor.ned_nederland_co2_intensity
 sensor.ned_nederland_co2_intensity_forecast
+sensor.ned_nederland_renewable_electricity_share
 sensor.ned_nederland_solar_forecast_today
 sensor.ned_nederland_solar_forecast_tomorrow
 ```
@@ -554,7 +573,7 @@ sensor.ned_nederland_solar_forecast_tomorrow
 {entry_id}_{point_id}_{type_id}_{activity_id}_{granularity_id}_{timezone_id}_{classification_id}_{metric}
 ```
 
-Behoud stabiele IDs bij restart, reload en keywijziging. Leg migraties vast wanneer de identificatiestrategie verandert.
+Behoud stabiele IDs bij restart, reload en keywijziging. Gebruik voor de samengestelde hernieuwbare-aandeelsensor een stabiele unieke ID op basis van entry, point, granulariteit, tijdzone, classificatie en een vaste afgeleide metrieknaam (geen fictief NED-type-ID en geen dynamische lijst van brontypen in de ID). Leg migraties vast wanneer de identificatiestrategie verandert.
 
 ### 11.5 Device Registry
 
@@ -983,7 +1002,8 @@ Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk start
 
 - [ ] Basis-entity implementeren.
 - [ ] Sensor descriptions definiëren.
-- [ ] P0-datasets ondersteunen.
+- [ ] P0-datasets ondersteunen en de zes directe current-sensoren uit §11.1 realiseren.
+- [ ] Hernieuwbaar elektriciteitsaandeel realiseren na bevestiging van de volledige bronmix en tests voor ontbrekende of overlappende bronnen, nulnoemer en afwijkende intervalgrenzen.
 - [ ] Device Registry implementeren.
 - [ ] Unique IDs valideren.
 - [ ] Eenheden en beschikbaarheid valideren.
@@ -992,7 +1012,7 @@ Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk start
 ### 21.5 Fase 4 — Forecast en historie
 
 - [ ] Forecasttijdreeksen verwerken.
-- [ ] Forecastsamenvattingen ontwikkelen.
+- [ ] Forecastsamenvattingen ontwikkelen, inclusief de CO₂-intensiteitssensor voor het eerstvolgende volledige toekomstige kwartier uit §11.1; test kwartiergrens, ontbrekend doelinterval, stale forecast en scheiding van current.
 - [ ] Optimaal-tijdvensteralgoritme implementeren.
 - [ ] Response actions implementeren.
 - [ ] Historische opvragingen begrenzen.
