@@ -9,13 +9,6 @@ from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_API_KEY, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from ned_api import (
-    NedAuthenticationClient,
-    NedConnectionError,
-    NedResponseError,
-    NedTimeoutError,
-    TransportResponse,
-)
 
 from custom_components.nationaal_energie_dashboard.config_flow import NedConfigFlow
 from custom_components.nationaal_energie_dashboard.const import (
@@ -31,6 +24,13 @@ from custom_components.nationaal_energie_dashboard.coordinator import (
     select_reading,
 )
 from custom_components.nationaal_energie_dashboard.sensor import SENSOR_DESCRIPTIONS
+from ned_api import (
+    NedAuthenticationClient,
+    NedConnectionError,
+    NedResponseError,
+    NedTimeoutError,
+    TransportResponse,
+)
 
 _START = datetime(2026, 11, 22, 12, tzinfo=UTC)
 
