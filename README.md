@@ -28,6 +28,8 @@ Afhankelijk van de dataset zijn intervallen van 10 minuten, 15 minuten, een uur,
 
 ## Beoogde functionaliteit
 
+De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-intensiteit voorspelling, aandeel hernieuwbare elektriciteitsproductie, zon, wind op land, wind op zee, totaal elektriciteitsverbruik en totale elektriciteitsproductie. Dit is geplande functionaliteit. Het hernieuwbare aandeel wordt een herkenbaar gelabelde schatting op basis van zon, wind, bijstook van biomassa en 53% van de afvalelektriciteit (voorlopige CBS-jaarfactor 2025); overige gemengde bronnen zijn niet inbegrepen. De zes gebruikte datasets moeten eerst contractueel en gezamenlijk worden gevalideerd; BL-003 blijft open.
+
 - Configuratie via de Home Assistant-gebruikersinterface.
 - Selecteerbare energiegegevens en sensoren.
 - Historische, actuele en voorspelde energiedata, voor zover ondersteund door de API.

@@ -18,6 +18,10 @@ Maak voor toekomstig gebruik een account aan bij [NED](https://ned.nl/), open Mi
 
 De geteste nationale P0-kwartierqueries zijn structureel gevalideerd. De NED-handleiding noemt vermogen (kW), intervalenergie (kWh), CO₂-emissies (kg) en emissiefactoren (kg CO₂/kWh). De OpenAPI-beschrijving noemt voor emissies echter ton; de onderzochte type-27-kwartierrecords ondersteunen kg, maar de formele eenheid blijft onbevestigd. Vermogen en energie zijn niet altijd exact onderling afleidbaar. Voor lokale dagtotalen is aggregatie uit volledig gevalideerde UTC-kwartieren beoogd; API-dagaggregaten blijven uitgesloten zolang de kalenderafwijkingen openstaan. De integratie is nog niet geïmplementeerd. Zie het [contractonderzoek](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/blob/main/docs/API_REFERENCE.md).
 
+## Prioritaire sensoren
+
+De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-intensiteit voorspelling, aandeel hernieuwbare elektriciteitsproductie, zon, wind op land, wind op zee, totaal elektriciteitsverbruik en totale elektriciteitsproductie. Dit is geplande functionaliteit. Het hernieuwbare aandeel wordt een herkenbaar gelabelde schatting op basis van zon, wind, bijstook van biomassa en 53% van de afvalelektriciteit (voorlopige CBS-jaarfactor 2025); overige gemengde bronnen zijn niet inbegrepen. De zes gebruikte datasets moeten eerst contractueel en gezamenlijk worden gevalideerd; BL-003 blijft open.
+
 ## Meer informatie
 
 - [Nederlandse projectdocumentatie](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/blob/main/README.md)
