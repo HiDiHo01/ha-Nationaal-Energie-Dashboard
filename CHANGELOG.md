@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Contractonafhankelijke asynchrone HTTPS-transportlaag met sessie-injectie, responslimiet, time-outs en geschoonde exceptions; 38 nieuwe synthetische tests. NED-specifieke verwerking blijft geblokkeerd door BL-003.
+
 - Beperkte fase 1 gestart op eigenaarsbesluit: zelfstandige packagebasis, getypeerde exception-hiërarchie en eerste synthetische tests; BL-003 blijft open. Wheel- en kwaliteitsvalidatie op de productie-baseline volgt via CI.
 
 - Openbare documentatie in beide talen afgestemd op de waargenomen kwartiercontracten, de onbevestigde emissie-eenheid en de uitsluiting van upstream-dagaggregaten.
@@ -26,6 +28,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Contract-independent asynchronous HTTPS transport with session injection, response size limit, timeouts and sanitized exceptions; 38 new synthetic tests. NED-specific processing remains blocked by BL-003.
 
 - Partial phase 1 started by owner decision: independent package foundation, typed exception hierarchy and initial synthetic tests; BL-003 remains open. Wheel and quality validation on the production baseline is pending CI.
 

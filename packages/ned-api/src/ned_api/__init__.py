@@ -11,6 +11,7 @@ from .exceptions import (
     NedUnsupportedDatasetError,
     NedValidationError,
 )
+from .transport import NedTransport, TransportResponse
 
 __all__ = [
     "NedApiError",
@@ -20,6 +21,8 @@ __all__ = [
     "NedRateLimitError",
     "NedResponseError",
     "NedTimeoutError",
+    "NedTransport",
     "NedUnsupportedDatasetError",
     "NedValidationError",
+    "TransportResponse",
 ]
