@@ -205,6 +205,10 @@ SEM-001: de gedocumenteerde exacte relatie is weerlegd als universele recordrege
 
 SEM-002: alle 192 positieve vergelijkingen ondersteunen emission in kg bij de gedocumenteerde volume-eenheid kWh en emissionfactor kg/kWh; geen enkele ondersteunt ton. Sterk runtimebewijs voor de twee geteste type 27-queries, overeenkomstig de handleiding. De formele OpenAPI-tegenstrijdigheid en afronding blijven open; geen automatische kg/ton-detectie of tolerantie als productiecontract. De 1%-band is diagnostisch. Percentage-schaal, niet-toepasselijkheid, revisies, volledige forecasthorizon en foutsemantiek blijven open. Geen nieuwe live-aanvragen nodig voor registratie.
 
+## Leveranciersverduidelijking
+
+Het [conceptverzoek aan NED](NED_CONTRACT_QUESTIONS.md) bundelt SEM-001, SEM-002, TZ-001/002/003 en de resterende contractvragen. Status: voorbereid, niet verzonden. Geen leveranciersantwoord of nieuwe live-observatie. De officiële [handleiding](https://ned.nl/nl/handleiding-api) bevestigt bovendien dat lastupdate kan wijzigen door herberekening zonder wijziging van de intervalwaarde; behandel een gewijzigde timestamp niet automatisch als gewijzigde energie-inhoud. Stabiele revisiesleutel, selectievolgorde, verwijdering en herkomst blijven te bevestigen.
+
 ## Openstaande verificatie
 
 - [x] OpenAPI-export ophalen, parsen en relevante schema's, filters, responses en security scheme inspecteren; verschillen vastgelegd.
