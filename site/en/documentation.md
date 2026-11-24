@@ -14,6 +14,8 @@ This development branch contains the nine requested integration files, eight sen
 
 ## NED API key
 
+Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The draft client and Config Flow distinguish 401 from 403 without logging error payloads; the live connection remains blocked.
+
 For future use, create an account at [NED](https://ned.nl/), open Mijn account (My account) → API and generate a personal API key. Store it securely. Never disclose keys in issues or logs.
 
 ## API contract status
