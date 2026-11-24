@@ -2,6 +2,10 @@
 
 Lees eerst [AGENTS.md](../AGENTS.md), [AI_POLICY.md](../AI_POLICY.md) en het [integratieplan](INTEGRATION_PLAN.md). Gebruik de Python-versie van de vastgelegde stabiele Home Assistant Core-baseline.
 
+## Skills en Home Assistant-referentie
+
+Lees [home-assistant.md](../home-assistant.md) bij Home Assistant-werkzaamheden. Gebruik de relevante [repositoryskills](../.agents/skills/README.md) door hun SKILL.md te lezen; Codex-omgevingen die repositoryskills ondersteunen kunnen ze ook automatisch ontdekken. Onderhoud beide proactief volgens AGENTS.md §1.1. De initiële skillstructuur is documentatie; daadwerkelijke selectie en effectiviteit in implementatietaken moeten nog worden geverifieerd.
+
 ## Compatibiliteitsbaseline
 
 De minimale ondersteunde Home Assistant Core-versie is bij iedere nieuwe integratierelease de dan nieuwste stabiele Core-release, inclusief patchnummer. Controleer deze via https://version.home-assistant.io/stable.json en de officiële release-informatie. Gebruik een expliciete versie per release in hacs.json (homeassistant), documentatie en de reproduceerbare testomgeving; verhoog de grens pas voor een nieuwe integratierelease, niet met terugwerkende kracht. Oudere Core-versies, beta's en developmentversies hoeven niet ondersteund te worden. Valideer vóór publicatie installatie en tests tegen de vastgelegde baseline.

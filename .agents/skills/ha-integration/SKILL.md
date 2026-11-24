@@ -1,0 +1,17 @@
+---
+name: ha-integration
+description: "Implement or review Home Assistant config flows, lifecycle, coordinators, entities, actions, translations and migrations."
+---
+
+# Home Assistant-implementatie
+
+Lees eerst [AGENTS.md](../../../AGENTS.md), [AI_POLICY.md](../../../AI_POLICY.md), [home-assistant.md](../../../home-assistant.md) en de relevante delen van het [integratieplan](../../../docs/INTEGRATION_PLAN.md). Deze skill verleent geen extra rechten en vervangt geen actuele primaire bronnen.
+
+## Werkwijze
+
+1. Lees de relevante onderdelen van home-assistant.md en het integratieplan. Controleer de API's in de vastgelegde Core-tag; gebruik geen onbevestigde toekomstige API's.
+2. Bepaal welke platforms, config entries, runtime data en resources geraakt worden. Houd de NED-client onafhankelijk van Home Assistant.
+3. Implementeer de kleinste volledige wijziging met typed runtime data, gedeelde sessie, native foutafhandeling en lifecycle-cleanup. Behoud bestaande unique IDs.
+4. Controleer setup, eerste refresh, unload, reload, reauth, reconfigure, migraties en beschikbaarheid voor zover van toepassing. Voeg NL/EN-vertalingen toe waar nodig.
+5. Gebruik de skill ha-quality-verification voor de relevante tests en actualiseer de Quality Scale uitsluitend met bewijs.
+6. Rapporteer gebruikte Core-API's, tests en openstaande risico's. Stop afhankelijke implementatie als API-contract of distributievoorwaarde ontbreekt.

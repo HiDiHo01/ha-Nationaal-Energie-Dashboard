@@ -15,11 +15,24 @@ Ontwikkel de Home Assistant-integratie volgens [docs/INTEGRATION_PLAN.md](docs/I
 - De API-aannames in het plan zijn geen bewezen contract. Bij strijdigheid met geverifieerde officiële specificaties: meld de afwijking, corrigeer de ontwerpdocumentatie en implementeer uitsluitend het bevestigde gedrag.
 - Voer uitsluitend werkzaamheden uit binnen de opdracht. Geen ongevraagde releases, wijziging van repository-instellingen, destructieve Git-acties of publicatie van dependencies.
 
+### 1.1 Verplicht gebruik en zelfstandig onderhoud van skills
+
+**AI gebruikt relevante skills actief en onderhoudt de projectkennis zelfstandig.** Lees bij aanvang van iedere ontwikkeltaak [home-assistant.md](home-assistant.md) voor Home Assistant-specifieke werkzaamheden en inventariseer de [repositoryskills](.agents/skills/README.md) en andere beschikbare, toegestane skills. Selecteer alle toepasselijke skills op basis van hun beschrijving, lees hun instructies vóór gebruik en volg de relevante procedures. Als automatische skill-discovery niet beschikbaar is, lees de SKILL.md-bestanden rechtstreeks. Meld ontbrekende of ontoegankelijke skills.
+
+- Gebruik skills voor herhaalbare werkzaamheden zoals API-contractvalidatie, Home Assistant-implementatie, energiedatasemantiek, kwaliteitscontrole, CI/CD, Marketplace en kennisbeheer.
+- Beoordeel bij iedere taak en faseovergang welke bewezen nieuwe kennis, regressies, deprecations en werkwijzen herbruikbaar zijn. Actualiseer home-assistant.md en relevante skills zelfstandig wanneer dit aantoonbare waarde heeft. Maak nieuwe skills bij concrete terugkerende taken; voorkom duplicatie en overmatige context.
+- Bewaar repositoryskills onder .agents/skills/<skill-name>/SKILL.md met geldige YAML-frontmatter (name en description), gerichte instructies en alleen noodzakelijke referenties, scripts of templates. Onderhoud de index; valideer namen, links en eventuele scripts. Gebruik de skill project-knowledge-maintenance voor dit onderhoud.
+- Controleer actuele primaire bronnen en de vastgelegde Home Assistant Core-tag. Noteer bron, datum, versie en onzekerheid bij relevante technische wijzigingen. Geen onbewezen API-feiten, credentials of gevoelige gegevens in skills.
+- AGENTS.md en AI_POLICY.md blijven leidend; home-assistant.md specialiseert de technische regels en skills operationaliseren deze. Skills mogen geen beleid versoepelen, extra rechten toekennen of ongeautoriseerde acties starten. Externe skills alleen na controle van herkomst, inhoud en toepasselijkheid; geen automatische installatie zonder vereiste toestemming.
+- Rapporteer welke skills relevant zijn gebruikt, welke kennis is bijgewerkt en welke validatie daadwerkelijk is uitgevoerd. Test skillgedrag waar haalbaar; claim geen automatische activatie zonder bewijs.
+
 ## 2. Verplichte referenties
 
 | Bron | Referentie |
 | --- | --- |
 | Integratieplan | [docs/INTEGRATION_PLAN.md](docs/INTEGRATION_PLAN.md) |
+| Home Assistant-ontwikkelreferentie | [home-assistant.md](home-assistant.md) |
+| Repositoryskills | [.agents/skills/README.md](.agents/skills/README.md) |
 | NED API | [Officiële API-documentatie](https://ned.nl/nl/api) |
 | NED API-handleiding | [Handleiding](https://ned.nl/nl/handleiding-api) |
 | NED OpenAPI | [Swagger](https://api.ned.nl/v1) |
@@ -257,7 +270,7 @@ pip-audit
 
 Een onderdeel is pas gereed wanneer alle toepasselijke punten uit hoofdstuk 24 aantoonbaar zijn afgedekt:
 
-- [ ] AGENTS.md en toepasselijke AI_POLICY.md gevolgd.
+- [ ] AGENTS.md en toepasselijke AI_POLICY.md gevolgd; relevante skills en home-assistant.md gebruikt en waar nodig bijgewerkt.
 - [ ] De actuele Python- en Home Assistant-baseline gerespecteerd.
 - [ ] Volledige type hints en docstrings.
 - [ ] Geen blokkerende I/O of achterblijvende async-taken.

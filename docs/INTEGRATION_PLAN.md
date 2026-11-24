@@ -846,6 +846,8 @@ Reguliere CI gebruikt reproduceerbare fixtures en gemockte responses zonder pers
 - Voeg in fase 1 een zelfstandige test-extra toe aan packages/ned-api/pyproject.toml (pytest, pytest-asyncio en alle vereiste API-testdependencies, geen Home Assistant). API-tests en fixtures zijn onafhankelijk van Home Assistant; plaats noodzakelijke conftest-fixtures onder tests/api. Sluit live_api-tests uit.
 - Zolang broncode of tests ontbreken, rapporteert de workflow expliciet welke controles niet zijn uitgevoerd. Een groene experimentele job is geen bewijs van volledige runtimecompatibiliteit of Platinum.
 
+Bij ontwikkeltaken worden relevante [repositoryskills](../.agents/skills/README.md) toegepast en zelfstandig onderhouden volgens AGENTS.md §1.1. [home-assistant.md](../home-assistant.md) is de levende Home Assistant-technische referentie. De architectuur en acceptatiecriteria blijven in dit plan.
+
 ## 20. CI/CD en kwaliteitscontroles
 
 ### 20.1 GitHub Actions
@@ -900,6 +902,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 ### 21.1 Fase 0 — Repository Foundation
 
 - [x] AGENTS.md opstellen.
+- [x] Home Assistant-ontwikkelreferentie en repositoryskills opstellen; zelfstandig gebruik en onderhoud verplicht stellen.
+- [ ] Skills in concrete implementatietaken toepassen en gedrag verifiëren.
 - [x] AI_POLICY.md opstellen.
 - [x] Auteursrechtbeleid vastleggen: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden.
 - [ ] Actuele Marketplace-toelatingsvoorwaarden, waaronder eventuele licentievereisten, definitief bevestigen.
