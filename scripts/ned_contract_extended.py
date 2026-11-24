@@ -137,9 +137,7 @@ def select_suite(today: date, scope: str) -> tuple[Query, ...]:
                 timezone_id=1,
                 granularity=6,
             ),
-            Query(
-                type_id=2, classification=2, day=date(2026, 11, 22), granularity=6
-            ),
+            Query(type_id=2, classification=2, day=date(2026, 11, 22), granularity=6),
         )
     suite = build_suite(today)
     if scope == "full":
