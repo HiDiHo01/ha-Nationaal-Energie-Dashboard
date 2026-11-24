@@ -736,6 +736,7 @@ Gebruik geen vaste 96 records per dag. Dedupliceer historische revisies op datas
 
 ```text
 NedApiError
+├── NedAccessDeniedError
 ├── NedAuthenticationError
 ├── NedPermissionError
 ├── NedConnectionError
@@ -753,7 +754,7 @@ NedApiError
 | 200 | Response valideren |
 | 400 | Requestfout, geen retry |
 | 401 | Authenticatieprobleem |
-| 403 | Autorisatieprobleem onderzoeken |
+| 403 | Toegang geweigerd; controleer credentials en rechten; geen automatische reauth |
 | 404 | Endpoint of dataset controleren |
 | 429 | Throttling en backoff |
 | 500–599 | Tijdelijke storing, begrensde retry |
@@ -762,7 +763,7 @@ NedApiError
 | Lege tijdreeks | Afzonderlijke datastatus |
 | Coroutine geannuleerd | Annulering doorgeven |
 
-Verifieer 401/403-semantiek; start geen reauth voor een onbewezen authenticatiefout.
+AUTH-001/002/003/005: drie door eigenaar gerapporteerde observaties voor dezelfde historische nationale zonnequery (zie [API_REFERENCE.md](API_REFERENCE.md#handmatige-authenticatieobservaties--25-november-2026)). Conceptmapping: 401 naar NedAuthenticationError, 403 naar onafhankelijke NedAccessDeniedError; 403 is ook waargenomen bij een ongeldige key en is geen bewijs van onvoldoende rechten. Geen automatische reauth bij 403. AUTH-004 (rechten) en 429/Retry-After blijven open; overige tabelregels zijn ontwerp, geen bewezen NED-contract.
 
 ### 16.3 Home Assistant-mapping
 
@@ -991,7 +992,7 @@ Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk start
 - [x] Werkelijke API-wheel via de native requirements-manager installeren naast de synthetische proef: [PR #35 Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45502356362/job/138828614103) op 26db739 slaagt op Core 2026.11.3/Python 3.14.10: native installatie van beide wheels, geïsoleerde typed import, sessie-injectie, behoud van alle bestaande distributieversies en uv pip check (165 packages). Werkelijke wheel ned_api-0.0.0-py3-none-any.whl, SHA256 ebf07c57fe9d9e2a427fa660b9dbebcae11d73013c77c0ff5e321b55cff9303c voor deze build. 54 API-tests geslaagd, 70 statements en 18 branches volledig gedekt, dependency-audit zonder bekende kwetsbaarheden. PR #35 gemerged op main 6f0abe9a42b6a800a2d3d32d94ba913d120e59c2. Zie [runtimeproef](../scripts/check_runtime_distribution.sh).
 - [ ] Enums en datasetcatalogus ontwikkelen.
 - [ ] Datamodellen implementeren.
-- [ ] Authenticatie en HTTP-client toevoegen.
+- [ ] Authenticatie en HTTP-client toevoegen. Conceptclient heeft AUTH-002/003-mapping en synthetische regressietests; verdere contract-, runtime- en CI-validatie blijft open.
 - [ ] JSON-LD-parser ontwikkelen.
 - [ ] Paginering en revisieverwerking implementeren.
 - [ ] Rate limiter implementeren.
