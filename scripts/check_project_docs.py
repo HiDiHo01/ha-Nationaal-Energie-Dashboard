@@ -3,7 +3,7 @@
 import json
 import re
 import shutil
-import subprocess  # noqa: S404 - Git is used with fixed arguments and no shell.
+import subprocess
 import sys
 from pathlib import Path
 from string import Formatter
@@ -44,7 +44,9 @@ def _markdown_links(content: str) -> list[tuple[int, str]]:
             continue
         text = INLINE_CODE.sub("", line)
         for pattern in (LINK, REFERENCE):
-            links.extend((number, item[1] or item[2]) for item in pattern.finditer(text))
+            links.extend(
+                (number, item[1] or item[2]) for item in pattern.finditer(text)
+            )
     return links
 
 

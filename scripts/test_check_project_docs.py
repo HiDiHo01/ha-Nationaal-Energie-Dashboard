@@ -13,9 +13,7 @@ class DocumentationTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create a repository-shaped fixture with both required README files."""
-        self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.enterContext(tempfile.TemporaryDirectory()))
         self.tracked: set[Path] = set()
         self.write_file("README.md", "[English](README.en.md)\n")
         self.write_file("README.en.md", "[Nederlands](README.md)\n")

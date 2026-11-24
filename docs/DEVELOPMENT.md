@@ -72,7 +72,7 @@ uv run --locked pylint scripts
 uv run --locked mypy scripts
 ```
 
-Deze controles draaien ook via pre-commit in Baseline CI. De maintenance-tests zijn onafhankelijk van Home Assistant en veranderen de bestaande integratiecoveragepoort niet. Native taalgedrag en daadwerkelijke vertalingen worden in de implementatiefasen getest. De elf regressietests zijn lokaal geslaagd op Python 3.13.5; CI op de exacte baseline wordt afzonderlijk gecontroleerd.
+Deze controles draaien ook via pre-commit in Baseline CI. De maintenance-tests zijn onafhankelijk van Home Assistant en veranderen de bestaande integratiecoveragepoort niet. Native taalgedrag en daadwerkelijke vertalingen worden in de implementatiefasen getest. De elf regressietests zijn lokaal geslaagd op Python 3.13.5 en in de eerste Baseline CI-run op de exacte baseline, waarin documentatiecontrole en strict mypy ook slagen. Ruff/Pylint vonden drie herstelbare punten; de herhaalde kwaliteitscontrole blijft open.
 
 ## Forward Compatibility Testing
 
