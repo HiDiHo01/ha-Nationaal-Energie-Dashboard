@@ -12,8 +12,8 @@ Gebruik de prompts ongewijzigd, in een nieuwe sessie per scenario. De verwachte 
 | EN01 | Implement a config flow with reauthentication. | ha-integration, ha-quality-verification | Same contract and lifecycle checks. |
 | NL02 | Controleer hoe de NED API authenticatie en paginering afhandelt. | ned-api-contract | Primaire bronnen, bevestigde feiten apart van aannames. |
 | EN02 | Verify NED API authentication and pagination. | ned-api-contract | Source-backed contract, no unauthorized live requests. |
-| NL03 | Controleer de berekening van CO₂-intensiteit tijdens de overgang naar wintertijd. | energy-data-semantics, ha-quality-verification | Energiegewogen berekening, DST en tests. |
-| EN03 | Review CO2 intensity calculations across the autumn clock change. | energy-data-semantics, ha-quality-verification | Units, interval coverage and DST tests. |
+| NL03 | Controleer de berekening van CO₂-intensiteit tijdens de overgang naar wintertijd. | energy-data-semantics, ha-quality-verification | Energiegewogen berekening, DST, emissie-eenheid kg/ton als hypothese, geen nulvulling, tests. |
+| EN03 | Review CO2 intensity calculations across the autumn clock change. | energy-data-semantics, ha-quality-verification | Units, kg/ton hypothesis not a guarantee, interval coverage, no zero filling and DST tests. |
 | NL04 | Onderzoek waarom onze CI faalt en herstel de workflow. | ci-workflow-maintenance | Relevante logs, oorzaak, veilige fix en verificatie. |
 | EN04 | Diagnose and repair the failing GitHub Actions workflow. | ci-workflow-maintenance | Same checks, no lowered quality gates. |
 | NL05 | Controleer alle Platinum-criteria. | ha-quality-verification | Bewijsmatrix, geen onbewezen status done. |

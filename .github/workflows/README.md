@@ -8,7 +8,7 @@
 | [hacs.yaml](hacs.yaml) | Handmatig, gepubliceerde release | Marketplace-validatie zonder genegeerde checks |
 | [baseline-watch.yaml](baseline-watch.yaml) | Dagelijks 07:17 UTC, handmatig | Signaleer afwijkende Core-stablebaseline |
 | [dependabot-automerge.yaml](dependabot-automerge.yaml) | Dependabot-PR naar main | Gecontroleerde squash-merge van geschikte minor/patchupdates na verplichte CI |
-| [api-contract.yaml](api-contract.yaml) | Handmatig, main, expliciete bevestiging | Twee dagaggregatieverzoeken (daily, standaard), zes tijdzoneverzoeken (timezone) of maximaal 18 read-only NED-requests (full) met beveiligde environment-secret; zie [API-contract](../../docs/API_REFERENCE.md) |
+| [api-contract.yaml](api-contract.yaml) | Handmatig, main, expliciete bevestiging | Zes kwartiersemantiekverzoeken (semantics, standaard), twee dagaggregatieverzoeken (daily), zes tijdzoneverzoeken (timezone) of maximaal 18 read-only NED-requests (full) met beveiligde environment-secret; zie [API-contract](../../docs/API_REFERENCE.md) |
 | [pages.yaml](pages.yaml) | PR, push naar main (sitewijzigingen), handmatig | Gelockte Jekyll-build, gem-audit, NL/EN- en linkvalidatie; uitsluitend main deployen via GitHub Pages |
 | [Dependabot](../dependabot.yml) | Dagelijks | Update-PR's voor GitHub Actions, uv (directe/indirecte dependencies) pre-commit-hooks en Bundler |
 

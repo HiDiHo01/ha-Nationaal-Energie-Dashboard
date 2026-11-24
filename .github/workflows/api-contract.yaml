@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: Daily discrepancies (2), timezone (6), or full matrix (18)
+        description: Metric semantics (6), daily discrepancies (2), timezone (6), or full matrix (18)
         type: choice
-        options: [daily, timezone, full]
-        default: daily
+        options: [semantics, daily, timezone, full]
+        default: semantics
         required: true
       confirm_live:
         description: Authorize the selected bounded read-only scope (2, 6 or 18 requests)

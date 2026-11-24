@@ -5,7 +5,7 @@ import os
 import sys
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, DecimalException, InvalidOperation
 from urllib.parse import parse_qsl, urlencode, urlsplit
 from zoneinfo import ZoneInfo
 
@@ -23,10 +23,12 @@ METRICS = ("capacity", "volume", "emission", "emissionfactor", "percentage")
 MAX_REQUESTS = 18
 TIMEZONE_REQUESTS = 6
 DAILY_REQUESTS = 2
+SEMANTIC_REQUESTS = 6
 REQUEST_BUDGETS = {
     "full": MAX_REQUESTS,
     "timezone": TIMEZONE_REQUESTS,
     "daily": DAILY_REQUESTS,
+    "semantics": SEMANTIC_REQUESTS,
 }
 RESOURCE_NAMES = {
     "type": "types",
@@ -48,6 +50,7 @@ class Query:
     timezone_id: int = 0
     granularity: int = 4
     page_size: int = 100
+    inspect_semantics: bool = False
 
     def __post_init__(self) -> None:
         """Reject dimensions outside the approved observation scope."""
@@ -127,7 +130,7 @@ def build_suite(today: date) -> tuple[Query, ...]:
 
 
 def select_suite(today: date, scope: str) -> tuple[Query, ...]:
-    """Select a fixed scope; daily repeats only the two disputed observations."""
+    """Select a bounded scope without arbitrary request parameters."""
     if scope == "daily":
         return (
             Query(
@@ -138,6 +141,24 @@ def select_suite(today: date, scope: str) -> tuple[Query, ...]:
                 granularity=6,
             ),
             Query(type_id=2, classification=2, day=date(2026, 11, 22), granularity=6),
+        )
+    if scope == "semantics":
+        return (
+            *(
+                Query(
+                    type_id=type_id,
+                    classification=2,
+                    day=date(2026, 11, 22),
+                    inspect_semantics=True,
+                )
+                for type_id in DATASETS
+            ),
+            Query(
+                type_id=27,
+                classification=1,
+                day=today + timedelta(days=1),
+                inspect_semantics=True,
+            ),
         )
     suite = build_suite(today)
     if scope == "full":
@@ -238,6 +259,70 @@ def _metric_counts(records: list[dict[str, object]]) -> dict[str, dict[str, int]
     return result
 
 
+def _metric_value(record: dict[str, object], field: str) -> Decimal | None:
+    """Read an available finite metric without interpreting null as zero."""
+    value = record.get(field)
+    return None if value is None else _number(value)
+
+
+def _capacity_relation(record: dict[str, object]) -> str:
+    """Classify the documented quarter-hour relation without assuming rounding."""
+    capacity = _metric_value(record, "capacity")
+    volume = _metric_value(record, "volume")
+    if capacity is None or volume is None:
+        return "unavailable"
+    difference = abs(capacity - 4 * volume)
+    if difference == 0:
+        return "exact"
+    return "within_3_kw" if difference <= 3 else "outside_3_kw"
+
+
+def _emission_relation(record: dict[str, object]) -> str:
+    """Compare kg and tonne hypotheses, not an authoritative unit decision."""
+    volume = _metric_value(record, "volume")
+    factor = _metric_value(record, "emissionfactor")
+    emission = _metric_value(record, "emission")
+    if volume is None or factor is None or emission is None:
+        return "unavailable"
+    if volume <= 0 or factor <= 0 or emission <= 0:
+        return "nonpositive"
+    expected_kg = volume * factor
+    tolerance = expected_kg * Decimal("0.01")
+    if abs(emission - expected_kg) <= tolerance:
+        return "kg_within_1_percent"
+    if abs(emission * 1000 - expected_kg) <= tolerance:
+        return "tonne_within_1_percent"
+    return "neither"
+
+
+def _semantic_counts(
+    records: list[dict[str, object]], query: Query
+) -> dict[str, dict[str, int]]:
+    """Count diagnostic relationships only, without raw values or residuals."""
+    capacity = dict.fromkeys(("exact", "within_3_kw", "outside_3_kw", "unavailable"), 0)
+    emission = dict.fromkeys(
+        (
+            "kg_within_1_percent",
+            "tonne_within_1_percent",
+            "neither",
+            "nonpositive",
+            "unavailable",
+        ),
+        0,
+    )
+    try:
+        for record in records:
+            capacity[_capacity_relation(record)] += 1
+            if query.type_id == 27:
+                emission[_emission_relation(record)] += 1
+    except DecimalException as error:
+        raise ProbeError("Invalid metric arithmetic") from error
+    result = {"capacity_relation": capacity}
+    if query.type_id == 27:
+        result["emission_unit_hypothesis"] = emission
+    return result
+
+
 def _daily_timing(
     expected: tuple[datetime, datetime],
     intervals: list[tuple[datetime, datetime]],
@@ -301,6 +386,11 @@ def observe(api_key: str, query: Query) -> bool:
                     "page": page,
                     **shape,
                     "metric_counts": _metric_counts(records),
+                    **(
+                        {"semantic_counts": _semantic_counts(records, query)}
+                        if query.inspect_semantics
+                        else {}
+                    ),
                     "total_matches_expected": total_matches,
                     "response_timezone_ids": sorted(timezone_ids),
                 },
@@ -338,7 +428,7 @@ def main() -> int:
     if not api_key.isascii() or not api_key.isprintable() or not api_key.strip():
         print("Missing or invalid NED_API_KEY", file=sys.stderr)
         return 1
-    scope = os.environ.get("NED_CONTRACT_SCOPE", "daily")
+    scope = os.environ.get("NED_CONTRACT_SCOPE", "semantics")
     try:
         suite = select_suite(datetime.now(UTC).date(), scope)
         budget = REQUEST_BUDGETS[scope]

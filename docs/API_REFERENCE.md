@@ -6,6 +6,7 @@ Peildatum: 24 november 2026. Status: openbare documentatie en machineleesbaar sc
 
 - [API-overzicht](https://ned.nl/nl/api)
 - [Handleiding](https://ned.nl/nl/handleiding-api)
+- [Kolom- en datasetdefinities](https://ned.nl/nl/definities)
 - [Productiedatacatalogus](https://ned.nl/datacatalogus)
 - [API-changelog](https://ned.nl/nl/changelog-api), nieuwste aangetroffen versie v1.28.0 (19 november 2026)
 - [Swagger](https://api.ned.nl/v1), [JSON OpenAPI](https://api.ned.nl/v1/index.jsonopenapi), [YAML OpenAPI](https://api.ned.nl/v1/index.yamlopenapi)
@@ -133,7 +134,7 @@ Voor alle zes responses zijn de vijftien onderzochte velden aanwezig en is hydra
 
 ### Gerichte dagaggregatieprobe (TZ-002/TZ-003)
 
-Scope daily is de nieuwe standaard en voert uitsluitend twee vaste aanvragen uit: nationale historische zon, granularity 6, point 0, activity 1, classification 2, page 1 en itemsPerPage 100. De datums zijn bewust vastgezet om exact de eerdere afwijkingen te reproduceren. Geen nieuwe kwartier-, forecast- of pagineringsaanvragen.
+Scope daily voert uitsluitend twee vaste aanvragen uit: nationale historische zon, granularity 6, point 0, activity 1, classification 2, page 1 en itemsPerPage 100. De datums zijn bewust vastgezet om exact de eerdere afwijkingen te reproduceren. Geen nieuwe kwartier-, forecast- of pagineringsaanvragen.
 
 | Referentie | Datumfilter | Query-ID | Verwachte UTC-grenzen | Verwachte duur |
 | --- | --- | --- | --- | --- |
@@ -155,6 +156,32 @@ Offline: 17 contracttests geslaagd op Python 3.13.5 (inclusief drie nieuwe tests
 
 TZ-002: het interval begint correct maar eindigt een uur te vroeg. Dit bewijst geen ontbrekende energiewaarde of vaste 24-uursimplementatie voor alle dagen. TZ-003: het interval is 23 uur verschoven; duur alleen is geen dekkingsbewijs. De oorzaak van beide afwijkingen en de meetsemantiek blijven onbekend. Geen automatische tijdstempelcorrectie, geen versoepeling van validatie en geen productiegebruik van dagaggregaten. Behoud de eerdere waarnemingen als regressiebewijs; vraag de API-leverancier om verduidelijking van daggrenzen, datumfilters, tijdzone-ID 0 en DST. Een volgende live-probe vereist een afzonderlijke hypothese, begrensde scope en expliciete autorisatie; herhaal niet zonder nieuwe onderzoeksvraag. Geen nieuwe live-aanvragen bij deze documentatiewijziging.
 
+## Meetsemantiek: broncontrole en bestaande loganalyse — 24 november 2026
+
+De officiële [definities](https://ned.nl/nl/definities) bevestigen intervalvolume en de naar uurwaarde omgerekende capaciteit; voor 15 minuten geldt capacity = 4 × volume. De [handleiding](https://ned.nl/nl/handleiding-api) noemt kW, kWh, kg en kg/kWh. De benuttingsformule (capacity gedeeld door percentage geeft maximale effectieve capaciteit) ondersteunt een eenheidsloze ratio, evenals de voorbeeldwaarde en live tellingen; exacte schaal, toepasselijkheid, afronding en bereik blijven te verifiëren. De OpenAPI-omschrijving van emission in ton is tegenstrijdig met de handleiding in kg. Geen automatische kg/ton-conversie zonder bevestiging.
+
+Heranalyse van [live-job 138729707092](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45474134929/job/138729707092): tien nationale P0-responses van 96 records plus twee pagina's van 48 voor de herhaalde historische zonquery (1056 ontvangen records, niet 1056 unieke intervallen). Alle vijf metrieken hebben nul ontbrekende, null of negatieve waarden. Percentage is nooit boven één. In de tien primaire responses:
+
+| Type | Nul capacity/volume/percentage current | Nul capacity/volume/percentage forecast | Nul emission/emissionfactor per classificatie |
+| --- | --- | --- | --- |
+| 1 | 7 / 7 / 7 | 0 / 0 / 0 | 96 / 96 |
+| 2 | 63 / 63 / 63 | 64 / 64 / 64 | 96 / 96 |
+| 51 | 0 / 0 / 0 | 0 / 0 / 0 | 96 / 96 |
+| 27 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 |
+| 59 | 0 / 0 / 96 | 0 / 0 / 96 | 96 / 96 |
+
+Deze marginale tellingen bewijzen geen recordgewijze relatie of algemene nullability. De [datacatalogus](https://ned.nl/nl/datacatalogus) noemt emissies voor 1/2/51 niet toepasselijk, voor 59 niet beschikbaar, voor 27 wel beschikbaar. Presenteer nul op niet-ondersteunde velden niet als bewezen emissiemeting; type 59-percentage niet als bewezen benuttingsmeting. Houd ontbrekend, null, nul, niet-toepasselijk en ongeldig afzonderlijk. De changelog v1.26.0 en v1.27.0–1.27.1 bevestigt herberekeningen en tijdelijke vervanging van current door forecasts; classificatie is geen garantie op bemeten data.
+
+### Gerichte kwartiersemantiekprobe (scope semantics)
+
+Nieuwe opt-in scope met zes afzonderlijke nationale UTC-kwartierqueries, page 1, itemsPerPage 100, gebruikelijke halfopen datumfilters: types 1/2/51/27/59, classification 2, vaste datum 2026-11-22; type 27, classification 1, morgen ten opzichte van uitvoeringsdatum UTC. Geen dagaggregatie, herhaalde paginering of fout-/belastingtest. Hypothesen:
+
+- Capacity en volume: tel exacte gelijkheid van capacity = 4 × volume, afwijkingen tot en met 3 kW, grotere afwijkingen en niet-vergelijkbare ontbrekende/null-waarden. De 3 kW-band is uitsluitend een diagnostische keuze om mogelijke integerafronding te signaleren, geen gedocumenteerde tolerantie of productieregel.
+- Alleen type 27: bij positieve volume, factor en emission toets emission versus volume × emissionfactor (kg) en emission × 1000 versus hetzelfde product (tonhypothese); tel overeenstemming binnen 1% relatieve afwijking, geen overeenstemming, niet-positieve en niet-beschikbare waarden. De 1%-band is uitsluitend een diagnostische keuze; geen unitgarantie of acceptatiegrens. Geen afleiding uit nulwaarden of vergelijking voor niet-ondersteunde datasets.
+- Bestaande metriek-, veldtype-, dimensie-, paginering- en intervaldekkingcontroles blijven behouden. De nieuwe uitvoer bevat alleen categorieaantallen; geen ruwe waarden, ratio's, residuals of identifiers. Een geslaagde workflow betekent alleen structurele contractobservatie; de semantische tellingen moeten apart worden beoordeeld.
+
+Deze probe is voorbereid, niet live uitgevoerd. Leveranciersverduidelijking blijft vereist voor emission-eenheid/afronding, percentage-schaal en niet-toepasselijke waarden, TZ-002/TZ-003, revisies, forecastgrenzen en fout-/ratelimitsemantiek. Geen nieuwe live-aanvragen zonder expliciete autorisatie.
+
 ## Openstaande verificatie
 
 - [x] OpenAPI-export ophalen, parsen en relevante schema's, filters, responses en security scheme inspecteren; verschillen vastgelegd.
@@ -172,7 +199,7 @@ TZ-002: het interval begint correct maar eindigt een uur te vroeg. Dit bewijst g
 
 De [opt-in workflow](../.github/workflows/api-contract.yaml) en [probe](../scripts/ned_contract_probe.py) zijn voorbereid. De workflow draait uitsluitend handmatig op main met expliciete bevestiging, beperkte leesrechten, een vaste environment ned-contract en een jobtimeout van zeven minuten. De secret wordt alleen in de probestap geïnjecteerd. De eigenaar heeft bevestigd dat de beveiligde environment en sleutel zijn ingesteld. Behoud de deploymentbranchbeperking tot main en vereiste reviewers waar beschikbaar. De environmentinstellingen zijn niet onafhankelijk uitleesbaar via de huidige connector; de succesvolle handmatige uitvoering op main bevestigt werkende secret-injectie. Gebruik uitsluitend een environment-secret NED_API_KEY, geen repositorybrede secret. Plaats nooit een key in chat, issues, code of artifacts.
 
-Scope daily (standaard, twee requests) is op main uitgevoerd; zie het live-resultaat hierboven. Start een nieuwe NED API contract observation uitsluitend bij expliciete autorisatie en een concrete onderzoeksvraag, met passende vaste scope en confirm_live. De [uitgebreide probe](../scripts/ned_contract_extended.py) voert maximaal 18 sequentiële GET-verzoeken uit, zonder retries, redirects of willekeurige URL's. De oorspronkelijke twee-waarnemingenprobe blijft beschikbaar voor offline regressietests. Sockettimeout 15 s, per response maximaal 2 MiB, uitsluitend de vaste TLS-host, geen account-/gebruikersendpoints. Stop bij de eerste transport-, veiligheids- of schemafout; bekende tijdzoneafwijkingen en afwijkende geldige totaaltellingen bij één pagina worden verzameld en resulteren in failure. De uitvoer bevat uitsluitend vooraf bekende querydimensies, dagen, bekende response-timezone-ID's, tellingen, veldtypen en booleans; geen ruwe energiewaarden, headers, identifiers, next-links of payloads.
+Scope daily (twee requests, eerdere standaard) is op main uitgevoerd; zie het live-resultaat hierboven. De nieuwe standaard semantics vraagt zes kwartierqueries en vereist opnieuw expliciete bevestiging. Start een nieuwe NED API contract observation uitsluitend bij expliciete autorisatie en een concrete onderzoeksvraag, met passende vaste scope en confirm_live. De [uitgebreide probe](../scripts/ned_contract_extended.py) voert maximaal 18 sequentiële GET-verzoeken uit, zonder retries, redirects of willekeurige URL's. De oorspronkelijke twee-waarnemingenprobe blijft beschikbaar voor offline regressietests. Sockettimeout 15 s, per response maximaal 2 MiB, uitsluitend de vaste TLS-host, geen account-/gebruikersendpoints. Stop bij de eerste transport-, veiligheids- of schemafout; bekende tijdzoneafwijkingen en afwijkende geldige totaaltellingen bij één pagina worden verzameld en resulteren in failure. De uitvoer bevat uitsluitend vooraf bekende querydimensies, dagen, bekende response-timezone-ID's, tellingen, veldtypen en booleans; geen ruwe energiewaarden, headers, identifiers, next-links of payloads.
 
 ### Uitgebreide contractmatrix (BL-003)
 

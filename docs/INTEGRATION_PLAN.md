@@ -564,11 +564,11 @@ Groepeer logische serviceapparaten per geografisch gebied: Nederland, Noord-Holl
 
 ### 12.1 Vermogen en energie
 
-Energie (kWh) = gemiddeld vermogen (kW) × intervalduur (uur). Bijvoorbeeld 1.000 kW gedurende 15 minuten = 250 kWh. Gebruik geldig API-volume als primaire bron. Bereken alleen een fallback indien de veldsemantiek dit rechtvaardigt.
+Energie (kWh) = gemiddeld vermogen (kW) × intervalduur (uur). Bijvoorbeeld 1.000 kW gedurende 15 minuten = 250 kWh. Gebruik geldig API-volume als primaire bron. De [NED-definities](https://ned.nl/nl/definities) bevestigen capacity = 4 × volume voor kwartierdata; verifieer recordgewijze consistentie en afronding met de [semantiekprobe](API_REFERENCE.md#gerichte-kwartiersemantiekprobe-scope-semantics). Bereken alleen een fallback indien de veldsemantiek dit rechtvaardigt.
 
 ### 12.2 CO₂-emissiefactor
 
-g/kWh = kg/kWh × 1.000. Voorbeeld: 0,184 kg/kWh = 184 g/kWh. Ontbrekende intensiteit is geen nul; controleer de betekenis van de productie- of consumptiemix.
+g/kWh = kg/kWh × 1.000. Voorbeeld: 0,184 kg/kWh = 184 g/kWh. Ontbrekende intensiteit is geen nul; controleer de betekenis van de productie- of consumptiemix. De handleiding noemt emission in kg, het OpenAPI-schema in ton; vergelijk uitsluitend positieve waarden van type 27 met volume × emissionfactor als diagnostische hypothese. Geen automatische conversie of emissietotaal zolang de eenheid niet bevestigd is. Niet-toepasselijke emissies en type 59-percentage niet als bewezen nulmetingen tonen.
 
 ### 12.3 Gewogen gemiddelde
 
