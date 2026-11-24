@@ -1,6 +1,6 @@
 # NED API — contractonderzoek
 
-Peildatum: 24 november 2026. Status: openbare documentatie en machineleesbaar schema gecontroleerd; eerste geauthenticeerde waarnemingen geslaagd; volledige contractvalidatie blijft open (BL-003).
+Peildatum: 25 november 2026. Status: openbare documentatie en machineleesbaar schema gecontroleerd; eerste geauthenticeerde waarnemingen geslaagd; volledige contractvalidatie blijft open (BL-003).
 
 ## Primaire bronnen
 
@@ -204,6 +204,53 @@ SEM-001: de gedocumenteerde exacte relatie is weerlegd als universele recordrege
 | Forecast | 96 | 0 | 0 | 0 | 0 |
 
 SEM-002: alle 192 positieve vergelijkingen ondersteunen emission in kg bij de gedocumenteerde volume-eenheid kWh en emissionfactor kg/kWh; geen enkele ondersteunt ton. Sterk runtimebewijs voor de twee geteste type 27-queries, overeenkomstig de handleiding. De formele OpenAPI-tegenstrijdigheid en afronding blijven open; geen automatische kg/ton-detectie of tolerantie als productiecontract. De 1%-band is diagnostisch. Percentage-schaal, niet-toepasselijkheid, revisies, volledige forecasthorizon en foutsemantiek blijven open. Geen nieuwe live-aanvragen nodig voor registratie.
+
+## Handmatige bereikbaarheidsdiagnostiek — 24/25 november 2026
+
+Bron: vijf door de eigenaar aangeleverde geschoonde JSON-logfragmenten van het zelfstandige lokale script `ned_api_url_test.py`, buiten de repository en buiten GitHub Actions. Uitvoering van 24 november 2026 22:48:31 UTC tot 23:04:27 UTC (24 november 23:48 tot 25 november 00:04 Nederlandse tijd). De beschikbare scriptkopie is geïnspecteerd; SHA-256 aa14e79b63d5cec61747b0e9fbdcbb08afbf44d20ba7041a8134e2622471f019. De exacte hash van het door de eigenaar uitgevoerde exemplaar is niet afzonderlijk bevestigd. Geen onafhankelijke heruitvoering of nieuwe live-aanvragen door de projectagent. Alleen samengevatte metadata, geen API-key, ruwe response, record-ID of accountgegevens.
+
+| Starttijd UTC (24 november) | Scope | Geslaagd / zichtbaar |
+| --- | --- | --- |
+| 22:48:31 | Zeven openbare URL's | 7/7 |
+| 22:59:23 | Eén geauthenticeerde UTC-kwartierquery; opdracht niet meegeleverd | 1/1 |
+| 23:01:16 | Extra URL 1; exacte URL niet meegeleverd | 1/1 |
+| 23:01:51 | Historische dataset 51, 22 november 2026 | 1/1 |
+| 23:04:27 | --urls --api --day 2026-11-22; standaard dataset 2 | 8/8 zichtbare resultaten |
+
+Totaal 18/18 gerapporteerde controles met HTTP 200 en passed=true: 14 openbare standaard-URL-controles, één extra URL en drie geauthenticeerde API-controles. Herhaalde verzoeken zijn geen unieke endpoints of datasets. Van de laatste uitvoering ontbreekt de afsluitende samenvatting/exitstatus in het aangeleverde fragment; de acht individuele resultaten zijn wel aanwezig.
+
+### Openbare documentatie
+
+| URL-label | Bytes, beide metingen | Eerste ms | Tweede ms | Gerapporteerd MIME-type |
+| --- | ---: | ---: | ---: | --- |
+| NED website (API-overzicht) | 64121 | 3243 | 1210 | text/html |
+| API-handleiding | 70607 | 170 | 141 | text/html |
+| Datadefinities | 79121 | 173 | 117 | text/html |
+| Datacatalogus | 84514 | 155 | 130 | text/html |
+| API-changelog | 75506 | 126 | 154 | text/html |
+| Swagger | 447 | 1125 | 95 | other/unknown |
+| OpenAPI JSON | 100234 | 166 | 117 | other/unknown |
+
+Beide OpenAPI-metingen melden 22 paden en 100234 bytes, overeenkomend met de eerder vastgelegde export. De huidige log bevat geen SHA-256 van de responses; inhoudelijke identiteit is niet bewezen. De beschikbare scriptkopie vraagt de export op via https://api.ned.nl/v1/docs.jsonopenapi?spec_version=3. De code normaliseert Content-Type naar een vaste allowlist; other/unknown omvat zowel ontbrekende als niet-geallowliste MIME-types. Het is geen bewezen serverfout en de oorspronkelijke header is onbekend. Extra URL 1 levert 447 bytes, other/unknown en 111 ms; gelijke lengte met Swagger bewijst geen gelijke URL of inhoud. De timer omvat de HTTPS-aanvraag en het lezen van de response, geen afzonderlijke serverlatency; de korte meetreeks bewijst geen structurele prestaties.
+
+### Geauthenticeerde kwartierdata
+
+| Scope | Bytes | ms | Records | Volgende link gedetecteerd |
+| --- | ---: | ---: | ---: | --- |
+| Eerste UTC-query, exacte parameters niet meegeleverd | 50931 | 3232 | 96 | Nee |
+| Type 51, historie 22 november | 51844 | 218 | 96 | Nee |
+| Type 2 volgens scriptdefaults, historie 22 november | 50931 | 172 | 96 | Nee |
+
+Alle drie melden application/ld+json, HTTP 200, de aanwezigheid van vijftien onderzochte velden en geen waargenomen nullwaarden. De beschikbare scriptkopie bouwt voor de opgegeven datum point=0, activity=1 voor type 2 en 51, classification=2, granularity=4, granularitytimezone=0, page=1, itemsPerPage=100, order[validfrom]=asc en datumfilters met de volgende kalenderdag als exclusieve bovengrens. Alleen de twee opdrachten met expliciete datum zijn in het aangeleverde log herleidbaar tot deze scope; de eerste query is niet als dataset 2 geclassificeerd uitsluitend op basis van responsegrootte.
+
+| Velden | Waargenomen runtime-typen |
+| --- | --- |
+| id, capacity, volume, emission, emissionfactor | int in alle drie |
+| percentage | int en float in eerste en laatste query; uitsluitend float in type 51 |
+| point, type, activity, classification, granularity, granularitytimezone | str in alle drie |
+| validfrom, validto, lastupdate | str in alle drie |
+
+De gerapporteerde vorm bevestigt bereikbaarheid en toegang voor de uitgevoerde verzoeken (aanvullend bewijs BL-004). Het recordaantal is consistent met 96 kwartieren, maar het script valideert geen unieke intervallen, tijdstempelinhoud, UTC-offset, volledige dekking, volgorde, dimensiewaarden, totalItems, revisies, meetwaarden, eenheden of pagineringsgedrag op een tweede pagina. Geen bewijs voor NED-productiecompatibiliteit van NedTransport: dit zelfstandige script gebruikt de standaardbibliotheek. Geen nieuw bewijs voor TZ-001/002/003 of SEM-001/002, geen leveranciersantwoord of nieuwe fasevrijgave. BL-003 blijft open; geen identieke nieuwe live-probe zonder concrete hypothese en expliciete autorisatie.
 
 ## Leveranciersverduidelijking
 
