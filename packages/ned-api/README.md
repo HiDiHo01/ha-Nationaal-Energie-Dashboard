@@ -3,3 +3,5 @@
 Zelfstandige async Python-library zonder Home Assistant-afhankelijkheid. Broncode onder src/ned_api. Verantwoordelijkheden: transport, authenticatie, parsing, catalogus, datamodellen, retries, rate limiting en exceptions.
 
 Valideer eerst het API-contract en de reproduceerbare runtime-distributiestrategie. Publicatie van het package vereist toestemming. Zie [integratieplan](../../docs/INTEGRATION_PLAN.md).
+
+De actuele broncontrole en ontbrekende contractbewijzen staan in [API_REFERENCE.md](../../docs/API_REFERENCE.md).

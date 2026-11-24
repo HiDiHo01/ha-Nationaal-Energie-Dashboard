@@ -120,10 +120,10 @@ Baseline 24 november 2026: Home Assistant Core 2026.11.3, Python 3.14, upstream 
 
 ## 6. NED API-contract en datakwaliteit
 
-Volg hoofdstukken 2, 3, 6, 7, 12 en 15 van het integratieplan.
+Volg hoofdstukken 2, 3, 6, 7, 12 en 15 van het integratieplan en de actuele broncontrole in [API_REFERENCE.md](docs/API_REFERENCE.md).
 
 - Valideer dataset-ID's, activiteiten, regio's, classificaties, granulariteit, tijdzone-ID's, velden, headers, authenticatie, paginering, querygrenzen en limieten vóór productiegebruik.
-- Werkhypothese: HTTPS REST API v1 met /utilizations, X-AUTH-TOKEN en JSON-LD. Behandel deze waarden als te bevestigen tot contracttests slagen.
+- Gedocumenteerd: HTTPS REST API v1 met /utilizations, X-AUTH-TOKEN en JSON-LD. Live gedrag en machineleesbaar schema blijven onbevestigd tot contractvalidatie.
 - Gebruik DatasetKey, DatasetDefinition, EnergyRecord, EnergySeries, DatasetSnapshot, CoordinatorData en NedRuntimeData waar passend. Datasetidentificatie omvat type, point, activity, granularity, classification en granularity_timezone.
 - Centraliseer validatie en parsing. Onderscheid nul, null, ontbrekende velden en ongeldige waarden. Wijs NaN, oneindige waarden en ongeldige intervallen af; beoordeel negatieve waarden per metriek.
 - Sorteer chronologisch, dedupliceer op dataset plus geldigheidsinterval en verwerk revisies zonder dubbeltelling. Behandel lastupdate niet als automatisch bewijs van inhoudelijke wijziging.
@@ -300,6 +300,6 @@ Rapporteer bij iedere opdracht de gewijzigde bestanden, relevante technische keu
 
 ## 15. Startstatus en volgende acceptatiepoort
 
-Bij het opstellen van dit bestand bevatte de repository alleen README.md en docs/INTEGRATION_PLAN.md. Fase 0 is gestart, niet voltooid. AGENTS.md en AI_POLICY.md zijn aanwezig. De eigenaar heeft gekozen voor beperkte Home Assistant-gebruikstoestemming met voorbehouden overige rechten. De basismappenstructuur is aanwezig; Marketplace-readiness is nog niet aangetoond. De minimale Home Assistant-versie is vastgesteld op 2026.11.3 (nieuwste stable op 24 november 2026). API-contractvalidatie, distributiestrategie, tooling, CI en runtimecompatibiliteitstests zijn nog open.
+Bij het opstellen van dit bestand bevatte de repository alleen README.md en docs/INTEGRATION_PLAN.md. Fase 0 is gestart, niet voltooid. AGENTS.md en AI_POLICY.md zijn aanwezig. De eigenaar heeft gekozen voor beperkte Home Assistant-gebruikstoestemming met voorbehouden overige rechten. De basismappenstructuur is aanwezig; Marketplace-readiness is nog niet aangetoond. De minimale Home Assistant-versie is vastgesteld op 2026.11.3 (nieuwste stable op 24 november 2026). Tooling en basis-CI zijn operationeel. API-contractvalidatie, distributiestrategie en runtimecompatibiliteitstests blijven open.
 
 Werk eerst de openstaande onderdelen van fase 0 af. Implementeer de API-client pas wanneer de noodzakelijke beleids-, contract- en toolingfundamenten gereed zijn. Als een externe afhankelijkheid (zoals een NED API-key) ontbreekt, meld de blokkade en voltooi alleen onafhankelijke werkzaamheden die verantwoord uitvoerbaar zijn.
