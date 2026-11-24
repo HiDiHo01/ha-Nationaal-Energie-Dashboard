@@ -14,4 +14,4 @@ NedTransport leent een vertrouwde certificaatvaliderende aiohttp-sessie en voert
 
 Runtime-dependencies: aiohttp >=3.14.5,<4 en yarl >=1.25.1,<2, beide aanwezig in de bestaande rootlock. Zie [transport.py](src/ned_api/transport.py). Geen productieaanroepen totdat de contractafhankelijke client is vrijgegeven.
 
-De [native requirements-proef](../../scripts/check_runtime_distribution.sh) bouwt de werkelijke wheel en installeert deze naast de synthetische proef via de echte Home Assistant requirements-manager vanuit een tijdelijke offline wheelhouse. CI-bewijs van de uitbreiding is nog open. Geen packagepublicatie of integratieload.
+De [native requirements-proef](../../scripts/check_runtime_distribution.sh) bouwt de werkelijke wheel en installeert deze naast de synthetische proef via de echte Home Assistant requirements-manager vanuit een tijdelijke offline wheelhouse. [CI-validatie geslaagd](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45502356362/job/138828614103) op Core 2026.11.3/Python 3.14.10; beide wheels geïnstalleerd, alle bestaande dependencyversies behouden en 165 packages consistent. Geen packagepublicatie of integratieload.
