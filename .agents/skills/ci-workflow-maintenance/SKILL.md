@@ -15,3 +15,7 @@ Lees eerst [AGENTS.md](../../../AGENTS.md), [AI_POLICY.md](../../../AI_POLICY.md
 4. Valideer YAML, expressions en scripts met beschikbare tooling; test relevante succes- en foutpaden. Voer actionlint uit indien beschikbaar.
 5. Controleer daadwerkelijke CI-jobstappen en artifacts. Review lockfile-kandidaten vóór commit. Verlaag geen kwaliteitsdrempels, wijzig geen repositoryrechten en publiceer niets zonder toestemming.
 6. Actualiseer workflowdocumentatie en roadmap; rapporteer ontbrekende prerequisites, failures en openstaande uitvoeringen.
+
+## Dependabot: test de bestaande beleidslogica
+
+Gebruik [scripts/test_dependabot_automerge.sh](../../../scripts/test_dependabot_automerge.sh) en de baseline-CI voor synthetische classificatie- en mergescenario's. Test de daadwerkelijke inline Bash-stappen met echte jq-filters en een gemockte gh, niet een tweede beleidsimplementatie. Laat de subprocessomgeving geen credentials erven; gebruik een beperkte PATH, gesimuleerde sleep en een merge-spy. Controleer positieve en negatieve uitkomsten, exacte revisie en verplichte checks. De test bewijst geen native GitHub-expressions, metadata-action, bottrigger of server-side branchregels; houd echte end-to-end-validatie open.
