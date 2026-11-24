@@ -203,9 +203,7 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
             {CONF_API_KEY: "invalid_auth"},
         ),
         (
-            TransportResponse(
-                403, b'{"message":"synthetic-key"}', "application/json"
-            ),
+            TransportResponse(403, b'{"message":"synthetic-key"}', "application/json"),
             {"base": "access_denied"},
         ),
     ],
