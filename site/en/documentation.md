@@ -18,6 +18,10 @@ For future use, create an account at [NED](https://ned.nl/), open Mijn account (
 
 The tested national P0 quarter-hour queries have been structurally validated. The NED manual describes power (kW), interval energy (kWh), CO₂ emissions (kg) and emission factors (kg CO₂/kWh). However, the OpenAPI description specifies tonnes for emissions; the examined type-27 quarter-hour records support kg, but the formal unit remains unconfirmed. Power and energy cannot always be derived exactly from each other. Local daily totals are intended to be calculated from fully validated UTC quarter-hour intervals; API daily aggregates remain excluded while the calendar discrepancies are unresolved. The integration has not been implemented yet. See the [contract investigation](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/blob/main/docs/API_REFERENCE.md).
 
+## Priority sensors
+
+The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. These are planned features; renewable share requires additional confirmation of the source mix and BL-003 remains open.
+
 ## Further information
 
 - [English project documentation](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/blob/main/README.en.md)
