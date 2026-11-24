@@ -3,8 +3,14 @@ name: NED API contract observation
 on:
   workflow_dispatch:
     inputs:
+      scope:
+        description: Full matrix or remaining timezone observations only
+        type: choice
+        options: [full, timezone]
+        default: timezone
+        required: true
       confirm_live:
-        description: Authorize up to 18 read-only requests using the test API key
+        description: Authorize up to 6 (timezone) or 18 (full) read-only requests
         type: boolean
         required: true
         default: false
@@ -35,4 +41,5 @@ jobs:
       - name: Observe fixed national P0, pagination and timezone contract
         env:
           NED_API_KEY: ${{ secrets.NED_API_KEY }}
+          NED_CONTRACT_SCOPE: ${{ inputs.scope }}
         run: python -m scripts.ned_contract_extended

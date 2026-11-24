@@ -118,6 +118,7 @@ class ExtendedTests(unittest.TestCase):
         query = extended.Query(type_id=2, classification=2, day=date(2026, 11, 22))
         for field, value in (
             ("type", "/v1/types/1"),
+            ("granularitytimezone", "https://example.org/synthetic-private"),
             ("validfrom", "2026-11-22T00:00:00"),
             ("validto", "2026-11-21T00:00:00+00:00"),
             ("capacity", True),
@@ -156,10 +157,41 @@ class ExtendedTests(unittest.TestCase):
         ):
             self.assertFalse(extended.observe("synthetic", query))
 
+    def test_timezone_scope(self) -> None:
+        """Select only the six fixed timezone scenarios and reject unknown scopes."""
+        today = date(2026, 11, 24)
+        self.assertEqual(
+            extended.select_suite(today, "timezone"), extended.build_suite(today)[-6:]
+        )
+        with self.assertRaises(ProbeError):
+            extended.select_suite(today, "unapproved")
+
+    def test_timezone_mismatch(self) -> None:
+        """Report known response timezone IDs separately from interval coverage."""
+        query = extended.Query(
+            type_id=2, classification=2, day=date(2026, 3, 29), timezone_id=1
+        )
+        document = self._response(query)
+        records = document["hydra:member"]
+        if not isinstance(records, list):
+            self.fail("Synthetic records missing")
+        for record in records:
+            record["granularitytimezone"] = "/v1/granularity_time_zones/0"
+        with (
+            patch.object(
+                extended, "fetch_body", return_value=json.dumps(document).encode()
+            ),
+            redirect_stdout(io.StringIO()) as output,
+        ):
+            self.assertFalse(extended.observe("synthetic", query))
+            self.assertIn('"coverage_complete": true', output.getvalue())
+            self.assertIn('"response_timezone_ids": [0]', output.getvalue())
+            self.assertIn('"timezone_matches_request": false', output.getvalue())
+
     def test_main(self) -> None:
         """Enforce opt-in key injection, request budget and sanitized errors."""
         with (
-            patch.dict(os.environ, {"NED_API_KEY": ""}),
+            patch.dict(os.environ, {"NED_API_KEY": "", "NED_CONTRACT_SCOPE": "full"}),
             patch.object(extended, "observe") as observe,
             redirect_stderr(io.StringIO()) as errors,
             redirect_stdout(io.StringIO()),
@@ -175,3 +207,8 @@ class ExtendedTests(unittest.TestCase):
             self.assertEqual(extended.main(), 1)
             self.assertEqual(observe.call_count, 1)
             self.assertNotIn("synthetic-private", errors.getvalue())
+            observe.reset_mock()
+            observe.side_effect = [False, True, True, True, True, True]
+            os.environ["NED_CONTRACT_SCOPE"] = "timezone"
+            self.assertEqual(extended.main(), 1)
+            self.assertEqual(observe.call_count, 6)

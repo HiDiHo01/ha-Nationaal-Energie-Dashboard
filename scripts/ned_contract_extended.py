@@ -21,6 +21,7 @@ from scripts.ned_contract_probe import (
 DATASETS = (1, 2, 51, 27, 59)
 METRICS = ("capacity", "volume", "emission", "emissionfactor", "percentage")
 MAX_REQUESTS = 18
+TIMEZONE_REQUESTS = 6
 RESOURCE_NAMES = {
     "type": "types",
     "point": "points",
@@ -119,6 +120,16 @@ def build_suite(today: date) -> tuple[Query, ...]:
     )
 
 
+def select_suite(today: date, scope: str) -> tuple[Query, ...]:
+    """Select a fixed full suite or the six remaining timezone queries."""
+    suite = build_suite(today)
+    if scope == "full":
+        return suite
+    if scope == "timezone":
+        return suite[-TIMEZONE_REQUESTS:]
+    raise ProbeError("Unsupported contract scope")
+
+
 def _check_next(value: object, expected_path: str) -> None:
     """Require the exact next query and never follow a supplied URL."""
     if not isinstance(value, str):
@@ -158,11 +169,23 @@ def _number(value: object) -> Decimal:
     return number
 
 
+def _response_timezone(value: object) -> int:
+    """Identify only known timezone IRIs; never expose arbitrary source values."""
+    for identifier in (0, 1):
+        iri = f"/v1/{RESOURCE_NAMES['granularitytimezone']}/{identifier}"
+        if value in (iri, f"https://{HOST}{iri}"):
+            return identifier
+    raise ProbeError("Unrecognized response timezone reference")
+
+
 def _inspect_record(
-    record: dict[str, object], query: Query
+    record: dict[str, object], query: Query, timezone_ids: set[int]
 ) -> tuple[datetime, datetime]:
     """Verify the documented IRI dimensions, identity and interval timestamps."""
     for field, identifier in query.dimensions().items():
+        if field == "granularitytimezone":
+            timezone_ids.add(_response_timezone(record.get(field)))
+            continue
         iri = f"/v1/{RESOURCE_NAMES[field]}/{identifier}"
         if record.get(field) not in (iri, f"https://{HOST}{iri}"):
             raise ProbeError(f"Unexpected dataset dimension: {field}")
@@ -204,6 +227,8 @@ def observe(api_key: str, query: Query) -> bool:
     expected = query.intervals()
     page_count = 2 if query.page_size == 48 else 1
     intervals: list[tuple[datetime, datetime]] = []
+    timezone_ids: set[int] = set()
+    total_matches = False
     for page in range(1, page_count + 1):
         body = fetch_body(api_key, query.path(page))
         shape = summarize(body)
@@ -213,7 +238,9 @@ def observe(api_key: str, query: Query) -> bool:
         records: list[dict[str, object]] = document["hydra:member"]
         if len(records) > query.page_size:
             raise ProbeError("Page exceeds requested record limit")
-        intervals.extend(_inspect_record(record, query) for record in records)
+        intervals.extend(
+            _inspect_record(record, query, timezone_ids) for record in records
+        )
         view = document.get("hydra:view", {})
         if not isinstance(view, dict):
             raise ProbeError("Invalid pagination metadata")
@@ -236,12 +263,15 @@ def observe(api_key: str, query: Query) -> bool:
                     **shape,
                     "metric_counts": _metric_counts(records),
                     "total_matches_expected": total_matches,
+                    "response_timezone_ids": sorted(timezone_ids),
                 },
                 sort_keys=True,
             )
         )
-        if not total_matches:
-            raise ProbeError("Unexpected totalItems count or type")
+        if not isinstance(total, int) or isinstance(total, bool) or total < 0:
+            raise ProbeError("Invalid totalItems count or type")
+        if page_count == 2 and not total_matches:
+            raise ProbeError("Unexpected paginated totalItems count")
     complete = intervals == expected
     print(
         json.dumps(
@@ -250,11 +280,12 @@ def observe(api_key: str, query: Query) -> bool:
                 "day": query.day.isoformat(),
                 "expected_records": len(expected),
                 "coverage_complete": complete,
+                "timezone_matches_request": timezone_ids <= {query.timezone_id},
             },
             sort_keys=True,
         )
     )
-    return complete
+    return complete and total_matches and timezone_ids <= {query.timezone_id}
 
 
 def main() -> int:
@@ -263,16 +294,20 @@ def main() -> int:
     if not api_key.isascii() or not api_key.isprintable() or not api_key.strip():
         print("Missing or invalid NED_API_KEY", file=sys.stderr)
         return 1
-    suite = build_suite(datetime.now(UTC).date())
-    if sum(2 if query.page_size == 48 else 1 for query in suite) != MAX_REQUESTS:
-        print("Invalid request budget", file=sys.stderr)
-        return 1
+    scope = os.environ.get("NED_CONTRACT_SCOPE", "full")
     try:
+        suite = select_suite(datetime.now(UTC).date(), scope)
+        budget = TIMEZONE_REQUESTS if scope == "timezone" else MAX_REQUESTS
+        if sum(2 if query.page_size == 48 else 1 for query in suite) != budget:
+            raise ProbeError("Invalid request budget")
         results = [observe(api_key, query) for query in suite]
     except PROBE_ERRORS as error:
         return report_failure(error)
     if not all(results):
-        print("Incomplete or unordered interval coverage", file=sys.stderr)
+        print(
+            "Contract mismatch: interval coverage, total count or response timezone",
+            file=sys.stderr,
+        )
         return 1
     print("Bounded P0 observations completed; semantics still require review.")
     return 0
