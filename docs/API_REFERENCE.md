@@ -207,7 +207,7 @@ SEM-002: alle 192 positieve vergelijkingen ondersteunen emission in kg bij de ge
 
 ## Leveranciersverduidelijking
 
-Het [conceptverzoek aan NED](NED_CONTRACT_QUESTIONS.md) bundelt SEM-001, SEM-002, TZ-001/002/003 en de resterende contractvragen. Status: voorbereid, niet verzonden. Geen leveranciersantwoord of nieuwe live-observatie. De officiële [handleiding](https://ned.nl/nl/handleiding-api) bevestigt bovendien dat lastupdate kan wijzigen door herberekening zonder wijziging van de intervalwaarde; behandel een gewijzigde timestamp niet automatisch als gewijzigde energie-inhoud. Stabiele revisiesleutel, selectievolgorde, verwijdering en herkomst blijven te bevestigen.
+Het [conceptverzoek aan NED](NED_CONTRACT_QUESTIONS.md) bundelt SEM-001, SEM-002, TZ-001/002/003 en de resterende contractvragen. Status: verzending per e-mail op 24 november 2026 door eigenaar bevestigd; in afwachting van leveranciersantwoord. Geen nieuwe live-observatie. De verzonden tekst en aflevering zijn niet onafhankelijk gecontroleerd. De officiële [handleiding](https://ned.nl/nl/handleiding-api) bevestigt bovendien dat lastupdate kan wijzigen door herberekening zonder wijziging van de intervalwaarde; behandel een gewijzigde timestamp niet automatisch als gewijzigde energie-inhoud. Stabiele revisiesleutel, selectievolgorde, verwijdering en herkomst blijven te bevestigen.
 
 ## Openstaande verificatie
 

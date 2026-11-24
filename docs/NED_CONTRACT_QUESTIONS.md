@@ -1,8 +1,8 @@
 # NED API — verzoek om contractverduidelijking
 
-Datum: 24 november 2026. Backlog: BL-003. Status: concept, niet verzonden; geen leveranciersantwoord ontvangen. Contactkanaal: [NED contact](https://ned.nl/nl/contact). De eigenaar kan het onderstaande verzoek versturen. Geen API-key, accountgegevens, ruwe payloads of recordidentifiers delen. De [contractreferentie](API_REFERENCE.md) bevat de onderzoeksdetails en blijft de canonieke bron.
+Datum: 24 november 2026. Backlog: BL-003. Status: verzending per e-mail op 24 november 2026 door de eigenaar bevestigd; in afwachting van leveranciersantwoord. Contactkanaal: [NED contact](https://ned.nl/nl/contact). De daadwerkelijke verzonden tekst en aflevering zijn niet onafhankelijk gecontroleerd. Geen API-key, accountgegevens, ruwe payloads of recordidentifiers delen. De [contractreferentie](API_REFERENCE.md) bevat de onderzoeksdetails en blijft de canonieke bron.
 
-## Conceptbericht
+## Vastgelegd conceptbericht
 
 **Onderwerp: Verduidelijking NED API v1 — kwartierwaarden, CO₂ en tijdzoneaggregaties**
 
@@ -26,6 +26,6 @@ Met vriendelijke groet,
 ## Interne opvolging
 
 - Bronnen: [handleiding](https://ned.nl/nl/handleiding-api), [definities](https://ned.nl/nl/definities), [OpenAPI](https://api.ned.nl/v1), [semantiekprobe](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45486109474/job/138771818423), [dagprobe](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45478763623/job/138745945524).
-- De antwoorden zijn nog niet ontvangen. Sluit geen afwijking en verwijder geen acceptatievoorwaarde op basis van dit concept.
+- 2026-11-24: eigenaar bevestigt verzending per e-mail. Geen leveranciersantwoord ontvangen. Sluit geen afwijking en verwijder geen acceptatievoorwaarde op basis van de verzending.
 - Registreer na ontvangst per vraag bron, datum, toepasselijke dataset, bevestigde garantie en resterende onzekerheid in API_REFERENCE.md; actualiseer plan, backlog en skills en maak waar nodig geschoonde synthetische regressietests.
 - Geen identieke nieuwe live-probe. Alleen een concrete nieuwe hypothese met afzonderlijke autorisatie, veilige credentials en begrensd requestbudget.
