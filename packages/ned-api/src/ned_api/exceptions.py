@@ -1,8 +1,12 @@
-"""Define contract-independent errors for the NED API library."""
+"""Define sanitized errors for the NED API library."""
 
 
 class NedApiError(Exception):
     """Base error for NED operations; messages must not contain credentials."""
+
+
+class NedAccessDeniedError(NedApiError):
+    """Indicate denied access without inferring credentials or permissions."""
 
 
 class NedAuthenticationError(NedApiError):
