@@ -16,7 +16,7 @@ Initiële referentie: 24 november 2026. De repositorybaseline staat in AGENTS.md
 
 - Domain nationaal_energie_dashboard; integratietype service; cloud_polling. Houd de zelfstandige ned_api-client vrij van Home Assistant-imports.
 - Maak manifest.json pas met echte metadata en gevalideerde runtime-requirements. Verifieer version, config_flow, integration_type, iot_class, documentation, issue_tracker en relevante overige velden tegen de officiële manifestreferentie. Geen onnodige dependencies.
-- Houd installatie reproduceerbaar op een schone Home Assistant-omgeving. De distributiemethode van de API-library blijft open; GPL-3.0-only is gekozen om de reguliere Marketplace-licentiecontrole te vervullen; bevestig GitHub-herkenning op main (BL-005, [integratieplan §26.3](docs/INTEGRATION_PLAN.md#263-auteursrecht-en-distributiebesluit)). Verwar installatie via een custom repository niet met algemene catalogustoelating.
+- Houd installatie reproduceerbaar op een schone Home Assistant-omgeving. De distributiemethode van de API-library blijft open; GPL-3.0-only en GitHub-herkenning op main zijn bevestigd (BL-005, [integratieplan §26.3](docs/INTEGRATION_PLAN.md#263-auteursrecht-en-distributiebesluit)). Verwar installatie via een custom repository niet met algemene catalogustoelating. Voor de API-library is een exact gepinde PyPI-wheel via manifest requirements gekozen; valideer eerst de [tijdelijke runtime-probe](scripts/check_runtime_distribution.sh) zonder publicatie (BL-006).
 
 ## 4. Config entries en lifecycle
 

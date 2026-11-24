@@ -94,6 +94,9 @@ jobs:
               if info['summary']['percent_covered'] < minimum:
                   raise SystemExit(f'{path}: coverage below {minimum}%')
           PY
+      - name: Validate isolated runtime distribution prototype
+        shell: bash
+        run: bash scripts/check_runtime_distribution.sh
       - name: Audit installed dependencies
         if: ${{ !cancelled() && steps.lock.outcome == 'success' }}
         run: |
