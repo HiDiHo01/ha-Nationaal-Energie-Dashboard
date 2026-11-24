@@ -8,7 +8,7 @@
 | Repository | [HiDiHo01/ha-Nationaal-Energie-Dashboard](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard) |
 | Doelarchitectuur | Home Assistant Custom Integration |
 | Kwaliteitsdoel | Platinum |
-| Python | 3.14, afhankelijk van Home Assistant-compatibiliteit |
+| Python | Volgt nieuwste stable Core; momenteel 3.14 (minimum 3.14.2, ontwikkelpin 3.14.10) |
 | Minimale Home Assistant Core-versie | 2026.11.3 (stable, 24 november 2026) |
 | Distributie | Home Assistant Marketplace (algemene catalogus) |
 
@@ -25,7 +25,7 @@ Ontwikkel een robuuste, schaalbare, volledig asynchrone Home Assistant-integrati
 | Domain | `nationaal_energie_dashboard` |
 | Integration type | `service` |
 | IoT class | `cloud_polling` |
-| Python | 3.14 |
+| Python | Volgt de vastgelegde Core-baseline |
 | HTTP-client | aiohttp |
 | Authenticatie | API-key |
 | Configuratie | Config Flow |
@@ -48,7 +48,13 @@ Platinum is vanaf het begin een ontwerpcriterium: asynchrone dependency, sessie-
 
 De minimale ondersteunde Home Assistant Core-versie is bij iedere nieuwe integratierelease de dan nieuwste stabiele Core-release, inclusief patchnummer. Controleer deze via https://version.home-assistant.io/stable.json en de officiële release-informatie. Gebruik een expliciete versie per release in hacs.json (homeassistant), documentatie en de reproduceerbare testomgeving; verhoog de grens pas voor een nieuwe integratierelease, niet met terugwerkende kracht. Oudere Core-versies, beta's en developmentversies hoeven niet ondersteund te worden. Valideer vóór publicatie installatie en tests tegen de vastgelegde baseline.
 
-De huidige baseline is 2026.11.3, uitgebracht op 23 november 2026, bevestigd via de [stable-versiefeed](https://version.home-assistant.io/stable.json) en [release-informatie](https://www.home-assistant.io/blog/2026/11/04/release-202611/). Python 3.14 blijft de doelversie; runtime- en dependencycompatibiliteit moeten in de ontwikkelomgeving worden gevalideerd.
+De huidige baseline is 2026.11.3, uitgebracht op 23 november 2026, bevestigd via de [stable-versiefeed](https://version.home-assistant.io/stable.json) en [release-informatie](https://www.home-assistant.io/blog/2026/11/04/release-202611/). Runtime- en dependencycompatibiliteit moeten in de ontwikkelomgeving worden gevalideerd.
+
+### 1.3 Python-versiebeleid
+
+De Python-doelversie volgt de major.minor-versie die de nieuwste stabiele Home Assistant Core-release gebruikt. Controleer bij het vaststellen van de Core-baseline de officiële release-tag: pyproject.toml (requires-python en toolversies) en .python-version (exacte ontwikkelversie). Neem de officiële minimale Python-versie over en pin de ontwikkelomgeving op de bijbehorende exacte Python-versie. Gebruik dezelfde major.minor-versie voor Ruff, Pylint, mypy en CI. Herbeoordeel deze waarden bij elke nieuwe integratierelease; pas oudere releases niet met terugwerkende kracht aan. Kies nooit zelfstandig een nieuwere Python-generatie dan de vastgelegde Core-baseline.
+
+Baseline 24 november 2026: Home Assistant Core 2026.11.3, Python 3.14, upstream requires-python >=3.14.2 en ontwikkelversie 3.14.10. Bronnen: [Core pyproject.toml](https://github.com/home-assistant/core/blob/2026.11.3/pyproject.toml) en [Core .python-version](https://github.com/home-assistant/core/blob/2026.11.3/.python-version).
 
 ## 2. Functionele scope
 
@@ -890,6 +896,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] Basis-CI configureren.
 - [ ] OpenAPI-contract valideren.
 - [x] Minimale Home Assistant-versie vaststellen: nieuwste stable, initiële baseline 2026.11.3.
+- [x] Python-baseline uit de bijbehorende Core-release vaststellen: 3.14, minimum 3.14.2, ontwikkelpin 3.14.10.
 
 ### 21.2 Fase 1 — API-client
 
@@ -1007,7 +1014,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 
 - [ ] Voldoet aan AGENTS.md.
 - [ ] Voldoet aan AI_POLICY.md.
-- [ ] Python 3.14-compatibel binnen de gekozen Home Assistant-versies.
+- [ ] Compatibel met de actuele vastgelegde Python- en Home Assistant-baseline.
 - [ ] Volledige type hints en docstrings.
 - [ ] Geen blokkerende I/O.
 - [ ] Invoer en API-responses gevalideerd.
@@ -1039,7 +1046,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | HACS | [HACS-documentatie](https://www.hacs.xyz/) |
 | Marketplace | [Home Assistant Contributors](https://contributors.home-assistant.io/marketplace/) |
 | Catalogus | [Get into the catalog](https://contributors.home-assistant.io/marketplace/guides/catalog/) |
-| Python | [Python 3.14-documentatie](https://docs.python.org/3.14/) |
+| Python | [Officiële Python-documentatie](https://docs.python.org/) |
 
 ## 26. Projectstatus en vervolgstap
 

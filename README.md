@@ -54,7 +54,7 @@ Het ontwikkeldoel is een onderhoudbare integratie die voldoet aan de toepasselij
 
 Technische uitgangspunten:
 
-- Python 3.14, afgestemd op de ondersteunde Home Assistant-versies.
+- Python-doelversie volgt de nieuwste stabiele Home Assistant Core-release (momenteel Python 3.14; minimum 3.14.2, ontwikkelversie 3.14.10).
 - Asynchrone API-communicatie met hergebruik van de Home Assistant-websessie.
 - Centrale gegevenscoördinatie en API-bewuste polling.
 - Strikte typeannotaties, invoervalidatie en consistente foutafhandeling.

@@ -27,7 +27,7 @@ Ontwikkel de Home Assistant-integratie volgens [docs/INTEGRATION_PLAN.md](docs/I
 | Quality Scale | [Integration Quality Scale](https://contributors.home-assistant.io/core/quality-scale/) |
 | Data updates | [Fetching data](https://developers.home-assistant.io/docs/integration_fetching_data/) |
 | HACS | [Documentatie](https://www.hacs.xyz/) |
-| Python | [Python 3.14](https://docs.python.org/3.14/) |
+| Python | [Officiële Python-documentatie](https://docs.python.org/) |
 
 Controleer actuele primaire documentatie wanneer API's, dependencies, compatibiliteit, kwaliteitscriteria of gedrag wijzigen. Gebruik geen verouderde voorbeelden als vervanging voor het actuele contract.
 
@@ -59,7 +59,7 @@ Volg hoofdstukken 21 en 22 van het integratieplan. Werk per afgebakend onderdeel
 | Domain | `nationaal_energie_dashboard` |
 | Integration type | `service` |
 | IoT class | `cloud_polling` |
-| Python | 3.14, compatibel met de vastgelegde HA-baseline |
+| Python | Volgt nieuwste stable Core; momenteel 3.14 (minimum 3.14.2, ontwikkelpin 3.14.10) |
 | Minimale Home Assistant Core-versie | 2026.11.3 (nieuwste stable op 24 november 2026) |
 | Transport | aiohttp, HTTPS, gedeelde sessie |
 | Configuratie | Native config entry en UI-flows |
@@ -79,9 +79,15 @@ Volg de directorystructuur en moduleverantwoordelijkheden in hoofdstuk 5. Gebrui
 
 De minimale ondersteunde Home Assistant Core-versie is bij iedere nieuwe integratierelease de dan nieuwste stabiele Core-release, inclusief patchnummer. Controleer deze via https://version.home-assistant.io/stable.json en de officiële release-informatie. Gebruik een expliciete versie per release in hacs.json (homeassistant), documentatie en de reproduceerbare testomgeving; verhoog de grens pas voor een nieuwe integratierelease, niet met terugwerkende kracht. Oudere Core-versies, beta's en developmentversies hoeven niet ondersteund te worden. Valideer vóór publicatie installatie en tests tegen de vastgelegde baseline.
 
+### 4.2 Python-versiebeleid
+
+De Python-doelversie volgt de major.minor-versie die de nieuwste stabiele Home Assistant Core-release gebruikt. Controleer bij het vaststellen van de Core-baseline de officiële release-tag: pyproject.toml (requires-python en toolversies) en .python-version (exacte ontwikkelversie). Neem de officiële minimale Python-versie over en pin de ontwikkelomgeving op de bijbehorende exacte Python-versie. Gebruik dezelfde major.minor-versie voor Ruff, Pylint, mypy en CI. Herbeoordeel deze waarden bij elke nieuwe integratierelease; pas oudere releases niet met terugwerkende kracht aan. Kies nooit zelfstandig een nieuwere Python-generatie dan de vastgelegde Core-baseline.
+
+Baseline 24 november 2026: Home Assistant Core 2026.11.3, Python 3.14, upstream requires-python >=3.14.2 en ontwikkelversie 3.14.10. Bronnen: [Core pyproject.toml](https://github.com/home-assistant/core/blob/2026.11.3/pyproject.toml) en [Core .python-version](https://github.com/home-assistant/core/blob/2026.11.3/.python-version).
+
 ## 5. Python-programmeerstandaarden
 
-- Gebruik moderne Python 3.14-syntaxis passend bij de daadwerkelijk ondersteunde Home Assistant-versies. Verlaag of verhoog de compatibiliteitsgrens niet zonder onderbouwing.
+- Gebruik moderne Python-syntaxis passend bij de volgens paragraaf 4.2 vastgelegde Home Assistant-baseline.
 - Volg PEP 8, PEP 257 en de vastgestelde Ruff-, Pylint- en mypy-configuratie. Gebruik twee lege regels vóór top-level functies en klassen; gebruik de gebruikelijke PEP 8-afstand binnen klassen.
 - Voeg betekenisvolle docstrings toe aan modules, klassen, functies en methoden, ook interne methoden. Beschrijf contract, parameters, returnwaarde en uitzonderingen waar niet vanzelfsprekend.
 - Gebruik volledige typeannotaties voor parameters, attributen waar nodig en returnwaarden. Controleer dat de werkelijke returntypes overeenkomen. Vermijd ongefundeerd Any, casts en brede type-ignore-directives.
@@ -226,7 +232,7 @@ pip-audit
 Een onderdeel is pas gereed wanneer alle toepasselijke punten uit hoofdstuk 24 aantoonbaar zijn afgedekt:
 
 - [ ] AGENTS.md en toepasselijke AI_POLICY.md gevolgd.
-- [ ] Python 3.14 en ondersteunde Home Assistant-versies gerespecteerd.
+- [ ] De actuele Python- en Home Assistant-baseline gerespecteerd.
 - [ ] Volledige type hints en docstrings.
 - [ ] Geen blokkerende I/O of achterblijvende async-taken.
 - [ ] Invoer, API-contract en responses gevalideerd.
