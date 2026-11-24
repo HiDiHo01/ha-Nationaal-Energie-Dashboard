@@ -916,10 +916,11 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] Reproduceerbare Marketplace-compatibele runtime-distributiestrategie valideren.
 - [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
 - [x] pyproject.toml configureren en statisch valideren.
-- [ ] Dependencyresolutie, lockfile en toolconfiguratie op de exacte Python/Core-baseline valideren.
+- [ ] Volledige toolconfiguratie op de exacte Python/Core-baseline met implementatie en tests valideren; dependencyresolutie en installatie van de gelockte tooling zijn geslaagd.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
 - [x] Basis-CI, Hassfest, Marketplace-validatie, baseline-watch en Dependabot configureren en statisch valideren.
-- [ ] Baseline-CI op GitHub Actions uitvoeren; lockfile-kandidaat controleren, committen en volledige installatie verifiëren.
+- [x] Baseline-CI op GitHub Actions uitvoeren; lockfile-kandidaat controleren, committen en volledige installatie verifiëren ([Baseline CI-run 45460571331](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45460571331); nog geen inhoudelijke integratietests).
+- [x] Main beschermen met een actieve ruleset, verplichte pull requests en de toepasselijke baseline- en Hassfest-checks (ruleset 28008175).
 - [x] Afzonderlijke niet-blokkerende Python-next-smokeworkflow configureren en statisch valideren.
 - [x] Python-next-workflow op GitHub Actions uitvoeren en resultaat verifiëren (run 45447217991; Python-setup en baselinecontrole, nog geen librarycode/tests).
 - [ ] OpenAPI-contract valideren.
