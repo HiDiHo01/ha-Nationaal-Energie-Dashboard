@@ -6,6 +6,8 @@ Lees eerst [AGENTS.md](../AGENTS.md), [AI_POLICY.md](../AI_POLICY.md) en het [in
 
 Lees [home-assistant.md](../home-assistant.md) bij Home Assistant-werkzaamheden. Gebruik de relevante [repositoryskills](../.agents/skills/README.md) door hun SKILL.md te lezen; Codex-omgevingen die repositoryskills ondersteunen kunnen ze ook automatisch ontdekken. Onderhoud beide proactief volgens AGENTS.md §1.1. De initiële skillstructuur is documentatie; daadwerkelijke selectie en effectiviteit in implementatietaken moeten nog worden geverifieerd.
 
+Automatische skillactivatie is standaard: native impliciete selectie waar ondersteund, anders zelfstandige selectie via de skill-index. Zie de [activatie-evaluaties](../.agents/skills/ACTIVATION_EVALS.md). Native gedrag moet afzonderlijk worden getest; metadata en directe selectie zijn geen native tracebewijs.
+
 ## Compatibiliteitsbaseline
 
 De minimale ondersteunde Home Assistant Core-versie is bij iedere nieuwe integratierelease de dan nieuwste stabiele Core-release, inclusief patchnummer. Controleer deze via https://version.home-assistant.io/stable.json en de officiële release-informatie. Gebruik een expliciete versie per release in hacs.json (homeassistant), documentatie en de reproduceerbare testomgeving; verhoog de grens pas voor een nieuwe integratierelease, niet met terugwerkende kracht. Oudere Core-versies, beta's en developmentversies hoeven niet ondersteund te worden. Valideer vóór publicatie installatie en tests tegen de vastgelegde baseline.
