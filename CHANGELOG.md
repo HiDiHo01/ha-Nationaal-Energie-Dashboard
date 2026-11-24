@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Acht prioritaire nationale sensoren vastgelegd; CO₂-forecast volgt fase 4 en het hernieuwbare elektriciteitsaandeel vereist aanvullend bronmixbewijs. Geen sensorimplementatie of wijziging van de fasepoorten.
+
 - Contractonafhankelijke asynchrone HTTPS-transportlaag met sessie-injectie, responslimiet, time-outs en geschoonde exceptions; 38 nieuwe synthetische tests. NED-specifieke verwerking blijft geblokkeerd door BL-003.
 
 - Beperkte fase 1 gestart op eigenaarsbesluit: zelfstandige packagebasis, getypeerde exception-hiërarchie en eerste synthetische tests; BL-003 blijft open. Wheel- en kwaliteitsvalidatie op de productie-baseline volgt via CI.
@@ -28,6 +30,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Eight priority national sensors specified; the CO₂ forecast follows phase 4 and renewable electricity share requires further source-mix evidence. No sensor implementation or change to the phase gates.
 
 - Contract-independent asynchronous HTTPS transport with session injection, response size limit, timeouts and sanitized exceptions; 38 new synthetic tests. NED-specific processing remains blocked by BL-003.
 
