@@ -18,6 +18,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
+from pytest_socket import socket_allow_hosts
 
 from ned_api import (
     NedConnectionError,
@@ -86,8 +87,11 @@ class LocalHttps:
 @pytest_asyncio.fixture(name="local_https")
 async def _local_https(
     tls_contexts: tuple[ssl.SSLContext, ssl.SSLContext],
+    socket_enabled: None,
 ) -> AsyncIterator[LocalHttps]:
     """Start a TLS server on an ephemeral IPv4 loopback port only."""
+    # Re-enable socket creation only for this fixture, retaining loopback limits.
+    socket_allow_hosts(["127.0.0.1"])
     server_context, client_context = tls_contexts
     paths: list[str] = []
     received = asyncio.Event()
