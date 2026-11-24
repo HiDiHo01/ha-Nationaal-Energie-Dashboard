@@ -10,6 +10,8 @@ This project develops a custom integration for [Home Assistant](https://www.home
 
 > **Development status:** phase 1 has partially started with the contract-independent package foundation. BL-003 remains open for contract-dependent functionality. No working integration or installable release is available yet.
 
+This development branch contains the nine requested integration files, eight sensor descriptions, a masked API-key flow and a separate authentication client. This is an offline draft: the provider factory and authentication connection block real configuration and live data requests; no working integration or release. Existing phase gates remain in effect.
+
 ## Energy data
 
 According to the source description, the NED API provides the data below. The tested national P0 quarter-hour queries have been validated for structure and coverage; further contract and measurement semantics validation remains pending. Integration support is not implemented yet.
