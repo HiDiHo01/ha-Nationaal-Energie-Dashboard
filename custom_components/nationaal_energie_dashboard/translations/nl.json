@@ -1,7 +1,37 @@
 {
   "config": {
+    "step": {
+      "user": {
+        "title": "Nationaal Energie Dashboard configureren",
+        "description": "Voer je persoonlijke NED API-sleutel in. De sleutel wordt pas opgeslagen nadat authenticatie is gevalideerd.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      },
+      "reauth_confirm": {
+        "title": "API-sleutel vernieuwen",
+        "description": "Voer je persoonlijke NED API-sleutel in. De sleutel wordt pas opgeslagen nadat authenticatie is gevalideerd.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      },
+      "reconfigure": {
+        "title": "API-sleutel wijzigen",
+        "description": "Voer je persoonlijke NED API-sleutel in. De sleutel wordt pas opgeslagen nadat authenticatie is gevalideerd.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      }
+    },
+    "error": {
+      "contract_pending": "De NED API-client is nog niet vrijgegeven. Configuratie is geblokkeerd totdat de contractvalidatie en runtime-distributie zijn afgerond.",
+      "invalid_key_format": "Voer een niet-lege API-sleutel zonder spaties of controletekens in."
+    },
     "abort": {
-      "contract_pending": "De NED API-client is nog niet vrijgegeven. Configuratie is geblokkeerd totdat de contractvalidatie en runtime-distributie zijn afgerond."
+      "already_configured": "Nationaal Energie Dashboard is al geconfigureerd.",
+      "already_in_progress": "Er loopt al een configuratie.",
+      "reauth_successful": "De API-sleutel is vernieuwd.",
+      "reconfigure_successful": "De API-sleutel is gewijzigd."
     }
   },
   "exceptions": {
