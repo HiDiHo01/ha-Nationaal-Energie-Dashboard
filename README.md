@@ -2,6 +2,8 @@
 
 Nederlands | [English](README.en.md)
 
+**[Projectwebsite](https://hidiho01.github.io/ha-Nationaal-Energie-Dashboard/)**
+
 Krijg inzicht en maak bewuste keuzes met historische, actuele en voorspellende energiedata.
 
 Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.home-assistant.io/) op basis van de API van het [Nationaal Energie Dashboard (NED)](https://ned.nl/). Het doel is Nederlandse energiedata beschikbaar te maken voor sensoren, dashboards en automatiseringen in Home Assistant.
