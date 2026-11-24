@@ -87,7 +87,7 @@ jobs:
               name = Path(path).name
               if name in {'config_flow.py', 'diagnostics.py'} or name.startswith('forecast'):
                   minimum = 100
-              elif name in {'client.py', 'parser.py', 'models.py', 'coordinator.py', 'sensor.py', 'binary_sensor.py', 'services.py'}:
+              elif name in {'client.py', 'transport.py', 'parser.py', 'models.py', 'coordinator.py', 'sensor.py', 'binary_sensor.py', 'services.py'}:
                   minimum = 95
               else:
                   continue
@@ -105,9 +105,12 @@ jobs:
           wheel="$work/ned_api-0.0.0-py3-none-any.whl"
           test -f "$wheel"
           uv venv --python "$(command -v python)" "$work/venv"
-          uv pip install --offline --no-index --python "$work/venv/bin/python" "$wheel"
+          uv pip freeze --python .venv/bin/python > "$work/constraints.txt"
+          uv pip install --constraint "$work/constraints.txt" --python "$work/venv/bin/python" "$wheel"
           uv pip check --python "$work/venv/bin/python"
-          "$work/venv/bin/python" -I - <<'PY'
+          aiohttp_version=$(uv run --no-sync python -c 'from importlib.metadata import version; print(version("aiohttp"))')
+          yarl_version=$(uv run --no-sync python -c 'from importlib.metadata import version; print(version("yarl"))')
+          "$work/venv/bin/python" -I - "$aiohttp_version" "$yarl_version" <<'PY'
           import importlib.util
           import sys
           from importlib.metadata import distribution
@@ -123,6 +126,9 @@ jobs:
           assert any(str(path).endswith(".dist-info/licenses/LICENSE") for path in dist.files or ())
           assert importlib.util.find_spec("homeassistant") is None
           assert issubclass(ned_api.NedAuthenticationError, ned_api.NedApiError)
+          assert distribution("aiohttp").version == sys.argv[1]
+          assert distribution("yarl").version == sys.argv[2]
+          assert callable(ned_api.NedTransport.async_get)
           print("Independent typed wheel, license, isolated import and exception exports passed.")
           PY
       - name: Exercise Dependabot merge policy offline
