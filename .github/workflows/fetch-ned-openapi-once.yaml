@@ -1,0 +1,41 @@
+name: Retrieve public NED OpenAPI (one time)
+on:
+  push:
+    branches: [feature/ned-contract-workflow]
+    paths: ['.github/workflows/fetch-ned-openapi-once.yaml']
+permissions: {}
+jobs:
+  fetch:
+    if: github.repository == 'HiDiHo01/ha-Nationaal-Energie-Dashboard'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Download public specification
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --proto '=https' --connect-timeout 10 --max-time 30 --max-filesize 10000000 --header 'Accept: application/vnd.openapi+json' 'https://api.ned.nl/v1/index.jsonopenapi' --output ned-openapi.json
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          raw = Path('ned-openapi.json').read_bytes()
+          spec = json.loads(raw)
+          if not isinstance(spec, dict) or not isinstance(spec.get('openapi'), str) or not isinstance(spec.get('paths'), dict):
+              raise SystemExit('Not an OpenAPI document')
+          print('OpenAPI:', spec['openapi'])
+          print('Version:', spec.get('info', {}).get('version'))
+          print('Bytes:', len(raw))
+          print('SHA256:', hashlib.sha256(raw).hexdigest())
+          print('Number of paths:', len(spec['paths']))
+          for path, definition in spec['paths'].items():
+              if path.rstrip('/').endswith('/utilizations'):
+                  print('Collection operation:', path)
+                  print(json.dumps(definition.get('get', {}), ensure_ascii=True)[:16000])
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ned-public-openapi
+          path: ned-openapi.json
+          if-no-files-found: error
+          retention-days: 1
