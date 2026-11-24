@@ -4,7 +4,7 @@
 
 Dit levende document geldt voor de ontwikkeling van Nationaal Energie Dashboard. Lees het bij iedere Home Assistant-gerelateerde taak. [AI_POLICY.md](AI_POLICY.md) blijft leidend voor mandaat en veiligheid; [AGENTS.md](AGENTS.md) voor technische projectregels; het [integratieplan](docs/INTEGRATION_PLAN.md) voor architectuur, scope en acceptatiecriteria. Dit document specialiseert die regels voor Home Assistant en wijzigt ze niet.
 
-Initiële referentie: 24 november 2026. De repositorybaseline staat in AGENTS.md §4, hacs.json, .python-version en pyproject.toml; controleer deze samen in plaats van hier een onafhankelijke versiepin te onderhouden. De integratie is nog in fase 0; onderstaande regels zijn ontwikkelvereisten, geen bewijs van een geïmplementeerde of gecertificeerde integratie.
+Initiële referentie: 24 november 2026. De repositorybaseline staat in AGENTS.md §4, hacs.json, .python-version en pyproject.toml; controleer deze samen in plaats van hier een onafhankelijke versiepin te onderhouden. Fase 0 blijft open voor BL-003; fase 1 is gedeeltelijk vrijgegeven voor contractonafhankelijke onderdelen volgens het integratieplan. Onderstaande regels zijn ontwikkelvereisten, geen bewijs van een geïmplementeerde of gecertificeerde integratie.
 
 ## 2. Upstreamversies en API-onderzoek
 

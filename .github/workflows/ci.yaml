@@ -94,6 +94,37 @@ jobs:
               if info['summary']['percent_covered'] < minimum:
                   raise SystemExit(f'{path}: coverage below {minimum}%')
           PY
+      - name: Build and verify independent API wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp LICENSE packages/ned-api/LICENSE
+          work=$(mktemp -d)
+          trap 'rm -rf -- "$work"' EXIT
+          uv build --wheel --no-sources --out-dir "$work" packages/ned-api
+          wheel="$work/ned_api-0.0.0-py3-none-any.whl"
+          test -f "$wheel"
+          uv venv --python "$(command -v python)" "$work/venv"
+          uv pip install --offline --no-index --python "$work/venv/bin/python" "$wheel"
+          uv pip check --python "$work/venv/bin/python"
+          "$work/venv/bin/python" -I - <<'PY'
+          import importlib.util
+          import sys
+          from importlib.metadata import distribution
+          from pathlib import Path
+
+          import ned_api
+
+          dist = distribution("ned-api")
+          assert dist.version == "0.0.0"
+          assert dist.metadata["License-Expression"] == "GPL-3.0-only"
+          assert Path(ned_api.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
+          assert Path(ned_api.__file__).with_name("py.typed").is_file()
+          assert any(str(path).endswith(".dist-info/licenses/LICENSE") for path in dist.files or ())
+          assert importlib.util.find_spec("homeassistant") is None
+          assert issubclass(ned_api.NedAuthenticationError, ned_api.NedApiError)
+          print("Independent typed wheel, license, isolated import and exception exports passed.")
+          PY
       - name: Exercise Dependabot merge policy offline
         shell: bash
         run: bash scripts/test_dependabot_automerge.sh

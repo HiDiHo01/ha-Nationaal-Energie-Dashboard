@@ -8,7 +8,7 @@ Gain insight into energy data and make informed choices using historical, curren
 
 This project develops a custom integration for [Home Assistant](https://www.home-assistant.io/) using the [Nationaal Energie Dashboard (NED)](https://ned.nl/) API. The goal is to make Dutch energy data available to Home Assistant sensors, dashboards and automations.
 
-> **Development status:** this project is in its initial development phase. No working integration or installable release is available yet.
+> **Development status:** phase 1 has partially started with the contract-independent package foundation. BL-003 remains open for contract-dependent functionality. No working integration or installable release is available yet.
 
 ## Energy data
 

@@ -8,7 +8,7 @@ Krijg inzicht en maak bewuste keuzes met historische, actuele en voorspellende e
 
 Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.home-assistant.io/) op basis van de API van het [Nationaal Energie Dashboard (NED)](https://ned.nl/). Het doel is Nederlandse energiedata beschikbaar te maken voor sensoren, dashboards en automatiseringen in Home Assistant.
 
-> **Ontwikkelstatus:** dit project bevindt zich in de initiële ontwikkelfase. Er is nog geen werkende integratie of installeerbare release beschikbaar.
+> **Ontwikkelstatus:** fase 1 is gedeeltelijk gestart met de contractonafhankelijke packagebasis. BL-003 blijft open voor contractafhankelijke functionaliteit. Er is nog geen werkende integratie of installeerbare release beschikbaar.
 
 ## Energiedata
 

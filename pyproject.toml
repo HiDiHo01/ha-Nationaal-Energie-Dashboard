@@ -26,7 +26,7 @@ dev = [
 ]
 
 # The repository is a development workspace, not an installable distribution.
-# The independent API package will have its own build metadata in phase 1.
+# The independent API package has its own build metadata under packages/ned-api.
 [tool.uv]
 package = false
 
@@ -66,7 +66,10 @@ warn_unused_configs = true
 namespace_packages = true
 explicit_package_bases = true
 mypy_path = "$MYPY_CONFIG_FILE_DIR/packages/ned-api/src"
-files = ["custom_components/nationaal_energie_dashboard", "packages/ned-api/src/ned_api", "tests"]
+# Discover all existing project sources, including future integration modules.
+# Explicit empty phase-placeholder directories are invalid mypy targets.
+files = ["."]
+exclude_gitignore = true
 
 [tool.pytest.ini_options]
 minversion = "9.0"
