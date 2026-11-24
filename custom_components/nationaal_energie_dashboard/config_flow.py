@@ -1,15 +1,21 @@
 """Prepare masked credential entry and native configuration flows."""
 
 from collections.abc import Mapping
-from typing import Any, override
+from typing import Any, Self, override
 
 import probatio
-
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers import config_validation as cv
+from ned_api import (
+    NedAccessDeniedError,
+    NedApiError,
+    NedAuthenticationError,
+    NedConnectionError,
+    NedTimeoutError,
+)
 
 from .const import CONTRACT_PENDING, DOMAIN
 
@@ -18,9 +24,7 @@ API_KEY_SCHEMA = probatio.Schema(
 )
 
 
-async def async_validate_api_key(
-    _hass: HomeAssistant, _api_key: str
-) -> None:
+async def async_validate_api_key(_hass: HomeAssistant, _api_key: str) -> None:
     """Fail closed until a validated NED client can authenticate the key.
 
     The future client must use bounded, authenticated requests and sanitized
@@ -39,6 +43,11 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @override
+    def is_matching(self, other_flow: Self) -> bool:
+        """Match only flows with the same established service identity."""
+        return self.unique_id is not None and self.unique_id == other_flow.unique_id
+
+    @override
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -49,7 +58,7 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
         return await self._async_key_step("user", user_input)
 
     async def async_step_reauth(
-        self, entry_data: Mapping[str, Any]
+        self, _entry_data: Mapping[str, Any]
     ) -> ConfigFlowResult:
         """Request a replacement key without pre-filling the existing key."""
         return await self.async_step_reauth_confirm()
@@ -93,6 +102,14 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
                     await async_validate_api_key(self.hass, api_key)
                 except ConfigEntryError:
                     errors["base"] = CONTRACT_PENDING
+                except NedAuthenticationError:
+                    errors[CONF_API_KEY] = "invalid_auth"
+                except NedAccessDeniedError:
+                    errors["base"] = "access_denied"
+                except NedConnectionError, NedTimeoutError:
+                    errors["base"] = "cannot_connect"
+                except NedApiError:
+                    errors["base"] = "cannot_validate"
                 else:
                     if entry is not None:
                         return self.async_update_reload_and_abort(
