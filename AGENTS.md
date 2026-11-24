@@ -123,7 +123,7 @@ Baseline 24 november 2026: Home Assistant Core 2026.11.3, Python 3.14, upstream 
 Volg hoofdstukken 2, 3, 6, 7, 12 en 15 van het integratieplan en de actuele broncontrole in [API_REFERENCE.md](docs/API_REFERENCE.md).
 
 - Valideer dataset-ID's, activiteiten, regio's, classificaties, granulariteit, tijdzone-ID's, velden, headers, authenticatie, paginering, querygrenzen en limieten vóór productiegebruik.
-- Gedocumenteerd: HTTPS REST API v1 met /utilizations, X-AUTH-TOKEN en JSON-LD. Het machineleesbare schema is opgehaald; zie de vastgelegde verschillen. Live gedrag en semantiek blijven onbevestigd tot contractvalidatie.
+- Gedocumenteerd: HTTPS REST API v1 met /utilizations, X-AUTH-TOKEN en JSON-LD. Het machineleesbare schema is opgehaald; zie de vastgelegde verschillen. De eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; respecteer de gedocumenteerde runtimeveldtypen naast het OpenAPI-schema. Volledige live contractvalidatie en semantiek blijven open.
 - Gebruik DatasetKey, DatasetDefinition, EnergyRecord, EnergySeries, DatasetSnapshot, CoordinatorData en NedRuntimeData waar passend. Datasetidentificatie omvat type, point, activity, granularity, classification en granularity_timezone.
 - Centraliseer validatie en parsing. Onderscheid nul, null, ontbrekende velden en ongeldige waarden. Wijs NaN, oneindige waarden en ongeldige intervallen af; beoordeel negatieve waarden per metriek.
 - Sorteer chronologisch, dedupliceer op dataset plus geldigheidsinterval en verwerk revisies zonder dubbeltelling. Behandel lastupdate niet als automatisch bewijs van inhoudelijke wijziging.

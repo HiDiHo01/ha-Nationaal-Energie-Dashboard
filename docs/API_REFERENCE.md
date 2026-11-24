@@ -1,6 +1,6 @@
 # NED API — contractonderzoek
 
-Peildatum: 24 november 2026. Status: openbare documentatie en machineleesbaar schema gecontroleerd; live contract nog niet gevalideerd (BL-003).
+Peildatum: 24 november 2026. Status: openbare documentatie en machineleesbaar schema gecontroleerd; eerste geauthenticeerde waarnemingen geslaagd; volledige contractvalidatie blijft open (BL-003).
 
 ## Primaire bronnen
 
@@ -79,10 +79,28 @@ De oorspronkelijke index-exportlinks faalden: webtoegang ondersteunt het mediaty
 
 De schemaomschrijvingen voor activity, classification en granularity lijken achter te lopen op de productiehandleiding/catalogus. Gebruik geen verouderde beperkingen als feit. Voor deze collectie noemt het schema alleen HTTP 200 en 403; betekenis van 401/403, 429 en Retry-After blijft open. Geen opzettelijke fout- of belastingtests tegen productie.
 
+## Eerste live-waarnemingen — 24 november 2026
+
+De eigenaar heeft de beveiligde environment met secret ingericht en de handmatige workflow gestart. [live-run 45469371205](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45469371205) op main (commit 0601ac0a937e6cbe5020e0757d28ed22697b600f) is geslaagd; de joblogs bevestigen twee HTTP 200-responses met application/ld+json en 96 records per aanvraag. De probe vroeg nationale zonne-energie (type 2, activity 1, point 0, granularity 4, granularitytimezone 0) op voor 22 november (classification 2) en 25 november (classification 1).
+
+| Veld of structuur | Waargenomen in beide collecties |
+| --- | --- |
+| id, capacity, volume | int; afwijking van OpenAPI string |
+| emission, emissionfactor | int; geen null waargenomen |
+| percentage | int en float |
+| point, type, activity, classification, granularity, granularitytimezone | str |
+| validfrom, validto, lastupdate | str |
+| Collectie | hydra:member, 96 records |
+| hydra:totalItems | int (waarde niet gelogd) |
+| Paginering | Metadata aanwezig; geen hydra:next |
+
+Alle vijftien onderzochte velden waren aanwezig in deze twee collecties. Er zijn uitsluitend veldtypen, recordaantallen en booleans gelogd; geen ruwe waarden. De toekomstige parser moet rekening houden met de aangetoonde verschillen tussen schema en runtime. Deze observaties bewijzen geen volledige tijdsdekking, timestampformaat, IRI-inhoud, meeteenheid, percentage-schaal of gedrag bij nullwaarden. Bevestigde toegang voor de twee queries is geen bewijs van toegang tot alle datasets.
+
 ## Openstaande verificatie
 
 - [x] OpenAPI-export ophalen, parsen en relevante schema's, filters, responses en security scheme inspecteren; verschillen vastgelegd.
-- [ ] Geautoriseerde begrensde read-only contracttest: één bekend P0-verzoek, current en forecast, status en content-type, vervolgens resterende P0-combinaties.
+- [x] Eerste geautoriseerde begrensde read-only contractobservatie: nationale zon, current/historie en forecast, status, content-type en veldtypen.
+- [ ] Resterende nationale P0-combinaties (wind land/zee, productie/CO₂ en verbruik) voor beide classificaties; controleer tijdsdekking en daadwerkelijke dimensies zonder ruwe waarden te loggen.
 - [ ] Bevestig paginering, veilige next-links, lege resultaten en datumbereik/offsets; test dagaggregatie en DST.
 - [ ] Bevestig meetsemantiek, null versus nul, percentage-schaal, forecastdekking en revisies.
 - [ ] Bevestig authenticatie-/autorisatiefouten, rate-limit-scope en Retry-After indien gedocumenteerd of normaal waargenomen. Geen opzettelijke limietoverschrijding.
@@ -90,10 +108,10 @@ De schemaomschrijvingen voor activity, classification en granularity lijken acht
 
 ## Veilige toegang (BL-004)
 
-De [opt-in workflow](../.github/workflows/api-contract.yaml) en [probe](../scripts/ned_contract_probe.py) zijn voorbereid. De workflow draait uitsluitend handmatig op main met expliciete bevestiging, beperkte leesrechten, een vaste environment ned-contract en een jobtimeout van drie minuten. De secret wordt alleen in de probestap geïnjecteerd. De eigenaar moet vóór toevoeging van een sleutel de environment ned-contract aanmaken en deployment branches beperken tot main; vereiste reviewers instellen waar beschikbaar. Gebruik uitsluitend een environment-secret NED_API_KEY, geen repositorybrede secret. Plaats nooit een key in chat, issues, code of artifacts.
+De [opt-in workflow](../.github/workflows/api-contract.yaml) en [probe](../scripts/ned_contract_probe.py) zijn voorbereid. De workflow draait uitsluitend handmatig op main met expliciete bevestiging, beperkte leesrechten, een vaste environment ned-contract en een jobtimeout van drie minuten. De secret wordt alleen in de probestap geïnjecteerd. De eigenaar heeft bevestigd dat de beveiligde environment en sleutel zijn ingesteld. Behoud de deploymentbranchbeperking tot main en vereiste reviewers waar beschikbaar. De environmentinstellingen zijn niet onafhankelijk uitleesbaar via de huidige connector; de succesvolle handmatige uitvoering op main bevestigt werkende secret-injectie. Gebruik uitsluitend een environment-secret NED_API_KEY, geen repositorybrede secret. Plaats nooit een key in chat, issues, code of artifacts.
 
 Na merge en instelling: start NED API contract observation via Actions op main en vink confirm_live aan. Hiermee autoriseer je maximaal twee GET-verzoeken voor nationale zon (type 2, activity 1), kwartierdata, UTC, elk één dag: twee dagen geleden (current/historie) en morgen (forecast). Per verzoek page=1, itemsPerPage=100, oplopende tijd; geen vervolgpagina's, redirects of retries, sockettimeout 15 s, responslimiet 2 MiB, vaste TLS-host. Geen account-/gebruikersendpoints, geen logging van headers, URL's, ruwe waarden of bodies. Alleen classificatie, aantallen, bekende veldtypen en pagineringsaanwezigheid worden gelogd. Een lege collectie is onvoldoende recordbewijs, geen authenticatiefout. Een alternatieve member-key wordt als waarneming gerapporteerd, niet als bewijs dat het schema klopt. De probe stopt bij de eerste fout. Een groene run bewijst alleen de twee begrensde observaties, niet het volledige contract of datavalidatie.
 
-De maintenance-probe gebruikt uitsluitend de standaardbibliotheek en is geen productieclient. De zes lokale unittest-tests met gesimuleerd transport zijn geslaagd op Python 3.13.5; eerste Baseline CI-run 45467538518 bevestigt de offline tests en audit. Formatterings- en mock-importbevindingen zijn hersteld; herhaalde CI blijft te verifiëren. De bestaande offline pre-commit-suite voert ze uit. Er is nog geen environment/secret ingesteld of geauthenticeerde aanvraag uitgevoerd.
+De maintenance-probe gebruikt uitsluitend de standaardbibliotheek en is geen productieclient. De zes lokale unittest-tests met gesimuleerd transport zijn geslaagd op Python 3.13.5; eerste Baseline CI-run 45467538518 bevestigt de offline tests en audit. Formatterings- en mock-importbevindingen zijn hersteld; herhaalde CI is geslaagd in [Baseline CI-run 45468321699](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45468321699). De bestaande offline pre-commit-suite voert ze uit. De eerste geauthenticeerde observatie is geslaagd; BL-004 is functioneel afgerond. Volgende live-uitbreidingen vereisen opnieuw expliciete opt-in en een beoordeelde begrensde requestset.
 
 De API-client blijft geblokkeerd totdat het noodzakelijke contract en distributiestrategie zijn gevalideerd. Zie [backlog](BACKLOG.md) en [integratieplan](INTEGRATION_PLAN.md).

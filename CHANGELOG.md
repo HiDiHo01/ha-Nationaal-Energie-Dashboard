@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Eerste geauthenticeerde NED-contractobservaties geslaagd via de beveiligde opt-in workflow; OpenAPI-veldtypeverschillen vastgelegd. Volledige contractvalidatie blijft open.
+
 - Repositoryfundament, technische ontwikkelrichtlijnen en autonome documentatie- en skillonderhoudsregels.
 - Gelockte Python-ontwikkelomgeving, pre-commit, VS Code, Baseline CI en dependency-audits.
 - Branchbescherming en gecontroleerde Dependabot-auto-merge; echte botmergevalidatie staat nog open.
@@ -13,6 +15,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Initial authenticated NED contract observations passed through the secured opt-in workflow; OpenAPI field type differences documented. Full contract validation remains open.
 
 - Repository foundation, technical development guidelines and autonomous documentation and skill maintenance rules.
 - Locked Python development environment, pre-commit, VS Code, baseline CI and dependency audits.
