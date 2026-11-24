@@ -20,3 +20,9 @@ Lees eerst [AGENTS.md](../../../AGENTS.md), [AI_POLICY.md](../../../AI_POLICY.md
 ## Beperkte fase-1-vrijgave
 
 Volg de expliciete eigenaarsbeslissing in [integratieplan §21.2](../../../docs/INTEGRATION_PLAN.md#212-fase-1--api-client). Contractonafhankelijke packageconfiguratie, exceptions en generiek transport mogen worden ontwikkeld met synthetische tests. Geen NED-specifieke statusmapping, rate-limitregels, datasetsemantiek, parser of live aanvragen zonder de toepasselijke bevestiging en autorisatie. BL-003 blijft open; volledige faseacceptatie blijft geblokkeerd. Maak geen aannames om de scope kunstmatig te verruimen.
+
+### Generieke transportlaag
+
+NedTransport leent een vertrouwde certificaatvaliderende aiohttp-sessie en voert GET uit tegen één gevalideerde HTTPS-origin. Standaard ClientTimeout(total=15.0) en maximaal 2 MiB verzamelde responsebytes; dit zijn configureerbare interne ontwerpwaarden, geen NED-limieten. Absolute paden zonder URL-componenten, geen redirects, ssl=True, geen automatische decompressie; vraag identity-encoding aan en wijs andere Content-Encoding af. Geef status en bytes terug als immutable TransportResponse (body niet in repr), zonder statusmapping, JSON-parsing, credentials of applicatieretries. Cancellation blijft intact; transportfouten krijgen geschoonde exceptions zonder ruwe exceptionketen. De caller blijft eigenaar van de sessie en levert uitsluitend niet-gevoelige queryparameters. De wire- en TLS-werking, compressiecompatibiliteit en API-contract zijn niet live getest.
+
+Test met synthetische async responsecontexten en streamingchunks; controleer vaste HTTPS-origin, requestopties, exacte bytegrens, encoding, statusbehoud, geschoonde errors en cancellation. Claim geen TLS- of live contractbewijs uit mocks. Valideer de echte wheel en dependencyversies in CI; houd BL-003 open.
