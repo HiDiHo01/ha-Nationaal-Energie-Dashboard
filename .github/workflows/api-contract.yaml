@@ -1,0 +1,38 @@
+name: NED API contract observation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_live:
+        description: Authorize up to two read-only requests using the test API key
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ned-live-contract
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    if: >-
+      github.repository == 'HiDiHo01/ha-Nationaal-Energie-Dashboard' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.confirm_live
+    environment: ned-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version-file: .python-version
+      - name: Observe initial current and forecast contract
+        env:
+          NED_API_KEY: ${{ secrets.NED_API_KEY }}
+        run: python -I scripts/ned_contract_probe.py

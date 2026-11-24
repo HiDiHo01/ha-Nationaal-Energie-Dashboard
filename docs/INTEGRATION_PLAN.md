@@ -95,7 +95,7 @@ De integratie levert gegevens en bestuurt geen apparaten. Nationale opwek is gee
 
 ## 3. API-architectuur
 
-Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden zijn geen live contractbewijs.
+Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs.
 
 ### 3.1 API-verbinding
 
@@ -929,7 +929,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] Main beschermen met een actieve ruleset, verplichte pull requests en de toepasselijke baseline- en Hassfest-checks (ruleset 28008175).
 - [x] Afzonderlijke niet-blokkerende Python-next-smokeworkflow configureren en statisch valideren.
 - [x] Python-next-workflow op GitHub Actions uitvoeren en resultaat verifiëren (run 45447217991; Python-setup en baselinecontrole, nog geen librarycode/tests).
-- [ ] OpenAPI-contract valideren.
+- [x] OpenAPI-export ophalen en relevante schema's inspecteren; afwijkingen in [API_REFERENCE.md](API_REFERENCE.md) vastleggen.
+- [ ] Geautoriseerde live contractvalidatie afronden (BL-003/BL-004); emissie-eenheid, veldtypen, datasetcombinaties, paginering, tijdzones en foutsemantiek.
 - [x] Minimale Home Assistant-versie vaststellen: nieuwste stable, initiële baseline 2026.11.3.
 - [x] Python-baseline uit de bijbehorende Core-release vaststellen: 3.14, minimum 3.14.2, ontwikkelpin 3.14.10.
 
@@ -1102,7 +1103,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
 
-De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is vastgesteld op 2026.11.3. Bij iedere nieuwe integratierelease wordt de nieuwste stable opnieuw vastgesteld; runtimecompatibiliteit is nog niet getest. Het auteursrechtbeleid is aangepast: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden; toelatingscompatibiliteit nog niet definitief bevestigd.
+De machineleesbare OpenAPI-specificatie is opgehaald via de docs-route; zie [API_REFERENCE.md](API_REFERENCE.md) voor bron, hash, schema-afwijkingen en de begrensde opt-in probe. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is vastgesteld op 2026.11.3. Bij iedere nieuwe integratierelease wordt de nieuwste stable opnieuw vastgesteld; runtimecompatibiliteit is nog niet getest. Het auteursrechtbeleid is aangepast: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden; toelatingscompatibiliteit nog niet definitief bevestigd.
 
 Domainnaam, pollingintervallen, intern requestbudget, packagearchitectuur, entitygroepering, testdoelen, branchbeleid en implementatiefasen zijn voorgestelde keuzes. Het plan is geen bewijs van werkende code of behaalde kwaliteitscriteria.
 
