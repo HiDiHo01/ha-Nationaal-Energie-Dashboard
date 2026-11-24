@@ -8,7 +8,7 @@ other_url: /nl/documentation/
 ---
 ## Installation and requirements
 
-The integration is still in development. No installable release is available. Distribution through Home Assistant Marketplace is intended. General catalog admission is blocked by the [HACS license requirement](https://www.hacs.xyz/docs/publish/include/#check-license); the project grants limited usage permission. Runtime compatibility still requires verification.
+The integration is still in development. No installable release is available. Distribution through Home Assistant Marketplace is intended. GPL-3.0-only has been chosen to meet the [HACS license requirement](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection and actual catalog admission still require confirmation. Runtime compatibility still requires verification.
 
 ## NED API key
 

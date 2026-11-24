@@ -48,7 +48,7 @@ The intended API base URL is https://api.ned.nl/v1. Never disclose API keys in G
 
 **Minimum Home Assistant Core version: 2026.11.3.** Each new integration release targets the latest stable Core release as its minimum. Older releases and prereleases need not be supported. The current baseline is a development target, not a tested runtime compatibility claim.
 
-Home Assistant Marketplace is the intended distribution channel. General catalog admission is currently blocked: the [HACS license check](https://www.hacs.xyz/docs/publish/include/#check-license) requires an OSI-approved license, while this project grants limited usage permission. Runtime distribution still requires validation. Local testing will take place during development. There is no installable release yet. Officially offered versions may be used in Home Assistant subject to the usage terms.
+Home Assistant Marketplace is the intended distribution channel. GPL-3.0-only, an OSI-approved license, has been chosen to meet the [HACS license check](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection and actual catalog admission still require confirmation. Runtime distribution still requires validation. Local testing will take place during development. There is no installable release yet. Officially offered versions may be used in Home Assistant subject to the usage terms.
 
 ## Development and quality
 
@@ -86,9 +86,9 @@ See the [prioritized backlog](docs/BACKLOG.md) for outstanding settings, depende
 
 ## Copyright and usage
 
-**All rights reserved, with limited permission for Home Assistant usage under [USAGE_TERMS.md](USAGE_TERMS.md). No open-source license.**
+**Open source under the [GNU General Public License version 3 only (GPL-3.0-only)](LICENSE).**
 
-Installation, updates and personal non-commercial use of officially offered versions within Home Assistant are permitted. Other copyrights, including source code reuse in other projects, independent redistribution and commercial exploitation, remain reserved. Consult the complete [usage terms](USAGE_TERMS.md), which are authoritative; this summary does not grant additional rights. No specific public release has been authorized yet.
+Use, modification and distribution, including commercial use, are permitted under the GPL. Distribution is subject to applicable source-code, copyleft and notice obligations. Copyright and third-party rights remain intact. See the [license explanation](USAGE_TERMS.md). No official project release is available yet.
 
 ## Support and contributions
 

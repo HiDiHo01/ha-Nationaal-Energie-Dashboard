@@ -8,7 +8,7 @@ other_url: /en/documentation/
 ---
 ## Installatie en vereisten
 
-De integratie is nog in ontwikkeling. Er is geen installeerbare release. De beoogde distributie verloopt via Home Assistant Marketplace. Algemene catalogustoelating is geblokkeerd door de [HACS-licentievoorwaarde](https://www.hacs.xyz/docs/publish/include/#check-license); het project verleent beperkte gebruikstoestemming. Runtimecompatibiliteit moet nog worden aangetoond.
+De integratie is nog in ontwikkeling. Er is geen installeerbare release. De beoogde distributie verloopt via Home Assistant Marketplace. GPL-3.0-only is gekozen om te voldoen aan de [HACS-licentievoorwaarde](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub-licentieherkenning en daadwerkelijke catalogustoelating moeten nog worden bevestigd. Runtimecompatibiliteit moet nog worden aangetoond.
 
 ## NED API-sleutel
 

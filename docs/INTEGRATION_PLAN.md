@@ -258,6 +258,7 @@ ha-Nationaal-Energie-Dashboard/
 │   ├── AUTOMATIONS.md
 │   ├── TROUBLESHOOTING.md
 │   └── DEVELOPMENT.md
+├── LICENSE
 ├── USAGE_TERMS.md
 ├── AGENTS.md
 ├── AI_POLICY.md
@@ -928,8 +929,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] Native evaluaties verplicht stellen en een geïsoleerde opt-in runner inrichten; runner statisch en met een gesimuleerde CLI controleren.
 - [ ] Skills in concrete implementatietaken toepassen en gedrag verifiëren, inclusief native activatie met tracebewijs (geblokkeerd: Codex CLI en authenticatie ontbreken in de huidige omgeving).
 - [x] AI_POLICY.md opstellen.
-- [x] Auteursrechtbeleid vastleggen: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden.
-- [ ] Marketplace-toelatingscompatibiliteit bevestigen (BL-005: licentievoorwaarde vastgesteld; huidige gebruikstoestemming niet compatibel met de reguliere cataloguscontrole; geblokkeerd op eigenaar/vooraf overeengekomen uitzondering, zie §26.3).
+- [x] Auteursrechtbeleid vastleggen: GPL-3.0-only op expliciete eigenaarsopdracht; auteursrecht en rechten van derden behouden.
+- [ ] Marketplace-toelatingscompatibiliteit bevestigen (BL-005: GPL-3.0-only gekozen en licentiebestand toegevoegd; GitHub-herkenning op main en CI nog te bevestigen, zie §26.3).
 - [ ] Reproduceerbare Marketplace-compatibele runtime-distributiestrategie valideren.
 - [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
 - [x] pyproject.toml configureren en statisch valideren.
@@ -1107,16 +1108,16 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Integratieplan | Vastgelegd in dit document |
 | AGENTS.md | Aanwezig |
 | AI_POLICY.md | Aanwezig |
-| Auteursrechtbeleid | Beperkte Home Assistant-gebruikstoestemming; overige rechten voorbehouden |
+| Auteursrechtbeleid | GPL-3.0-only; auteursrecht en rechten van derden blijven behouden |
 | Repositorystructuur | Basismappen en ondersteunende bestanden aanwezig |
-| Marketplace | Algemene catalogus als doel; licentiecompatibiliteit geblokkeerd (BL-005); niet aangemeld |
+| Marketplace | Algemene catalogus als doel; OSI-licentie gekozen, GitHub-herkenning nog te bevestigen (BL-005); niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
 | Live API-contracttests | Nationale UTC-P0-queries, paginering en NL-kwartierdekking voor historische zon bevestigd; twee dagaggregatie-afwijkingen, semantiek en volledige contractvalidatie open |
 | CI/CD | Basis-CI, pre-commit, dependency-audit en branchbescherming operationeel; inhoudelijke integratievalidatie nog niet uitgevoerd |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
 
-De machineleesbare OpenAPI-specificatie is opgehaald via de docs-route; zie [API_REFERENCE.md](API_REFERENCE.md) voor bron, hash, schema-afwijkingen en de begrensde opt-in probe. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is vastgesteld op 2026.11.3. Bij iedere nieuwe integratierelease wordt de nieuwste stable opnieuw vastgesteld; runtimecompatibiliteit is nog niet getest. Het auteursrechtbeleid is aangepast: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden; toelatingscompatibiliteit nog niet definitief bevestigd.
+De machineleesbare OpenAPI-specificatie is opgehaald via de docs-route; zie [API_REFERENCE.md](API_REFERENCE.md) voor bron, hash, schema-afwijkingen en de begrensde opt-in probe. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is vastgesteld op 2026.11.3. Bij iedere nieuwe integratierelease wordt de nieuwste stable opnieuw vastgesteld; runtimecompatibiliteit is nog niet getest. Het auteursrechtbeleid is op eigenaarsopdracht aangepast naar GPL-3.0-only; daadwerkelijke catalogustoelating is nog niet bevestigd.
 
 Domainnaam, pollingintervallen, intern requestbudget, packagearchitectuur, entitygroepering, testdoelen, branchbeleid en implementatiefasen zijn voorgestelde keuzes. Het plan is geen bewijs van werkende code of behaalde kwaliteitscriteria.
 
@@ -1126,9 +1127,9 @@ AGENTS.md en AI_POLICY.md zijn aanwezig. Rond de resterende fase-0-werkzaamheden
 
 ### 26.3 Auteursrecht en distributiebesluit
 
-De eigenaar kiest de Home Assistant Marketplace als distributiedoel en staat gebruik van officieel aangeboden versies binnen Home Assistant toe. Zie [USAGE_TERMS.md](../USAGE_TERMS.md) voor de beperkte gebruikstoestemming en voorbehouden rechten. Er wordt geen open-sourcelicentie verleend. Publieke releases en catalogusaanmelding vereisen afzonderlijke toestemming. De repository blijft openbaar; de toepasselijke GitHub-voorwaarden en rechten van derden blijven gelden.
+De eigenaar kiest de Home Assistant Marketplace als distributiedoel en heeft op 24 november 2026 expliciet opdracht gegeven het beleid voor catalogustoelating aan te passen. Besluit: [GNU GPL versie 3 uitsluitend (GPL-3.0-only)](../LICENSE), een [OSI-goedgekeurde licentie](https://opensource.org/license/gpl-3-0), met sterk copyleft. Gebruik (inclusief commercieel), wijziging en verspreiding zijn toegestaan volgens de GPL; geen aanvullende beperkingen. Zie [USAGE_TERMS.md](../USAGE_TERMS.md) voor toelichting. Auteursrecht en rechten van derden blijven behouden. Officiële releases, packagepublicatie en catalogusaanmelding door de projectagent vereisen afzonderlijke toestemming; dit beperkt geen GPL-rechten van ontvangers. De repository blijft openbaar.
 
-De actuele [Marketplace-repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/) noemen openbare GitHub-repositories, hacs.json, een geldig manifest, branding, HACS- en Hassfest-validatie en volledige releases. De Home Assistant-cataloguspagina noemt de licentie niet expliciet in haar checklist, maar verwijst naar dezelfde hacs/default-catalogus. De actuele [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) vereist een door GitHub herkende, OSI-goedgekeurde licentie; niet-commerciële beperkingen falen. GitHub-repositorymetadata op 24 november 2026 geeft license=null. De huidige beperkte gebruikstoestemming is daarom niet compatibel met de reguliere cataloguscontrole. De HACS-reviewprocedure laat vooraf overeengekomen uitzonderingen toe; voor dit project is geen uitzondering bevestigd. BL-005 is geblokkeerd; BL-006 blijft afhankelijk. Verander geen gebruiksrechten zonder expliciete eigenaarsopdracht. Een [custom repository via link](https://www.home-assistant.io/integrations/marketplace/#custom-repositories) is technisch een afzonderlijke installatieroute, geen catalogusopname; daadwerkelijke installatie en geschiktheid onder de huidige voorwaarden zijn nog niet bewezen. Geen release of catalogus-PR zolang de toepasselijke acceptatiepoorten niet zijn behaald.
+De actuele [Marketplace-repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/) noemen openbare GitHub-repositories, hacs.json, een geldig manifest, branding, HACS- en Hassfest-validatie en volledige releases. De Home Assistant-cataloguspagina noemt de licentie niet expliciet in haar checklist, maar verwijst naar dezelfde hacs/default-catalogus. De actuele [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) vereist een door GitHub herkende, OSI-goedgekeurde licentie; niet-commerciële beperkingen falen. GitHub-repositorymetadata vóór de licentiewijziging op 24 november 2026 gaf license=null; dit is historisch bewijs van de oorspronkelijke blokkade. GPL-3.0-only is gekozen om de reguliere licentievoorwaarde te vervullen; de volledige ongewijzigde licentietekst staat in LICENSE, pyproject.toml gebruikt de SPDX-identificatie. Bevestig na merge dat GitHub de licentie als GPL-3.0 herkent; laat BL-005 open totdat deze controle en CI zijn geslaagd. De Nederlandse scope vereist country NL in hacs.json. BL-006 blijft afhankelijk van BL-005. Verander geen gebruiksrechten zonder expliciete eigenaarsopdracht. Een [custom repository via link](https://www.home-assistant.io/integrations/marketplace/#custom-repositories) is technisch een afzonderlijke installatieroute, geen catalogusopname; daadwerkelijke installatie en runtimecompatibiliteit zijn nog niet bewezen. Geen release of catalogus-PR zolang de toepasselijke acceptatiepoorten niet zijn behaald.
 
 ### 26.4 Vastleggingsnotitie
 

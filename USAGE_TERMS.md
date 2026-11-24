@@ -1,26 +1,21 @@
-# Gebruiksvoorwaarden — Nationaal Energie Dashboard
+# Licentietoelichting / License explanation — Nationaal Energie Dashboard
 
-**Alle rechten voorbehouden, met beperkte gebruikstoestemming voor Home Assistant.**
+## Nederlands
 
-## Toegestaan gebruik
+Projecteigen materiaal is gelicentieerd onder de GNU General Public License, versie 3 uitsluitend (SPDX: GPL-3.0-only). De volledige [LICENSE](LICENSE) is leidend. Deze toelichting voegt geen gebruiksbeperkingen toe.
 
-De rechthebbende verleent eindgebruikers een kosteloze, niet-exclusieve toestemming om officieel door de rechthebbende aangeboden versies van deze integratie te downloaden, installeren, uitvoeren, bijwerken en voor eigen niet-commercieel gebruik binnen Home Assistant te gebruiken. Technisch noodzakelijke kopieën en eigen back-ups voor dit gebruik zijn toegestaan.
+Gebruik, wijziging en verspreiding, ook commercieel, zijn toegestaan volgens de GPL. Bij verspreiding gelden de toepasselijke copyleft-, broncode- en vermeldingsverplichtingen. Auteursrechten blijven bij de rechthebbenden. De GPL-licentie verleent geen rechten op NED-data, merken of ander materiaal van derden dat niet door de rechthebbenden onder deze licentie is gebracht. Externe dependencies behouden hun eigen licenties. Respecteer toepasselijke rechten en voorwaarden van derden.
 
-GitHub, de Home Assistant Marketplace en de bijbehorende catalogus- en distributiediensten mogen de officiële versies aanbieden, indexeren, opslaan en afleveren voor zover noodzakelijk voor deze geautoriseerde distributie. De daadwerkelijke publicatie van een release en catalogusaanmelding vereisen een afzonderlijke opdracht of toestemming van de eigenaar.
+Het project is onafhankelijk van NED en Home Assistant. De GPL bevat de toepasselijke bepalingen over garantie en aansprakelijkheid. Catalogustoelating en werkende installatie zijn niet gegarandeerd.
 
-## Voorbehouden rechten
+Officiële projectreleases, packagepublicatie en catalogusaanmelding door projectmedewerkers of AI vereisen afzonderlijke toestemming van de eigenaar volgens [AI_POLICY.md](AI_POLICY.md). Deze interne bevoegdheidsregel beperkt niet de rechten die ontvangers onder de GPL hebben.
 
-Buiten deze beperkte toestemming worden geen rechten verleend. Zonder voorafgaande uitdrukkelijke toestemming van de rechthebbende is onder meer niet toegestaan:
+## English
 
-- De eigen broncode of documentatie overnemen in andere projecten.
-- Gewijzigde versies publiceren of verspreiden.
-- De integratie onafhankelijk herdistribueren, verkopen of commercieel exploiteren.
-- Auteursrechtvermeldingen verwijderen of zich als rechthebbende voordoen.
+Project-owned material is licensed under the GNU General Public License, version 3 only (SPDX: GPL-3.0-only). The full [LICENSE](LICENSE) governs. This explanation adds no restrictions.
 
-Er wordt geen open-sourcelicentie verleend. Wettelijke uitzonderingen en dwingende rechten, en de toepasselijke GitHub-voorwaarden voor openbare repositories, blijven onverlet. De rechten en licenties van Home Assistant, NED-data, externe dependencies en andere materialen van derden worden niet gewijzigd door deze voorwaarden.
+Use, modification and distribution, including commercial use, are permitted under the GPL. Distribution is subject to applicable copyleft, source-code and notice obligations. Copyright remains with the respective rightsholders. The GPL does not grant rights to NED data, trademarks or other third-party material not licensed by its rightsholders under this license. External dependencies retain their own licenses. Respect applicable third-party rights and terms.
 
-## Beschikbaarheid
+This project is independent of NED and Home Assistant. The GPL contains the applicable warranty and liability provisions. Catalog admission and working installation are not guaranteed.
 
-De integratie wordt ontwikkeld als onafhankelijk project. Er wordt geen garantie gegeven over beschikbaarheid, juistheid van brongegevens of geschiktheid voor een bepaald doel, voor zover wettelijk toegestaan.
-
-Deze gebruikstoestemming is geen bewijs van acceptatie door de Marketplace. De actuele catalogusvoorwaarden en compatibiliteit met dit beleid moeten vóór publieke release worden bevestigd.
+Official project releases, package publication and catalog submission by project maintainers or AI require separate owner authorization under [AI_POLICY.md](AI_POLICY.md). This internal authority rule does not restrict recipients' GPL rights.

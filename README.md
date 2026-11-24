@@ -48,7 +48,7 @@ Het beoogde API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit v
 
 **Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
 
-Het distributiedoel is Home Assistant Marketplace. Algemene catalogustoelating is momenteel geblokkeerd: de [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) vereist een OSI-goedgekeurde licentie, terwijl dit project beperkte gebruikstoestemming verleent. Runtime-distributie moet nog worden gevalideerd. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
+Het distributiedoel is Home Assistant Marketplace. Voor de [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) is GPL-3.0-only gekozen, een OSI-goedgekeurde licentie. GitHub-licentieherkenning en daadwerkelijke catalogustoelating moeten nog worden bevestigd. Runtime-distributie moet nog worden gevalideerd. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
 
 ## Ontwikkeling en kwaliteit
 
@@ -86,9 +86,9 @@ Zie de [geprioriteerde backlog](docs/BACKLOG.md) voor openstaande instellingen, 
 
 ## Auteursrecht en gebruik
 
-**Alle rechten voorbehouden, met beperkte gebruikstoestemming voor Home Assistant volgens [USAGE_TERMS.md](USAGE_TERMS.md). Geen open-sourcelicentie.**
+**Open source onder [GNU GPL versie 3 uitsluitend (GPL-3.0-only)](LICENSE).**
 
-Installatie, updates en eigen niet-commercieel gebruik van officieel aangeboden versies binnen Home Assistant zijn toegestaan. De overige auteursrechten, waaronder hergebruik van broncode in andere projecten, onafhankelijke herdistributie en commerciële exploitatie, blijven voorbehouden. Raadpleeg de volledige [gebruiksvoorwaarden](USAGE_TERMS.md). Er is nog geen toestemming voor een concrete publieke release verleend.
+Gebruik, wijziging en verspreiding, ook commercieel, zijn toegestaan volgens de GPL. Bij verspreiding gelden de toepasselijke broncode-, copyleft- en vermeldingsverplichtingen. Auteursrecht en rechten van derden blijven behouden. Zie [licentietoelichting](USAGE_TERMS.md). Er is nog geen officiële projectrelease beschikbaar.
 
 ## Ondersteuning en bijdragen
 

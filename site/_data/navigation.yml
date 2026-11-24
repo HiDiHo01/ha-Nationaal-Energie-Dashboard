@@ -2,8 +2,8 @@ nl:
   home: /
   navigation: Hoofdnavigatie
   disclaimer: Onafhankelijk project, niet officieel verbonden aan NED of Home Assistant.
-  rights: Alle rechten voorbehouden. Beperkte gebruikstoestemming voor Home Assistant.
-  terms: Gebruiksvoorwaarden
+  rights: Open source onder GPL-3.0-only.
+  terms: Licentietoelichting
   items:
     - label: Home
       path: /nl/
@@ -13,8 +13,8 @@ en:
   home: /en/
   navigation: Main navigation
   disclaimer: Independent project, not officially affiliated with NED or Home Assistant.
-  rights: All rights reserved. Limited permission for Home Assistant usage.
-  terms: Usage terms (Dutch)
+  rights: Open source under GPL-3.0-only.
+  terms: License explanation
   items:
     - label: Home
       path: /en/
