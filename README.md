@@ -41,6 +41,8 @@ De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-inte
 
 ## API-sleutel
 
+Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De conceptclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de live koppeling blijft geblokkeerd.
+
 Voor toegang tot de NED API is een persoonlijke API-sleutel vereist.
 
 1. Maak een account aan op [ned.nl](https://ned.nl/).
