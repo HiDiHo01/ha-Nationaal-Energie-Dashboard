@@ -917,7 +917,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] Repositorystructuur aanmaken (basismappen, metadata en ondersteunende documentatie; modules volgen per fase).
 - [x] pyproject.toml configureren en statisch valideren.
 - [ ] Volledige toolconfiguratie op de exacte Python/Core-baseline met implementatie en tests valideren; dependencyresolutie en installatie van de gelockte tooling zijn geslaagd.
-- [ ] Ontwikkelomgeving en pre-commit inrichten: configuratie aanwezig; volledige hookuitvoering op GitHub wordt gevalideerd (BL-002).
+- [x] Ontwikkelomgeving en pre-commit inrichten: configuratie en toepasselijke hooks gevalideerd op de gelockte baseline ([Baseline CI-run 45462898030](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45462898030); Python-broncodecontroles nog niet uitgevoerd, BL-002).
 - [x] VS Code-workspace-instellingen, aanbevolen extensies en uv-taken configureren en JSON statisch valideren (BL-010; GUI niet getest).
 - [x] Basis-CI, Hassfest, Marketplace-validatie, baseline-watch en Dependabot configureren en statisch valideren.
 - [x] Baseline-CI op GitHub Actions uitvoeren; lockfile-kandidaat controleren, committen en volledige installatie verifiëren ([Baseline CI-run 45460571331](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45460571331); nog geen inhoudelijke integratietests).
