@@ -25,7 +25,11 @@
     },
     "error": {
       "contract_pending": "De NED API-client is nog niet vrijgegeven. Configuratie is geblokkeerd totdat de contractvalidatie en runtime-distributie zijn afgerond.",
-      "invalid_key_format": "Voer een niet-lege API-sleutel zonder spaties of controletekens in."
+      "invalid_key_format": "Voer een niet-lege API-sleutel zonder spaties of controletekens in.",
+      "invalid_auth": "Authenticatie is geweigerd. Controleer de API-sleutel.",
+      "access_denied": "NED weigert toegang (HTTP 403). Controleer de sleutel en toegangsrechten.",
+      "cannot_connect": "Verbinding met NED mislukt. Probeer het later opnieuw.",
+      "cannot_validate": "Toegang kon niet worden vastgesteld. Controleer de beschikbaarheid van NED en probeer het later opnieuw."
     },
     "abort": {
       "already_configured": "Nationaal Energie Dashboard is al geconfigureerd.",
