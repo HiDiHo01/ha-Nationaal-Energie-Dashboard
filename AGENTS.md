@@ -244,6 +244,8 @@ pip-audit
 
 **Verplichte regel: AI beheert documentatie autonoom.** Controleer bij iedere taak en faseovergang de impact op README, changelog, backlog, integratieplan, ontwikkelreferenties, skills en gebruikersdocumentatie. Werk alle geraakte documenten in dezelfde pull request bij zonder afzonderlijke opdracht. Baseer status, voorbeelden, versies en compatibiliteitsclaims op geverifieerde implementatie en testbewijs. Vermeld ontbrekende controles en onderhoud canonieke bronnen zonder duplicatie. Houd beide gebruikersdocumentatietalen inhoudelijk gelijkwaardig; gebruik README.md (NL), README.en.md (EN) en voor nieuwe gebruikershandleidingen gelijknamige bestanden onder docs/user/nl en docs/user/en. Changelog bevat beide talen; interne technische en beleidsdocumenten mogen Nederlands blijven. Verifieer verwijzingen, vertaalpariteit en inhoudelijke juistheid vóór oplevering. Wijzig geen rechten of kwaliteitscriteria.
 
+- Onderhoud de openbare tweetalige projectsite onder site/ bij relevante gebruikersgerichte wijzigingen. Publiceer alleen de expliciete allowlist via [Pages-workflow](.github/workflows/pages.yaml); houd de status gelijk aan de README-versies en link naar de canonieke gebruiksvoorwaarden. Geen interne documenten, secrets of ruwe testgegevens in het publicatiepakket.
+
 - Voer de [documentatievalidator](scripts/check_project_docs.py) en de regressietests via pre-commit uit. Controleer inhoud en externe verwijzingen aanvullend handmatig; bestandspariteit bewijst geen vertaal- of inhoudskwaliteit. Vertalingen zijn verplicht vanaf het manifest, of eerder zodra vertaalbestanden worden toegevoegd. Houd ontbrekende native gedragsevaluaties expliciet open.
 
 ### 13.1 Auteursrecht en distributie

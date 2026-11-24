@@ -34,6 +34,8 @@ Deze backlog concretiseert de openstaande instellingen en vervolgstappen uit de 
 | BL-016 | Later | 7 | Gebruikersactie | Marketplace-publicatietoestemming | Vraag expliciete toestemming voor concrete release, eventuele packagepublicatie en catalogusaanmelding na aantoonbaar geslaagde acceptatiecontroles. Verifieer catalogusopname pas na acceptatie en synchronisatie. | BL-005, BL-006, BL-014, BL-015; eigenaar. |
 | BL-017 | Hoog | 0–7 | In uitvoering | Autonome dependencyupdates | Dagelijkse Dependabot-controles voor Actions en uv, verifieer lockfile en geslaagde update-PR's; voeg nieuwe manifesten toe zodra aanwezig. Houd Core/Python gezamenlijk op de baseline en controleer beveiligingsmeldingen; de auto-mergeworkflow is ingericht; verifieer een echte geschikte Dependabot-PR inclusief afwijzing van ongeschikte updates en eventuele opvolgende push-CI. | BL-001, BL-011 voor automatische merge. |
 
+| BL-018 | Normaal | 0–7 | In uitvoering | GitHub Pages | Tweetalige openbare projectsite, gecontroleerd publicatiepakket, geslaagde deployment en bereikbare HTTPS-site; onderhoud documentatie bij functionele wijzigingen. | Pages-publicatiebron GitHub Actions en environment github-pages; eigenaar indien instellingen ontbreken. |
+
 ## Actuele bewijzen en beperkingen
 
 - BL-004: opt-in contractworkflow en begrensde probe voorbereid; zes lokale offline unittest-tests geslaagd (Python 3.13.5). Eerste Baseline CI-run 45467538518: offline tests, security-audit en documentatie geslaagd; Ruff-format en drie strict-mypy-mockimports gericht hersteld, zes lokale tests opnieuw geslaagd. Herhaalde CI-validatie open. Environment/secret en live-uitvoering blijven gebruikersactie.
