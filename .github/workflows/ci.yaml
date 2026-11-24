@@ -94,6 +94,9 @@ jobs:
               if info['summary']['percent_covered'] < minimum:
                   raise SystemExit(f'{path}: coverage below {minimum}%')
           PY
+      - name: Exercise Dependabot merge policy offline
+        shell: bash
+        run: bash scripts/test_dependabot_automerge.sh
       - name: Validate isolated runtime distribution prototype
         shell: bash
         run: bash scripts/check_runtime_distribution.sh
