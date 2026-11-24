@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- AUTH-001–005: drie handmatig gerapporteerde observaties vastgelegd, conceptmapping 401/403, NL/EN-foutmeldingen en synthetische regressietests toegevoegd; autorisatie blijft open, geen live koppeling of fasevrijgave. Eerdere Ruff/Pylint-bevindingen aangepakt; CI nog niet bevestigd.
+
 - Offline ontwikkelconcept voor de acht sensoren, gemaskeerde Config Flow, vertalingen, en een begrensde afzonderlijke authenticatieclient; synthetische tests toegevoegd, CI en runtimevalidatie niet bevestigd. Geen live koppeling, fasevrijgave of publicatie.
 
 - Acht prioritaire nationale sensoren vastgelegd; CO₂-forecast volgt fase 4 en het geschatte hernieuwbare elektriciteitsaandeel krijgt een expliciete rekenmethode met voorlopige CBS-afvalfactor 0.53 en vereist aanvullende contractvalidatie. Geen sensorimplementatie of wijziging van de fasepoorten.
@@ -32,6 +34,8 @@
 - Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- AUTH-001–005: record three manually reported observations, draft 401/403 mapping, NL/EN errors and synthetic regression tests; permission semantics remain open, no live connection or phase acceptance. Addressed previous Ruff/Pylint findings; CI unconfirmed.
 
 - Offline development draft for the eight sensors, masked Config Flow, translations, and a bounded independent authentication client; synthetic tests added, CI and runtime validation unconfirmed. No live connection, phase acceptance or publication.
 
