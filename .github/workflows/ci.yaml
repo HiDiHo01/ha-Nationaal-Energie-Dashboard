@@ -49,26 +49,9 @@ jobs:
         with:
           version: '0.13.9'
           enable-cache: false
-      - name: Resolve or verify dependency lock
+      - name: Verify committed dependency lock
         id: lock
-        shell: bash
-        run: |
-          if [[ -f uv.lock ]]; then
-            uv lock --check --python "$(command -v python)"
-          else
-            uv lock --python "$(command -v python)"
-            echo 'candidate=true' >> "$GITHUB_OUTPUT"
-            echo '::warning::uv.lock is a generated candidate; review and commit it before implementation CI.'
-            echo 'Lockfile candidate generated; repository lockfile still missing.' >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Preserve generated lockfile candidate
-        if: steps.lock.outputs.candidate == 'true'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: uv-lock-candidate
-          path: uv.lock
-          retention-days: 7
-          if-no-files-found: error
+        run: uv lock --check --python "$(command -v python)"
       - name: Install exact baseline and check dependencies
         run: |
           uv sync --locked --python "$(command -v python)"
@@ -78,28 +61,18 @@ jobs:
           uv run --no-sync pylint --version
           uv run --no-sync mypy --version
           uv run --no-sync pytest --version
+      - name: Validate configuration and run pre-commit
+        run: |
+          uv run --no-sync pre-commit validate-config
+          uv run --no-sync pre-commit run --all-files --show-diff-on-failure
       - name: Quality and offline tests
-        env:
-          LOCK_CANDIDATE: ${{ steps.lock.outputs.candidate }}
         shell: bash
         run: |
           if [[ -z "$(find custom_components packages tests -type f -name '*.py' -print -quit)" ]]; then
             echo 'Source quality and test coverage not evaluated: no Python implementation yet.' >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if [[ "$LOCK_CANDIDATE" == true ]]; then
-            echo '::error::Commit a reviewed uv.lock before implementation CI.'
-            exit 1
-          fi
           uv run --no-sync python -m compileall -q custom_components packages tests
-          uv run --no-sync ruff format --check .
-          uv run --no-sync ruff check .
-          for source in custom_components/nationaal_energie_dashboard packages/ned-api/src/ned_api; do
-            if [[ -n "$(find "$source" -type f -name '*.py' -print -quit)" ]]; then
-              uv run --no-sync pylint "$source"
-            fi
-          done
-          uv run --no-sync mypy
           uv run --no-sync pytest --cov --cov-branch --cov-report=term-missing --cov-report=json
           uv run --no-sync python - <<'PY'
           import json

@@ -1,0 +1,78 @@
+minimum_pre_commit_version: '4.7.0'
+default_stages: [pre-commit]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
+    hooks:
+      - id: check-json
+      - id: check-yaml
+      - id: check-toml
+        types: [file]
+        files: '(\.toml|^uv\.lock)$'
+      - id: check-merge-conflict
+        args: [--assume-in-merge]
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=no]
+      - id: detect-private-key
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # v8.30.1
+    hooks:
+      - id: gitleaks
+        name: Scan tracked snapshot for secrets (redacted)
+        # Scan the Git index, not the working tree or local .venv.
+        # This also scans all tracked content in clean CI checkouts.
+        entry: >-
+          bash -c 'set -euo pipefail;
+          snapshot=$(mktemp -d);
+          trap "rm -rf -- \"$snapshot\"" EXIT;
+          git checkout-index --all --prefix="$snapshot/";
+          gitleaks dir --redact=100 --no-banner "$snapshot"'
+        pass_filenames: false
+        always_run: true
+  - repo: local
+    hooks:
+      - id: forbid-local-credentials
+        name: Reject local credential files
+        language: fail
+        entry: Local credential files must not be committed.
+        files: '(^|/)(\.env(\..*)?|secrets\.yaml|\.storage(/.*)?|[^/]+\.(pem|key))$'
+        exclude: '(^|/)\.env\.example$'
+      - id: uv-lock
+        name: Verify committed dependency lock
+        language: unsupported
+        entry: uv lock --check
+        pass_filenames: false
+        always_run: true
+      - id: ruff-format
+        name: Ruff format check
+        language: unsupported
+        entry: uv run --locked ruff format --check .
+        types: [python]
+        pass_filenames: false
+      - id: ruff-check
+        name: Ruff lint
+        language: unsupported
+        entry: uv run --locked ruff check .
+        types: [python]
+        pass_filenames: false
+      - id: pylint-integration
+        name: Pylint integration
+        language: unsupported
+        entry: uv run --locked pylint custom_components/nationaal_energie_dashboard
+        files: '^custom_components/nationaal_energie_dashboard/'
+        types: [python]
+        pass_filenames: false
+      - id: pylint-api
+        name: Pylint API library
+        language: unsupported
+        entry: uv run --locked pylint packages/ned-api/src/ned_api
+        files: '^packages/ned-api/src/ned_api/'
+        types: [python]
+        pass_filenames: false
+      - id: mypy
+        name: Strict mypy
+        language: unsupported
+        entry: uv run --locked mypy
+        types: [python]
+        pass_filenames: false
