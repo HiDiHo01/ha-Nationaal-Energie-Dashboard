@@ -95,13 +95,15 @@ def summarize(body: bytes) -> dict[str, object]:
     }
 
 
-def probe(api_key: str, classification: int, day: date) -> dict[str, object]:
-    """Issue one TLS-verified GET; never follow redirects or retry."""
+def fetch_body(api_key: str, path: str) -> bytes:
+    """Issue one TLS-verified GET to the fixed host without redirects or retries."""
+    if not path.startswith("/v1/utilizations?"):
+        raise ProbeError("Request outside approved endpoint")
     connection = http.client.HTTPSConnection(HOST, timeout=15)
     try:
         connection.request(
             "GET",
-            build_path(classification, day),
+            path,
             headers={"Accept": "application/ld+json", "X-AUTH-TOKEN": api_key},
         )
         response = connection.getresponse()
@@ -113,9 +115,14 @@ def probe(api_key: str, classification: int, day: date) -> dict[str, object]:
         body = response.read(MAX_BYTES + 1)
         if len(body) > MAX_BYTES:
             raise ProbeError("Response exceeds safety limit")
-        return summarize(body)
+        return body
     finally:
         connection.close()
+
+
+def probe(api_key: str, classification: int, day: date) -> dict[str, object]:
+    """Summarize the initial national solar query."""
+    return summarize(fetch_body(api_key, build_path(classification, day)))
 
 
 def main() -> int:

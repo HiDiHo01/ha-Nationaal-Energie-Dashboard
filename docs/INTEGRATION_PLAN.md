@@ -95,7 +95,7 @@ De integratie levert gegevens en bestuurt geen apparaten. Nationale opwek is gee
 
 ## 3. API-architectuur
 
-Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs. Eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; zie de vastgelegde veldtype-afwijkingen en resterende vragen in API_REFERENCE.md.
+Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs. Eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; de uitgebreide opt-in P0-matrix en paginerings-/tijdzonecontroles zijn voorbereid, live bewijs blijft open; zie de vastgelegde veldtype-afwijkingen en resterende vragen in API_REFERENCE.md.
 
 ### 3.1 API-verbinding
 
