@@ -11,15 +11,24 @@ from zoneinfo import ZoneInfo
 
 from scripts.ned_contract_probe import (
     HOST,
-    TRANSPORT_ERRORS,
+    PROBE_ERRORS,
     ProbeError,
     fetch_body,
+    report_failure,
     summarize,
 )
 
 DATASETS = (1, 2, 51, 27, 59)
 METRICS = ("capacity", "volume", "emission", "emissionfactor", "percentage")
 MAX_REQUESTS = 18
+RESOURCE_NAMES = {
+    "type": "types",
+    "point": "points",
+    "activity": "activities",
+    "classification": "classifications",
+    "granularity": "granularities",
+    "granularitytimezone": "granularity_time_zones",
+}
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -153,16 +162,8 @@ def _inspect_record(
     record: dict[str, object], query: Query
 ) -> tuple[datetime, datetime]:
     """Verify the documented IRI dimensions, identity and interval timestamps."""
-    resources = {
-        "type": "types",
-        "point": "points",
-        "activity": "activities",
-        "classification": "classifications",
-        "granularity": "granularities",
-        "granularitytimezone": "granularity_time_zones",
-    }
     for field, identifier in query.dimensions().items():
-        iri = f"/v1/{resources[field]}/{identifier}"
+        iri = f"/v1/{RESOURCE_NAMES[field]}/{identifier}"
         if record.get(field) not in (iri, f"https://{HOST}{iri}"):
             raise ProbeError(f"Unexpected dataset dimension: {field}")
     identifier_value = record.get("id")
@@ -182,7 +183,7 @@ def _metric_counts(records: list[dict[str, object]]) -> dict[str, dict[str, int]
     """Report only counts of missing, null, zero, negative and above-one values."""
     result: dict[str, dict[str, int]] = {}
     for field in METRICS:
-        counts = dict(missing=0, null=0, zero=0, negative=0, above_one=0)
+        counts = {"missing": 0, "null": 0, "zero": 0, "negative": 0, "above_one": 0}
         for record in records:
             if field not in record:
                 counts["missing"] += 1
@@ -268,12 +269,8 @@ def main() -> int:
         return 1
     try:
         results = [observe(api_key, query) for query in suite]
-    except ProbeError as error:
-        print(f"Contract observation failed: {error}", file=sys.stderr)
-        return 1
-    except TRANSPORT_ERRORS:
-        print("Contract observation failed: transport or JSON error", file=sys.stderr)
-        return 1
+    except PROBE_ERRORS as error:
+        return report_failure(error)
     if not all(results):
         print("Incomplete or unordered interval coverage", file=sys.stderr)
         return 1

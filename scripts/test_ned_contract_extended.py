@@ -19,18 +19,10 @@ class ExtendedTests(unittest.TestCase):
     def _response(query: extended.Query, page: int = 1) -> dict[str, object]:
         """Create synthetic records with documented IRIs and known intervals."""
         intervals = query.intervals()
-        resources = {
-            "type": "types",
-            "point": "points",
-            "activity": "activities",
-            "classification": "classifications",
-            "granularity": "granularities",
-            "granularitytimezone": "granularity_time_zones",
-        }
         records = [
             {
                 **{
-                    field: f"/v1/{resources[field]}/{value}"
+                    field: f"/v1/{extended.RESOURCE_NAMES[field]}/{value}"
                     for field, value in query.dimensions().items()
                 },
                 "id": index,
@@ -46,7 +38,9 @@ class ExtendedTests(unittest.TestCase):
             for index, (start, end) in enumerate(intervals)
         ]
         return {
-            "hydra:member": records[(page - 1) * query.page_size : page * query.page_size],
+            "hydra:member": records[
+                (page - 1) * query.page_size : page * query.page_size
+            ],
             "hydra:totalItems": len(intervals),
             "hydra:view": {"hydra:next": query.path(2)}
             if page == 1 and query.page_size == 48
@@ -62,7 +56,9 @@ class ExtendedTests(unittest.TestCase):
             {(q.type_id, q.classification) for q in suite[:10]},
             {(type_id, kind) for type_id in extended.DATASETS for kind in (1, 2)},
         )
-        self.assertEqual([len(q.intervals()) for q in suite[11:]], [92, 100, 96, 1, 1, 0])
+        self.assertEqual(
+            [len(q.intervals()) for q in suite[11:]], [92, 100, 96, 1, 1, 0]
+        )
         self.assertTrue(
             all(q.dimensions()["activity"] == 2 for q in suite if q.type_id == 59)
         )
@@ -83,7 +79,9 @@ class ExtendedTests(unittest.TestCase):
             patch.object(extended, "fetch_body", side_effect=responses) as fetch,
             redirect_stdout(io.StringIO()) as output,
         ):
-            self.assertTrue(all(extended.observe("synthetic", query) for query in suite))
+            self.assertTrue(
+                all(extended.observe("synthetic", query) for query in suite)
+            )
             self.assertEqual(fetch.call_count, 18)
             self.assertNotIn("12345.67", output.getvalue())
             self.assertNotIn("synthetic-private", output.getvalue())

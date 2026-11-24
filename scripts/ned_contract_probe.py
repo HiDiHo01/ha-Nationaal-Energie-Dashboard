@@ -33,6 +33,16 @@ class ProbeError(Exception):
     """Represent a safe diagnostic without upstream payloads or credentials."""
 
 
+PROBE_ERRORS = (ProbeError, *TRANSPORT_ERRORS)
+
+
+def report_failure(error: Exception) -> int:
+    """Report a safe diagnostic without upstream exception details."""
+    message = str(error) if isinstance(error, ProbeError) else "transport or JSON error"
+    print(f"Contract observation failed: {message}", file=sys.stderr)
+    return 1
+
+
 def build_path(classification: int, day: date) -> str:
     """Build a single documented national solar query for one UTC day."""
     if classification not in (1, 2):
@@ -142,12 +152,8 @@ def main() -> int:
             print(json.dumps(observation, sort_keys=True))
             if result["record_count"] == 0:
                 raise ProbeError("Empty collection; no record evidence")
-    except ProbeError as error:
-        print(f"Contract observation failed: {error}", file=sys.stderr)
-        return 1
-    except TRANSPORT_ERRORS:
-        print("Contract observation failed: transport or JSON error", file=sys.stderr)
-        return 1
+    except PROBE_ERRORS as error:
+        return report_failure(error)
     print("Two bounded observations completed; full contract validation remains open.")
     return 0
 
