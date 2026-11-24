@@ -1,0 +1,14 @@
+{
+  "domain": "nationaal_energie_dashboard",
+  "name": "Nationaal Energie Dashboard",
+  "codeowners": [
+    "@HiDiHo01"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/issues",
+  "requirements": [],
+  "version": "0.0.0.dev0"
+}
