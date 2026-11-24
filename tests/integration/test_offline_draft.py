@@ -1,14 +1,21 @@
 """Exercise sensor logic and the draft configuration flow without live NED."""
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
+from aiohttp import ClientSession
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_API_KEY, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from ned_api import (
+    NedAuthenticationClient,
+    NedConnectionError,
+    NedResponseError,
+    NedTimeoutError,
+    TransportResponse,
+)
 
 from custom_components.nationaal_energie_dashboard.config_flow import NedConfigFlow
 from custom_components.nationaal_energie_dashboard.const import (
@@ -82,7 +89,9 @@ def test_forecast_window() -> None:
         select_reading((first, second), _START + timedelta(seconds=1), forecast=True)
         == second
     )
-    assert select_reading((first,), _START + timedelta(seconds=1), forecast=True) is None
+    assert (
+        select_reading((first,), _START + timedelta(seconds=1), forecast=True) is None
+    )
     assert select_reading((first, first), _START, forecast=True) is None
     with pytest.raises(ValueError, match="timezone-aware"):
         select_reading((first,), _START.replace(tzinfo=None), forecast=True)
@@ -182,3 +191,86 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_API_KEY: "synthetic-key"}
     validate.assert_awaited_once_with(hass, "synthetic-key")
+
+
+@pytest.mark.parametrize(
+    ("response", "expected_errors"),
+    [
+        (
+            TransportResponse(
+                401, b'{"hydra:title":"synthetic-key"}', "application/ld+json"
+            ),
+            {CONF_API_KEY: "invalid_auth"},
+        ),
+        (
+            TransportResponse(
+                403, b'{"message":"synthetic-key"}', "application/json"
+            ),
+            {"base": "access_denied"},
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_observed_denials_in_config_flow(
+    hass: HomeAssistant,
+    response: TransportResponse,
+    expected_errors: dict[str, str],
+) -> None:
+    """Connect the real client to the flow through an offline injected validator."""
+    client = NedAuthenticationClient(MagicMock(spec=ClientSession))
+
+    async def validate(_hass: HomeAssistant, api_key: str) -> None:
+        """Exercise the client with the synthetic transport below."""
+        await client.async_validate_api_key(api_key)
+
+    flow = _flow(hass)
+    with (
+        patch(
+            "custom_components.nationaal_energie_dashboard.config_flow.async_validate_api_key",
+            side_effect=validate,
+        ),
+        patch(
+            "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
+        ) as get,
+    ):
+        get.return_value = response
+        result = await flow.async_step_user({CONF_API_KEY: "synthetic-key"})
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == expected_errors
+    assert "synthetic-key" not in repr(result)
+    assert not hass.config_entries.async_entries(DOMAIN)
+    get.assert_awaited_once()
+
+
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    [
+        (NedConnectionError("synthetic"), "cannot_connect"),
+        (NedTimeoutError("synthetic"), "cannot_connect"),
+        (NedResponseError("synthetic"), "cannot_validate"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_inconclusive_config_validation(
+    hass: HomeAssistant, error: Exception, expected: str
+) -> None:
+    """Keep the form open without presenting unconfirmed failures as bad keys."""
+    flow = _flow(hass)
+    with patch(
+        "custom_components.nationaal_energie_dashboard.config_flow.async_validate_api_key",
+        side_effect=error,
+    ):
+        result = await flow.async_step_user({CONF_API_KEY: "synthetic-key"})
+    assert result["errors"] == {"base": expected}
+    assert not hass.config_entries.async_entries(DOMAIN)
+
+
+def test_matching_flow(hass: HomeAssistant) -> None:
+    """Compare established identities without comparing credentials."""
+    flow = _flow(hass)
+    other = _flow(hass)
+    assert not flow.is_matching(other)
+    flow.context["unique_id"] = DOMAIN
+    assert not flow.is_matching(other)
+    other.context["unique_id"] = DOMAIN
+    assert flow.is_matching(other)
