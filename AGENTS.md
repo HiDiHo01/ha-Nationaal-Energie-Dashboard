@@ -53,7 +53,7 @@ Volg hoofdstukken 21 en 22 van het integratieplan. Werk per afgebakend onderdeel
 
 | Fase | Verplichte oplevering | Acceptatiepoort |
 | --- | --- | --- |
-| 0 — Foundation | AGENTS.md, AI_POLICY.md, auteursrechtbeleid (beperkte gebruikstoestemming), repositorystructuur, pyproject.toml, tooling, basis-CI, gevalideerd API-contract en minimale HA-versie | Beleid, contract en tooling aantoonbaar gereed |
+| 0 — Foundation | AGENTS.md, AI_POLICY.md, auteursrechtbeleid (GPL-3.0-only), repositorystructuur, pyproject.toml, tooling, basis-CI, gevalideerd API-contract en minimale HA-versie | Beleid, contract en tooling aantoonbaar gereed |
 | 1 — API-client | Zelfstandig async ned_api-package, enums, catalogus, modellen, parser, rate limiter, fixtures | Clienttests en contractvalidatie geslaagd |
 | 2 — Integration Core | Manifest, config/ options/ reauth/ reconfigure flows, typed runtime data, coordinators, lifecycle en migraties | Setup, reload, unload en flowtests geslaagd |
 | 3 — Sensors | P0-datasets, declaratieve entities, device registry, unique IDs, eenheden, vertalingen | Sensortests en semantische datavalidatie geslaagd |
@@ -250,14 +250,14 @@ pip-audit
 
 ### 13.1 Auteursrecht en distributie
 
-- Alle rechten voorbehouden, met beperkte gebruikstoestemming voor Home Assistant volgens [USAGE_TERMS.md](USAGE_TERMS.md). Geen open-sourcelicentie. Verleen geen aanvullende rechten aan derden zonder toestemming.
+- Projecteigen materiaal valt onder [GPL-3.0-only](LICENSE); [USAGE_TERMS.md](USAGE_TERMS.md) licht de licentie toe zonder aanvullende restricties. Behoud auteursrecht- en licentievermeldingen, respecteer copyleft en controleer rechten van derden. Verleen geen andere licenties zonder expliciete eigenaarsopdracht.
 - Respecteer wettelijke uitzonderingen, GitHub-voorwaarden en licenties van externe materialen.
 - Marketplace-distributie van officiële versies is het doel. Publicatie van releases, packages of catalogusaanmelding vereist expliciete toestemming. Wijzig repositoryzichtbaarheid niet zelfstandig.
 
 ### 13.2 Marketplace-readiness
 
 - Volg [repositoryvereisten](https://contributors.home-assistant.io/marketplace/reference/repository-structure/) en [catalogusprocedure](https://contributors.home-assistant.io/marketplace/guides/catalog/).
-- Bevestig in fase 0 of de beperkte gebruikstoestemming voldoet aan de actuele toelatingsvoorwaarden; vraag de eigenaar bij een vereiste beleidswijziging.
+- Controleer in fase 0 de OSI-licentievoorwaarde en GitHub-licentieherkenning voor GPL-3.0-only op main; vraag de eigenaar bij een vereiste toekomstige licentiewijziging. Verifieer de landenmetadata voor de Nederlandse integratie.
 - Eén integratie in custom_components/nationaal_energie_dashboard; root-hacs.json, geldig manifest, branding, README, beschrijving, topics en ingeschakelde issues. Alle runtime-dependencies zijn beschikbaar bij een schone installatie.
 - Vereis geslaagde HACS- en Hassfest-validatie zonder genegeerde checks, volledige GitHub-release, installatie-/update-/verwijderingstests en catalogus-PR bij hacs/default (integration).
 - Claim catalogusopname pas na acceptatie en synchronisatie. Platinum blijft een afzonderlijk kwaliteitsdoel.

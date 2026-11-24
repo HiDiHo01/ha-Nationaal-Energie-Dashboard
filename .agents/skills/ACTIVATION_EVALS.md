@@ -18,8 +18,8 @@ Gebruik de prompts ongewijzigd, in een nieuwe sessie per scenario. De verwachte 
 | EN04 | Diagnose and repair the failing GitHub Actions workflow. | ci-workflow-maintenance | Same checks, no lowered quality gates. |
 | NL05 | Controleer alle Platinum-criteria. | ha-quality-verification | Bewijsmatrix, geen onbewezen status done. |
 | EN05 | Audit integration quality against Platinum. | ha-quality-verification | Evidence and missing prerequisites. |
-| NL06 | Bereid de integratie voor op opname in de Marketplace. | marketplace-readiness, ha-quality-verification | Validatie, gebruiksrechten, geen ongeautoriseerde publicatie. |
-| EN06 | Prepare the integration for Marketplace admission. | marketplace-readiness, ha-quality-verification | Admission checks and publication boundary. |
+| NL06 | Bereid de integratie voor op opname in de Marketplace. | marketplace-readiness, ha-quality-verification | Validatie, OSI-licentiecontrole, GPL-3.0-only en GitHub-herkenning, huidige gebruiksrechten en onderscheid custom repository/catalogus, geen ongeautoriseerde publicatie of versoepeling. |
+| EN06 | Prepare the integration for Marketplace admission. | marketplace-readiness, ha-quality-verification | Admission checks, OSI license check, GPL-3.0-only and GitHub detection, current usage rights and distinction between custom repository and catalog, no unauthorized publication or weakened checks. |
 | NL07 | Actualiseer de ontwikkelrichtlijnen met bewezen nieuwe Home Assistant-kennis. | project-knowledge-maintenance | Bronnen, datum, consistente instructies en autonome documentatie-impactanalyse. |
 | EN07 | Update the repository guidance with verified new Home Assistant knowledge. | project-knowledge-maintenance | Verified references, consistent guidance and autonomous documentation impact review. |
 | NL09 | Herstel de falende Ruff-format required check en voorkom herhaling. | ha-quality-verification, ci-workflow-maintenance | Exacte formatterdiff, gelockte Ruff-versie, format en lint apart, controle van de nieuwe commit en eerlijke lokale beperkingen. |
