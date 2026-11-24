@@ -3,5 +3,35 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 3
+      interval: daily
+      time: "08:00"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 10
+    groups:
+      actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: daily
+      time: "08:30"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: all
+    # Upgrade these together with the Core/Python release baseline.
+    ignore:
+      - dependency-name: homeassistant
+      - dependency-name: pytest-homeassistant
+    groups:
+      python-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch

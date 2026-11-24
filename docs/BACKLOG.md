@@ -33,6 +33,8 @@ Deze backlog concretiseert de openstaande instellingen en vervolgstappen uit de 
 | BL-015 | Later | 7 | Wacht op implementatie | Releasevalidatieworkflow | Automatiseer build, metadata, runtime-installatie, upgrade/verwijdering, HACS/Hassfest, tests en beveiligingspoorten; geen automatische releasepublicatie. | BL-005, BL-006; fase 1–6 en toepasselijke releasepoorten. |
 | BL-016 | Later | 7 | Gebruikersactie | Marketplace-publicatietoestemming | Vraag expliciete toestemming voor concrete release, eventuele packagepublicatie en catalogusaanmelding na aantoonbaar geslaagde acceptatiecontroles. Verifieer catalogusopname pas na acceptatie en synchronisatie. | BL-005, BL-006, BL-014, BL-015; eigenaar. |
 
+| BL-017 | Hoog | 0–7 | In uitvoering | Autonome dependencyupdates | Dagelijkse Dependabot-controles voor Actions en uv, verifieer lockfile en geslaagde update-PR's; voeg nieuwe manifesten toe zodra aanwezig. Houd Core/Python gezamenlijk op de baseline en controleer beveiligingsmeldingen; activeer veilige automatische merge pas na branchbescherming en vereiste checks. | BL-001, BL-011 voor automatische merge. |
+
 ## Actuele bewijzen en beperkingen
 
 - [Baseline CI-run 45452773996](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45452773996) is afgerond met conclusie success. De run leverde een uv-lock-candidate-artifact op (ID 14948254865). De repository bevat nog geen uv.lock; review en commit blijven open. Inhoudelijke integratietests zijn nog niet mogelijk.

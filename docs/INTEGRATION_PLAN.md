@@ -850,6 +850,8 @@ Bij ontwikkeltaken worden relevante [repositoryskills](../.agents/skills/README.
 
 ## 20. CI/CD en kwaliteitscontroles
 
+Dependabot controleert GitHub Actions en uv-dependencies dagelijks volgens AGENTS.md §13.3. Core en pytest-homeassistant worden uitsluitend gezamenlijk met de releasebaseline bijgewerkt. Controleer de lockfile en CI voor iedere update. Automatische merge blijft open tot de noodzakelijke branchbescherming en required checks zijn ingesteld. De standalone API-library en eventuele externe pre-commit-hooks worden toegevoegd zodra hun manifesten bestaan.
+
 ### 20.1 GitHub Actions
 
 Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → geautoriseerde release en Marketplace-catalogusaanmelding na geslaagde controles.
