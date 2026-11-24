@@ -1,0 +1,113 @@
+{
+  "config": {
+    "abort": {
+      "contract_pending": "The NED API client is not ready for use. Configuration is blocked until contract validation and runtime distribution have been completed."
+    }
+  },
+  "exceptions": {
+    "contract_pending": {
+      "message": "The NED API client is not ready for use. Configuration is blocked until contract validation and runtime distribution have been completed."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "co2_intensity": {
+        "name": "CO₂ intensity",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "co2_intensity_forecast": {
+        "name": "Forecast CO₂ intensity",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "renewable_electricity_share": {
+        "name": "Estimated renewable electricity share",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "method_version": {
+            "name": "Method version"
+          },
+          "waste_renewable_factor": {
+            "name": "Renewable waste factor"
+          },
+          "waste_factor_year": {
+            "name": "Waste factor source year"
+          }
+        }
+      },
+      "solar_power": {
+        "name": "Solar generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "wind_onshore_power": {
+        "name": "Onshore wind generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "wind_offshore_power": {
+        "name": "Offshore wind generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "electricity_consumption": {
+        "name": "Electricity consumption",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "electricity_production": {
+        "name": "Electricity generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      }
+    }
+  }
+}
