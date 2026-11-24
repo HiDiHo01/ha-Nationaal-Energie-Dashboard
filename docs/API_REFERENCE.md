@@ -1,6 +1,6 @@
 # NED API — contractonderzoek
 
-Peildatum: 24 november 2026. Status: openbare documentatie gecontroleerd; OpenAPI-schema en live contract niet gevalideerd (BL-003).
+Peildatum: 24 november 2026. Status: openbare documentatie en machineleesbaar schema gecontroleerd; live contract nog niet gevalideerd (BL-003).
 
 ## Primaire bronnen
 
@@ -53,11 +53,35 @@ Begin met point=0, granularity=4; forecast/current afzonderlijk. CO₂-productie
 - v1.24.0: vernieuwd model type 59, activiteit 2.
 - v1.27.0–1.27.1: bij bronuitval zijn tijdelijk voorspellingen als actuele waarden aangeboden. Classificatie current is daarom geen garantie op gemeten waarden. Historische herberekeningen vereisen revisieverwerking.
 
+## Machineleesbaar schema — opgehaald
+
+Bron: [OpenAPI-export](https://api.ned.nl/v1/docs.jsonopenapi?spec_version=3), opgehaald op 24 november 2026 via [GitHub Actions-run 45466844487](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45466844487). OpenAPI 3.1.0, info.version 0.1.0 (dit is niet de operationele API-changelogversie), 22 paden, 100234 bytes. SHA-256: 4f2a3c1ff88f326b932ce852dd56feee3e60549957ff1083f806531f6b3bf4e6. De gedownloade ZIP en JSON zijn op hash gecontroleerd en lokaal geparseerd. De openbare export wordt niet in de repository gekopieerd.
+
+De oorspronkelijke index-exportlinks faalden: webtoegang ondersteunt het mediatype niet en lokaal DNS ontbreekt. De twee GitHub-pogingen op index.jsonopenapi leverden geen schema op, bij de tweede alleen resourceNameCollection. De docs-route werkt. De eenmalige workflow voor deze openbare download is verwijderd uit de uiteindelijke wijziging.
+
+### Bevestigd in het schema
+
+- GET /v1/utilizations; globale API-key security scheme in de header X-AUTH-TOKEN.
+- JSON-LD-collectieobject met verplichte hydra:member-array; optioneel hydra:totalItems (integer), hydra:view met first/last/previous/next IRI's en hydra:search.
+- page integer, default 1; itemsPerPage integer, default 144, schema-minimum 0 en maximum 200. Gebruik begrensde positieve waarden, nooit 0. order[validfrom] asc/desc, default desc. Volg in de uiteindelijke client uitsluitend veilige begrensde next-links.
+- Queryfilters voor id, point, type, granularity, granularitytimezone, classification, activity; ook arrayvarianten met [] en de vier validfrom-datumfilters. Datasetdimensies worden als querystrings beschreven; het schema noemt de filters optioneel maar de client begrenst altijd de query.
+- De recordreferentie Utilization.jsonld kent geen required-lijst. Vereis semantisch essentiële velden in de client pas op basis van de live bevindingen. Paginering en volledige veldvalidatie blijven open.
+
+| Veld | OpenAPI 3.1-type | Aandachtspunt |
+| --- | --- | --- |
+| id | string | Handleiding toont integer |
+| point, type, activity, classification, granularity, granularitytimezone | IRI-reference string | Valideer verwijzingen en verwachte dimensies |
+| capacity, volume | string | Handleiding toont numerieke waarden; live representatie verifiëren |
+| percentage | number | Schaal blijft open |
+| emission | integer of null | Schema-omschrijving CO2/ton versus handleiding kg; eenheid niet bevestigd |
+| emissionfactor | number of null | Handleiding kg/kWh |
+| validfrom, validto, lastupdate | date-time string | UTC, inclusiviteit en revisies live toetsen |
+
+De schemaomschrijvingen voor activity, classification en granularity lijken achter te lopen op de productiehandleiding/catalogus. Gebruik geen verouderde beperkingen als feit. Voor deze collectie noemt het schema alleen HTTP 200 en 403; betekenis van 401/403, 429 en Retry-After blijft open. Geen opzettelijke fout- of belastingtests tegen productie.
+
 ## Openstaande verificatie
 
-De Swagger-pagina is bereikbaar, maar beide machineleesbare exports konden niet worden gelezen: webtoegang accepteert de OpenAPI-mediatypen niet; lokaal curl faalde op DNS. Geen schema, live response of paginering verzinnen.
-
-- [ ] OpenAPI-export uitlezen: schema, vereiste/optionele velden, types, nullability, filters, responses en security scheme.
+- [x] OpenAPI-export ophalen, parsen en relevante schema's, filters, responses en security scheme inspecteren; verschillen vastgelegd.
 - [ ] Geautoriseerde begrensde read-only contracttest: één bekend P0-verzoek, current en forecast, status en content-type, vervolgens resterende P0-combinaties.
 - [ ] Bevestig paginering, veilige next-links, lege resultaten en datumbereik/offsets; test dagaggregatie en DST.
 - [ ] Bevestig meetsemantiek, null versus nul, percentage-schaal, forecastdekking en revisies.
@@ -66,6 +90,10 @@ De Swagger-pagina is bereikbaar, maar beide machineleesbare exports konden niet 
 
 ## Veilige toegang (BL-004)
 
-Voorgestelde secretnaam: NED_API_KEY. Maak eerst een afgeschermde, handmatig gestarte contractworkflow met read-only repositoryrechten, beperkte requests, timeouts en zonder logging van headers of ongeschoonde bodies. Gebruik een aparte testkey in GitHub Secrets (bij voorkeur een beveiligde environment), pas nadat de workflow en toegang zijn beoordeeld. Geen API-sleutel in chat, repository of issue. Er is nog geen contractworkflow of geauthenticeerde aanvraag uitgevoerd. Geen externe gegevensopvraging buiten het expliciete mandaat.
+De [opt-in workflow](../.github/workflows/api-contract.yaml) en [probe](../scripts/ned_contract_probe.py) zijn voorbereid. De workflow draait uitsluitend handmatig op main met expliciete bevestiging, beperkte leesrechten, een vaste environment ned-contract en een jobtimeout van drie minuten. De secret wordt alleen in de probestap geïnjecteerd. De eigenaar moet vóór toevoeging van een sleutel de environment ned-contract aanmaken en deployment branches beperken tot main; vereiste reviewers instellen waar beschikbaar. Gebruik uitsluitend een environment-secret NED_API_KEY, geen repositorybrede secret. Plaats nooit een key in chat, issues, code of artifacts.
+
+Na merge en instelling: start NED API contract observation via Actions op main en vink confirm_live aan. Hiermee autoriseer je maximaal twee GET-verzoeken voor nationale zon (type 2, activity 1), kwartierdata, UTC, elk één dag: twee dagen geleden (current/historie) en morgen (forecast). Per verzoek page=1, itemsPerPage=100, oplopende tijd; geen vervolgpagina's, redirects of retries, sockettimeout 15 s, responslimiet 2 MiB, vaste TLS-host. Geen account-/gebruikersendpoints, geen logging van headers, URL's, ruwe waarden of bodies. Alleen classificatie, aantallen, bekende veldtypen en pagineringsaanwezigheid worden gelogd. Een lege collectie is onvoldoende recordbewijs, geen authenticatiefout. Een alternatieve member-key wordt als waarneming gerapporteerd, niet als bewijs dat het schema klopt. De probe stopt bij de eerste fout. Een groene run bewijst alleen de twee begrensde observaties, niet het volledige contract of datavalidatie.
+
+De maintenance-probe gebruikt uitsluitend de standaardbibliotheek en is geen productieclient. De zes lokale unittest-tests met gesimuleerd transport zijn geslaagd op Python 3.13.5; eerste Baseline CI-run 45467538518 bevestigt de offline tests en audit. Formatterings- en mock-importbevindingen zijn hersteld; herhaalde CI blijft te verifiëren. De bestaande offline pre-commit-suite voert ze uit. Er is nog geen environment/secret ingesteld of geauthenticeerde aanvraag uitgevoerd.
 
 De API-client blijft geblokkeerd totdat het noodzakelijke contract en distributiestrategie zijn gevalideerd. Zie [backlog](BACKLOG.md) en [integratieplan](INTEGRATION_PLAN.md).
