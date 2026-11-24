@@ -1,0 +1,11 @@
+{% assign labels = site.data.navigation[page.lang] %}
+<header class="shell masthead">
+  <a class="brand" href="{{ labels.home | relative_url }}">NED <span> / HOME ASSISTANT</span></a>
+  <nav aria-label="{{ labels.navigation }}">
+    {% for item in labels.items %}
+      <a href="{{ item.path | relative_url }}"{% if page.url == item.path %} aria-current="page"{% endif %}>{{ item.label }}</a>
+    {% endfor %}
+    {% include language-switch.html %}
+    <a href="{{ site.repository_url }}">GitHub</a>
+  </nav>
+</header>

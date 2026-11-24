@@ -98,4 +98,13 @@ De vier nieuwe workflowbestanden en Dependabot-configuratie zijn lokaal als YAML
 
 ## GitHub Pages
 
-De openbare projectsite staat in site/ (Nederlands index.html, Engels en.html en gedeelde styles.css). Houd de inhoud in beide talen gelijkwaardig en synchroon met de actuele README-versies; link naar canonieke gebruiksvoorwaarden en documentatie. De [Pages-workflow](../.github/workflows/pages.yaml) valideert de structuur en interne links en publiceert uitsluitend deze drie bestanden. Geen interne documenten, API-testgegevens, secrets, scripts of repositorycheckout in de deployjob. Gebruik Settings → Pages → Source: GitHub Actions; beperk de github-pages-environment tot main. Start zo nodig de workflow handmatig op main. Verifieer de deployment en HTTPS-URL voordat de site als operationeel wordt aangemerkt. Er is geen release of cataloguspublicatie aan gekoppeld.
+De openbare site gebruikt Jekyll 4.4.1 met Ruby 4.0.10 en Bundler 4.0.20. Gebruik site/.ruby-version, Gemfile en de gecommitteerde Gemfile.lock als bron voor de versies. De lockfile is afkomstig van [lock-resolutierun 45471790543](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45471790543) met 69 gem-checksums. Houd beide talen inhoudelijk gelijkwaardig; Markdown-pagina's onder site/nl en site/en gebruiken gedeelde layouts, includes en navigatiedata. De root is Nederlands; en.html blijft een compatibiliteitspagina.
+
+```bash
+cd site
+bundle install
+bundle exec jekyll serve --baseurl ""
+bundle exec bundler-audit check --update
+```
+
+Installeer de vastgelegde Ruby- en Bundler-versies vooraf. CI gebruikt BUNDLE_FROZEN, controleert de lockfile, audit gems en bouwt alleen site/ met safe mode en strict front matter. De uitvoerallowlist en alle interne links worden vóór artifact-upload gecontroleerd. Externe links en browserweergave vereisen afzonderlijke controle. De [Pages-workflow](../.github/workflows/pages.yaml) is de enige publicatieroute; de standaard root-Jekyll-workflow is vervangen. Deploy uitsluitend main naar github-pages met minimale rechten, geen NED-secret. Settings → Pages → Source: GitHub Actions; beperk de environment tot main. Dependabot controleert Bundler dagelijks; merge gem-updates pas na review en geslaagde Pages-build en verplichte CI. Geen automatische release of cataloguspublicatie.

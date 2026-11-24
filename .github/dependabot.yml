@@ -43,3 +43,11 @@ updates:
       time: "09:00"
       timezone: Europe/Amsterdam
     open-pull-requests-limit: 5
+
+  - package-ecosystem: bundler
+    directory: /site
+    schedule:
+      interval: daily
+      time: "09:30"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 5

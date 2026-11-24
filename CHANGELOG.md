@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Tweetalige projectsite gemigreerd naar Jekyll met gedeelde layouts, gelockte gems en gecontroleerde Pages-deployment.
+
 - Eerste geauthenticeerde NED-contractobservaties geslaagd via de beveiligde opt-in workflow; OpenAPI-veldtypeverschillen vastgelegd. Volledige contractvalidatie blijft open.
 
 - Repositoryfundament, technische ontwikkelrichtlijnen en autonome documentatie- en skillonderhoudsregels.
@@ -15,6 +17,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Bilingual project site migrated to Jekyll with shared layouts, locked gems and guarded Pages deployment.
 
 - Initial authenticated NED contract observations passed through the secured opt-in workflow; OpenAPI field type differences documented. Full contract validation remains open.
 
