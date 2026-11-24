@@ -10,6 +10,8 @@ Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.h
 
 > **Ontwikkelstatus:** fase 1 is gedeeltelijk gestart met de contractonafhankelijke packagebasis. BL-003 blijft open voor contractafhankelijke functionaliteit. Er is nog geen werkende integratie of installeerbare release beschikbaar.
 
+Op deze ontwikkelbranch staan de negen gevraagde integratiebestanden, acht sensordefinities, een gemaskeerde API-keyflow en een afzonderlijke authenticatieclient. Dit is een offline concept: de providerfactory en de authenticatiekoppeling blokkeren echte configuratie en live dataverkeer; geen werkende integratie of release. De algemene fasepoorten blijven van kracht.
+
 ## Energiedata
 
 De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De geteste nationale P0-kwartierqueries zijn gevalideerd op structuur en dekking; verdere contract- en meetsemantiekvalidatie blijft open. Ondersteuning door de integratie moet nog worden geïmplementeerd.
