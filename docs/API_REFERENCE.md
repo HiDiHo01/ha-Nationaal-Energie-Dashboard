@@ -28,7 +28,7 @@ Gebruik de productiebronnen; de acceptatieomgeving kan achterlopen. Documentatie
 
 Querydimensies: point, type, granularity, granularitytimezone, classification, activity en datumfilters. Begin met één dataset per verzoek; collectiefilters en exacte grenzen nog toetsen.
 
-De handleiding geeft tegenstrijdige tijdzone-informatie in het voorbeeld. De parametertabel en tijdzoneparagraaf vermelden 0 = UTC, 1 = Europe/Amsterdam; dag/maand/jaar vereisen 1. Responstijdstempels zijn volgens de handleiding UTC. Verifieer dit, inclusiviteit en DST met echte responses.
+De handleiding geeft tegenstrijdige tijdzone-informatie: 0 = UTC, 1 = Europe/Amsterdam, maar het voorbeeld toont een request met 1 en een record met 0. De handleiding vermeldt dat dag/maand/jaar 1 vereisen. Live-observaties hieronder bevestigen voor nationale historische zonne-energie dat kwartierdata met querytijdzone 1 records met tijdzone-ID 0 en correcte Nederlandse kalendergrenzen levert. Ook levert daggranulariteit met querytijdzone 0 een record op, in strijd met de verwachte beperking. De exacte grenzen daarvan en de NL-wintertijdaggregatie blijven open.
 
 Velden: capacity (gemiddeld kW), volume (kWh), emission (kg), emissionfactor (kg/kWh), percentage (benuttingsgraad), validfrom, validto, lastupdate. De getoonde percentagewaarde lijkt een ratio; bewijs schaal en bereik vóór conversie. Het documentatievoorbeeld is geen geldige volledige JSON-response. Null, afwezigheid en nul niet gelijkstellen zonder contractbewijs.
 
@@ -106,13 +106,39 @@ Het dertiende verzoek (nationale zon, 29 maart 2026, granularity 4, granularityt
 
 De vervolgprobe biedt scope timezone (zes requests) of full (18). Alleen bekende timezone-IRI-ID's 0/1 worden als veilige categorieën gerapporteerd; onbekende referenties worden zonder ruwe waarde verworpen. De querytijdzone, waargenomen recordtijdzone-ID's en intervaldekking worden apart beoordeeld. Bij een bekende ID-afwijking of afwijkende geldige totaaltelling op een enkelvoudige pagina gaan de onafhankelijke scenario's door, maar de eindstatus blijft failure. Onveilige links, transport-/schemafouten en foutieve andere dimensies blijven onmiddellijk blokkerend. Een lege collectie levert geen bewijs van een response-timezone-ID. De standaard scope van de handmatige workflow is timezone om reeds bewezen requests niet te herhalen.
 
+## Vervolgobservaties tijdzones — 24 november 2026
+
+[live-run 45475494852](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45475494852/job/138734501798), commit d46e5963602425655001aa2690669f674ce188aa (PR #14), scope timezone: alle zes begrensde aanvragen uitgevoerd; eindstatus failure. Alle aanvragen betreffen historische nationale zonne-energie (type 2, point 0, activity 1, classification 2). De probe valideert UTC-aware begin- en eindtijdstempels, geordende intervaldekking, dimensies en totalItems. Dit zijn geen algemene garanties voor andere datasets of granulariteiten.
+
+| Datum | Granulariteit | Querytijdzone | Response-ID | Records (verwacht / ontvangen) | Exacte dekking |
+| --- | --- | --- | --- | --- | --- |
+| 2026-03-29 | 4 (kwartier) | 1 | 0 | 92 / 92 | Correct |
+| 2026-10-25 | 4 (kwartier) | 1 | 0 | 100 / 100 | Correct |
+| 2026-11-22 | 4 (kwartier) | 1 | 0 | 96 / 96 | Correct |
+| 2026-03-29 | 6 (dag) | 1 | 1 | 1 / 1 | Correct (23 uur) |
+| 2026-10-25 | 6 (dag) | 1 | 1 | 1 / 1 | Afwijkend van verwachte 25-uursintervalgrenzen |
+| 2026-11-22 | 6 (dag) | 0 | 0 | 0 / 1 | Niet gevalideerd; de oude verwachting was een lege collectie |
+
+Voor alle zes responses zijn de vijftien onderzochte velden aanwezig en is hydra:totalItems een integer; er is geen volgende pagina. De vijf niet-lege verwachte collecties hebben een overeenkomend totaal; de UTC-dagcollectie wijkt af van het verwachte totaal nul.
+
+### Contractafwijkingen en gevolgen
+
+- **TZ-001 — bevestigd voor de geteste kwartierqueries:** querytijdzone 1 bepaalt de Nederlandse daggrenzen, terwijl de records tijdzone-ID 0 hebben. De drie geteste dagen hebben volledige dekking met 92, 100 en 96 kwartieren. De validator verwachtte ten onrechte altijd gelijkheid van query- en response-ID. Behandel querytijdzone en recordtijdzone als verschillende concepten; valideer de overige dimensies en de werkelijke tijdstempels onafhankelijk. Generaliseer dit nog niet naar andere granulariteiten of datasets.
+- **TZ-002 — open:** de NL-dagaggregatie op 25 oktober bevat één record met ID 1, maar de UTC-intervalgrenzen wijken af van de verwachte Nederlandse kalenderdag. Verwacht: 24 oktober 22:00 UTC tot 25 oktober 23:00 UTC, een interval van 25 uur. De logs geven geen exacte ontvangen grenzen of duur; beweer niet dat het record 24 uur duurt. Onderzoek de begin- en eindafwijkingen afzonderlijk.
+- **TZ-003 — open:** de UTC-dagaggregatie retourneert één record met ID 0, hoewel de handleiding een beperking tot tijdzone 1 vermeldt. De exacte UTC-intervalgrenzen zijn niet gelogd. De oude verwachting nul records is voor deze aanvraag weerlegd; een record met volledige 24-uursdekking is nog niet bewezen.
+
+**Implementatiebeperking:** gebruik een dagaggregatie uit de API niet als bewezen bron voor energie- of forecastberekeningen zolang TZ-002/TZ-003 openstaan. Voor toekomstige Nederlandse kalenderaggregaties zijn gevalideerde UTC-kwartierintervallen het aangewezen vertrekpunt; controleer dekking en meetsemantiek voordat volumes worden opgeteld. Geen automatische reparatie van upstream-tijdstempels, geen stilzwijgende acceptatie van onjuiste intervallen.
+
+Vervolgonderzoek: breid de probe gericht uit met geredigeerde start-/eindafwijkingen en intervalduur (geen ruwe records), een begrensde dagaggregatiescope en afzonderlijke verwachting voor de bevestigde TZ-001-combinaties. Verifieer de verwachte grenzen van UTC-dagrecords. Houd de dagafwijkingen blokkerend totdat de semantiek is vastgesteld. Geen extra live-verzoeken in deze documentatiewijziging.
+
 ## Openstaande verificatie
 
 - [x] OpenAPI-export ophalen, parsen en relevante schema's, filters, responses en security scheme inspecteren; verschillen vastgelegd.
 - [x] Eerste geautoriseerde begrensde read-only contractobservatie: nationale zon, current/historie en forecast, status, content-type en veldtypen.
 - [x] Nationale P0-combinaties voor beide classificaties, UTC-kwartierdata en IRI-dimensies voor de geteste dagen.
 - [x] Paginering 48 + 48 en veilige next-link voor de geteste nationale zonquery.
-- [ ] Lege resultaten, datumbereik/offsets, response-timezone-IRI's, dagaggregatie en DST.
+- [x] Voor nationale historische zonne-energie: Nederlandse kwartierdekking op 23-, 24- en 25-uursdagen, response-ID 0 bij query-ID 1 (TZ-001).
+- [ ] Lege resultaten en overige datumfiltercombinaties; NL-dagaggregatie wintertijd en UTC-dagaggregatie (TZ-002/TZ-003).
 - [ ] Bevestig meetsemantiek, null versus nul, percentage-schaal, forecastdekking en revisies.
 - [ ] Bevestig authenticatie-/autorisatiefouten, rate-limit-scope en Retry-After indien gedocumenteerd of normaal waargenomen. Geen opzettelijke limietoverschrijding.
 - [ ] Leg geschoonde fixtures en concrete verificatieresultaten vast; onderscheid synthetische tests van live bewijs.
@@ -121,7 +147,7 @@ De vervolgprobe biedt scope timezone (zes requests) of full (18). Alleen bekende
 
 De [opt-in workflow](../.github/workflows/api-contract.yaml) en [probe](../scripts/ned_contract_probe.py) zijn voorbereid. De workflow draait uitsluitend handmatig op main met expliciete bevestiging, beperkte leesrechten, een vaste environment ned-contract en een jobtimeout van zeven minuten. De secret wordt alleen in de probestap geïnjecteerd. De eigenaar heeft bevestigd dat de beveiligde environment en sleutel zijn ingesteld. Behoud de deploymentbranchbeperking tot main en vereiste reviewers waar beschikbaar. De environmentinstellingen zijn niet onafhankelijk uitleesbaar via de huidige connector; de succesvolle handmatige uitvoering op main bevestigt werkende secret-injectie. Gebruik uitsluitend een environment-secret NED_API_KEY, geen repositorybrede secret. Plaats nooit een key in chat, issues, code of artifacts.
 
-Na merge: start NED API contract observation op main en vink confirm_live aan. De [uitgebreide probe](../scripts/ned_contract_extended.py) voert maximaal 18 sequentiële GET-verzoeken uit, zonder retries, redirects of willekeurige URL's. De oorspronkelijke twee-waarnemingenprobe blijft beschikbaar voor offline regressietests. Sockettimeout 15 s, per response maximaal 2 MiB, uitsluitend de vaste TLS-host, geen account-/gebruikersendpoints. Stop bij de eerste transport-, veiligheids- of schemafout; bekende tijdzoneafwijkingen en afwijkende geldige totaaltellingen bij één pagina worden verzameld en resulteren in failure. De uitvoer bevat uitsluitend vooraf bekende querydimensies, dagen, tellingen, veldtypen en booleans; geen ruwe energiewaarden, headers, identifiers, next-links of payloads.
+Na merge: start NED API contract observation op main en vink confirm_live aan. De [uitgebreide probe](../scripts/ned_contract_extended.py) voert maximaal 18 sequentiële GET-verzoeken uit, zonder retries, redirects of willekeurige URL's. De oorspronkelijke twee-waarnemingenprobe blijft beschikbaar voor offline regressietests. Sockettimeout 15 s, per response maximaal 2 MiB, uitsluitend de vaste TLS-host, geen account-/gebruikersendpoints. Stop bij de eerste transport-, veiligheids- of schemafout; bekende tijdzoneafwijkingen en afwijkende geldige totaaltellingen bij één pagina worden verzameld en resulteren in failure. De uitvoer bevat uitsluitend vooraf bekende querydimensies, dagen, bekende response-timezone-ID's, tellingen, veldtypen en booleans; geen ruwe energiewaarden, headers, identifiers, next-links of payloads.
 
 ### Uitgebreide contractmatrix (BL-003)
 
@@ -131,11 +157,11 @@ Na merge: start NED API contract observation op main en vink confirm_live aan. D
 | Paginering nationale zon | 2 | 48 + 48 records, exact volgende query, totaal 96, geen extra pagina |
 | NL-tijdzone kwartierdata | 3 | 29 maart 2026: 92, 25 oktober 2026: 100, twee dagen geleden: kalenderdaglengte berekend via Europe/Amsterdam |
 | NL-dagaggregatie | 2 | Eén interval van 23 respectievelijk 25 uur op de vaste DST-datums |
-| UTC-dagaggregatie | 1 | Lege collectie volgens de handleiding (niet als authenticatiefout beoordelen) |
+| UTC-dagaggregatie | 1 | Oude verwachting: lege collectie; live één record, grenzen nog onbekend (TZ-003) |
 
 Controleer gedocumenteerde IRI's voor alle zes dimensies, id-type, UTC-aware validfrom/validto/lastupdate, strikt positieve intervalduur, oplopende en volledige intervaldekking, hydra:member, totalItems en paginalimieten. Next-link moet dezelfde HTTPS-host of een relatief pad en exact de zelf opgebouwde tweede query bevatten; volg de aangeleverde URL nooit rechtstreeks. Elke numerieke metriek moet bij aanwezigheid en niet-null eindig numeriek zijn; booleans en NaN/Infinity worden verworpen. Rapporteer per metriek ontbrekend, null, nul, negatief en groter dan één, zonder conclusies over eenheid of percentage-schaal. De matrix test strikte gedocumenteerde verwachtingen; een contractafwijking kan de run stoppen en moet worden onderzocht, niet stilzwijgend geaccepteerd.
 
-De zes nieuwe offline unittest-methoden gebruiken uitsluitend synthetische gegevens en dekken alle 18 requests, verkeerde dimensies, onveilige next-links, ongeldige getallen/tijdstempels, ontbrekende dekking en redactie. De twaalf contracttests (zes bestaande plus zes nieuwe) zijn lokaal geslaagd op Python 3.13.5. [Eerste Baseline CI-run 45473451958](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45473451958) bevestigt geslaagde offline tests en strict mypy op de exacte Python-versie; Ruff-format en Pylint vonden formatterings- en duplicatiebevindingen, die gericht zijn hersteld. Herhaalde CI op de gemergede commit slaagt; uitgebreide live-run is gedeeltelijk geslaagd zoals hierboven vastgelegd. Twee aanvullende offline regressietests (in totaal veertien contracttests) slagen lokaal op Python 3.13.5; CI van de vervolgprobe blijft open. Een groene run bewijst deze nationale combinaties en tijdvakken, niet alle regio's, horizon, eenheden, foutsemantiek of rate-limit-scope.
+De zes nieuwe offline unittest-methoden gebruiken uitsluitend synthetische gegevens en dekken alle 18 requests, verkeerde dimensies, onveilige next-links, ongeldige getallen/tijdstempels, ontbrekende dekking en redactie. De twaalf contracttests (zes bestaande plus zes nieuwe) zijn lokaal geslaagd op Python 3.13.5. [Eerste Baseline CI-run 45473451958](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45473451958) bevestigt geslaagde offline tests en strict mypy op de exacte Python-versie; Ruff-format en Pylint vonden formatterings- en duplicatiebevindingen, die gericht zijn hersteld. Herhaalde CI op de gemergede commit slaagt; uitgebreide live-run is gedeeltelijk geslaagd zoals hierboven vastgelegd. Twee aanvullende offline regressietests (in totaal veertien contracttests) slagen lokaal op Python 3.13.5; CI van de vervolgprobe is geslaagd in [Baseline CI 45475337532](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45475337532); PR #14 is gemerged. De zes vervolgobservaties zijn uitgevoerd, maar de live-run faalt zoals hierboven beschreven. Een groene run bewijst deze nationale combinaties en tijdvakken, niet alle regio's, horizon, eenheden, foutsemantiek of rate-limit-scope.
 
 De maintenance-probe gebruikt uitsluitend de standaardbibliotheek en is geen productieclient. De zes lokale unittest-tests met gesimuleerd transport zijn geslaagd op Python 3.13.5; eerste Baseline CI-run 45467538518 bevestigt de offline tests en audit. Formatterings- en mock-importbevindingen zijn hersteld; herhaalde CI is geslaagd in [Baseline CI-run 45468321699](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45468321699). De bestaande offline pre-commit-suite voert ze uit. De eerste geauthenticeerde observatie is geslaagd; BL-004 is functioneel afgerond. Volgende live-uitbreidingen vereisen opnieuw expliciete opt-in en een beoordeelde begrensde requestset.
 

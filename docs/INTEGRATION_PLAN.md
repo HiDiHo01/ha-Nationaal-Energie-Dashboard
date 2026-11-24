@@ -95,7 +95,7 @@ De integratie levert gegevens en bestuurt geen apparaten. Nationale opwek is gee
 
 ## 3. API-architectuur
 
-Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs. Eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; de uitgebreide opt-in P0-matrix en paginerings-/tijdzonecontroles zijn voorbereid, live bewijs blijft open; zie de vastgelegde veldtype-afwijkingen en resterende vragen in API_REFERENCE.md.
+Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs. Eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; de nationale UTC-P0-matrix en paginering zijn live bevestigd; NL-kwartierdekking voor historische zon is bevestigd, dagaggregatie-afwijkingen blijven open; zie de vastgelegde veldtype-afwijkingen en resterende vragen in API_REFERENCE.md.
 
 ### 3.1 API-verbinding
 
@@ -125,7 +125,7 @@ GET https://api.ned.nl/v1/utilizations
 | point | Geografische locatie |
 | type | Energiedrager |
 | granularity | Tijdsinterval |
-| granularitytimezone | Tijdzone van aggregatie |
+| granularitytimezone | Querytijdzone voor datumfilters en aggregaties; response-ID kan bij kwartierdata afwijken (zie API_REFERENCE.md) |
 | classification | Actueel of voorspelling |
 | activity | Activiteitstype |
 | validfrom[after] | Begin zoekinterval; inclusiviteit verifiëren |
@@ -678,7 +678,7 @@ from datetime import datetime, timezone
 now = datetime.now(timezone.utc)
 ```
 
-Onderscheid UTC-tijdstempels, Home Assistant-gebruikerstijdzone en Nederlandse kalenderaggregaties. De handleiding noemt granularitytimezone=0 voor UTC en 1 voor Nederlandse tijd; dag-, maand- en jaaraggregaties vereisen volgens de handleiding 1. Het eerdere plan constateerde inconsistentie met een documentatievoorbeeld. Bevestig dit met contracttests.
+Onderscheid UTC-tijdstempels, Home Assistant-gebruikerstijdzone, querytijdzone en response-tijdzone. De [live-observaties](API_REFERENCE.md#vervolgobservaties-tijdzones--24-november-2026) bevestigen voor nationale historische zonne-energie dat querytijdzone 1 bij kwartierdata records met ID 0 en correcte Nederlandse 23-, 24- en 25-uurskalendergrenzen geeft. Houd beide tijdzoneconcepten gescheiden. NL-dagaggregatie op de wintertijdsovergang heeft afwijkende intervalgrenzen; UTC-dagaggregatie levert in tegenstelling tot de oude verwachting één record. Gebruik API-dagaggregaten niet voor berekeningen zolang deze afwijkingen (TZ-002/TZ-003) niet zijn opgehelderd. Baseer Nederlandse kalenderberekeningen op volledig gevalideerde kwartierintervallen en bevestigde meetsemantiek; pas upstream-tijdstempels niet stilzwijgend aan. Andere datasets en granulariteiten blijven afzonderlijk te verifiëren.
 
 | Nederlandse kalenderdag | Uren | Kwartierintervallen |
 | --- | ---: | ---: |
@@ -1099,7 +1099,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Repositorystructuur | Basismappen en ondersteunende bestanden aanwezig |
 | Marketplace | Doel vastgelegd; niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
-| Live API-contracttests | Tien nationale P0-queries en paginering geslaagd; NL-tijdzoneafwijking, semantiek en volledige contractvalidatie open |
+| Live API-contracttests | Nationale UTC-P0-queries, paginering en NL-kwartierdekking voor historische zon bevestigd; twee dagaggregatie-afwijkingen, semantiek en volledige contractvalidatie open |
 | CI/CD | Basis-CI, pre-commit, dependency-audit en branchbescherming operationeel; inhoudelijke integratievalidatie nog niet uitgevoerd |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
