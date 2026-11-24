@@ -28,6 +28,7 @@ Lees eerst [AGENTS.md](../../../AGENTS.md), [AI_POLICY.md](../../../AI_POLICY.md
   uv run --locked pre-commit run --all-files --show-diff-on-failure
   ```
 
+- Formatteer ook alle gewijzigde test- en maintenancebestanden; handmatig afgebroken Query- en assertEqual-aanroepen zijn twee bewezen regressies. Laat de gelockte formatter beslissen, ook bij regels die onder de limiet passen. Voer de formatcheck uit op de definitieve inhoud na de laatste Python-wijziging; herhaal deze na iedere latere codewijziging. Een succesvolle unittest-run, syntaxiscontrole of handmatige lengtemeting vervangt de formatter niet.
 - Inspecteer de diff na formattering en herhaal relevante offline tests. Controleer na commit dat de daadwerkelijk gepushte inhoud overeenkomt met de gecontroleerde bestanden. Houd formatteringswijzigingen gericht; pas geen businesslogica, configuratie, lockfile of kwaliteitsdrempels aan om een formatteringsfout te omzeilen.
 - Bij falende CI: lees de exacte joblog, hook-ID `ruff-format`, exitcode, bestandslocatie en voorgestelde formatterdiff. Kan de gelockte omgeving lokaal niet worden uitgevoerd, pas uitsluitend de expliciete CI-formatterdiff toe en vermeld de lokale beperking. Verifieer op de nieuwe commit dat de verplichte Baseline CI én de Ruff-format-hook slagen; beschouw de fix vóór dat bewijs als onbevestigd. Gebruik [ci-workflow-maintenance](../ci-workflow-maintenance/SKILL.md) voor CI-diagnose.
 
@@ -43,3 +44,16 @@ Baseline: Python 3.14, Ruff 0.17.6, line-length 88. [Falende CI](https://github.
 ```
 
 De [herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45477494450/job/138741477108) slaagde; de logs bevestigen afzonderlijk Ruff-format en Ruff-lint. Dit bewijst de formatteringsfix op die commit, niet de live API-semantiek of native skillactivatie. Laat bij toekomstige codewijzigingen Ruff zelf de regelindeling bepalen.
+
+### Bewezen regressie — PR #21, 24 november 2026
+
+Baseline: Core 2026.11.3, Python 3.14.10, Ruff 0.17.6, line-length 88. [Falende Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45484642366/job/138766646265): hook ruff-format, exitcode 1, scripts/test_ned_contract_extended.py:269. Ruff-lint, Pylint maintenance, strict mypy maintenance, documentatie, offline tests en dependency-audit waren geslaagd. Het betrof geen inhoudelijke testfout. Ruff wilde uitsluitend de volgende wijziging:
+
+```diff
+-        self.assertEqual(
+-            [query.type_id for query in suite], [1, 2, 51, 27, 59, 27]
+-        )
++        self.assertEqual([query.type_id for query in suite], [1, 2, 51, 27, 59, 27])
+```
+
+[Herstelcommit 4a0bca6](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/commit/4a0bca648e68e50587a62f1d951df098cd50d0be): exacte CI-diff zonder testlogica, productiecode, lockfile of kwaliteitsdrempel te wijzigen; contractreferentie en backlog bijgewerkt. De lokale gelockte Python-omgeving ontbrak. [Herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45485551617/job/138769838010) is geslaagd, inclusief afzonderlijke Ruff-format- en Ruff-lint-hooks, Pylint, strict mypy, documentatievalidator, offline maintenance-tests, synthetische runtime-wheelproef en dependency-audit. Deze tweede formatterregressie bevestigt dat ook testbestanden de verplichte laatste formatcheck nodig hebben. Geen bewijs van live API-semantiek of native skillactivatie.
