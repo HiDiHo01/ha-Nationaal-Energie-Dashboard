@@ -48,7 +48,6 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
         self._async_abort_entries_match()
         return await self._async_key_step("user", user_input)
 
-    @override
     async def async_step_reauth(
         self, entry_data: Mapping[str, Any]
     ) -> ConfigFlowResult:
@@ -81,9 +80,12 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             api_key = user_input.get(CONF_API_KEY)
-            if not isinstance(api_key, str) or not api_key or any(
-                char.isspace() or ord(char) < 32 or ord(char) == 127
-                for char in api_key
+            if (
+                not isinstance(api_key, str)
+                or not api_key
+                or not api_key.isascii()
+                or not api_key.isprintable()
+                or any(char.isspace() for char in api_key)
             ):
                 errors[CONF_API_KEY] = "invalid_key_format"
             else:
