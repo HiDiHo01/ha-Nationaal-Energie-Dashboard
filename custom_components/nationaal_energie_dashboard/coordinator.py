@@ -4,10 +4,10 @@ No HTTP client or authentication behavior is implemented here. The provider
 boundary remains closed until the independent client is contract-validated.
 """
 
+import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-import logging
+from datetime import UTC, datetime, timedelta
 from math import isfinite
 from typing import Protocol
 
@@ -83,9 +83,7 @@ class NedRuntimeData:
 type NedConfigEntry = ConfigEntry[NedRuntimeData]
 
 
-def create_provider(
-    _hass: HomeAssistant, _entry: NedConfigEntry
-) -> NedDataProvider:
+def create_provider(_hass: HomeAssistant, _entry: NedConfigEntry) -> NedDataProvider:
     """Fail closed until the independent client and distribution are ready.
 
     This explicit boundary can be replaced by a validated client adapter.
@@ -131,7 +129,7 @@ def select_reading(
     """
     if now.utcoffset() is None:
         raise ValueError("Selection requires a timezone-aware timestamp.")
-    utc_now = now.astimezone(timezone.utc)
+    utc_now = now.astimezone(UTC)
     if forecast:
         target = utc_now.replace(
             minute=utc_now.minute // 15 * 15, second=0, microsecond=0
@@ -146,9 +144,7 @@ def select_reading(
             if timedelta(0) <= utc_now - reading.valid_to <= MAX_CURRENT_AGE
         )
         latest = max((reading.valid_to for reading in candidates), default=None)
-        matches = tuple(
-            reading for reading in candidates if reading.valid_to == latest
-        )
+        matches = tuple(reading for reading in candidates if reading.valid_to == latest)
     return matches[0] if len(matches) == 1 else None
 
 
