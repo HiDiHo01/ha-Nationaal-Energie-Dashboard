@@ -1,6 +1,6 @@
 """Define the eight planned national energy sensors for offline validation."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -138,7 +138,7 @@ class NedSensor(CoordinatorEntity[DataUpdateCoordinator[NedSnapshot]], SensorEnt
             return None
         return select_reading(
             self.coordinator.data.get(self._key, ()),
-            datetime.now(timezone.utc),
+            datetime.now(UTC),
             forecast=self._key == SensorKey.CO2_FORECAST,
         )
 
