@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Gerichte dagaggregatieprobe voor TZ-002/TZ-003 met twee vaste aanvragen, intervalduur en afzonderlijke grensafwijkingen; live-verificatie blijft open.
+
 - Nationale P0-datasets en paginering live gevalideerd voor de geteste queries; NL-kwartierdekking voor historische zon bevestigd, afwijkende recordtijdzone en twee dagaggregatie-afwijkingen vastgelegd. Verdere contractvalidatie blijft open.
 
 - Tweetalige projectsite gemigreerd naar Jekyll met gedeelde layouts, gelockte gems en gecontroleerde Pages-deployment.
@@ -19,6 +21,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Focused daily aggregation probe for TZ-002/TZ-003 with two fixed requests, interval duration and separate boundary offsets; live verification remains pending.
 
 - National P0 datasets and pagination validated live for the tested queries; Dutch quarter-hour coverage for historical solar data confirmed, differing record timezone and two daily aggregation discrepancies documented. Further contract validation remains pending.
 

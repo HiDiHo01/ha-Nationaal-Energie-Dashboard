@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: Full matrix or remaining timezone observations only
+        description: Daily discrepancies (2), timezone (6), or full matrix (18)
         type: choice
-        options: [full, timezone]
-        default: timezone
+        options: [daily, timezone, full]
+        default: daily
         required: true
       confirm_live:
-        description: Authorize up to 6 (timezone) or 18 (full) read-only requests
+        description: Authorize the selected bounded read-only scope (2, 6 or 18 requests)
         type: boolean
         required: true
         default: false
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version-file: .python-version
-      - name: Observe fixed national P0, pagination and timezone contract
+      - name: Observe selected fixed NED contract scope
         env:
           NED_API_KEY: ${{ secrets.NED_API_KEY }}
           NED_CONTRACT_SCOPE: ${{ inputs.scope }}

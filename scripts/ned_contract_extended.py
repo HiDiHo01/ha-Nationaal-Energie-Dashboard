@@ -22,6 +22,12 @@ DATASETS = (1, 2, 51, 27, 59)
 METRICS = ("capacity", "volume", "emission", "emissionfactor", "percentage")
 MAX_REQUESTS = 18
 TIMEZONE_REQUESTS = 6
+DAILY_REQUESTS = 2
+REQUEST_BUDGETS = {
+    "full": MAX_REQUESTS,
+    "timezone": TIMEZONE_REQUESTS,
+    "daily": DAILY_REQUESTS,
+}
 RESOURCE_NAMES = {
     "type": "types",
     "point": "points",
@@ -80,14 +86,14 @@ class Query:
         return f"/v1/utilizations?{urlencode(parameters)}"
 
     def intervals(self) -> list[tuple[datetime, datetime]]:
-        """Calculate expected UTC intervals for the requested calendar day."""
+        """Calculate calendar bounds; UTC daily coverage is a test hypothesis."""
         zone = ZoneInfo("Europe/Amsterdam") if self.timezone_id else UTC
         start = datetime.combine(self.day, time.min, zone).astimezone(UTC)
         end = datetime.combine(self.day + timedelta(days=1), time.min, zone).astimezone(
             UTC
         )
         if self.granularity == 6:
-            return [(start, end)] if self.timezone_id else []
+            return [(start, end)]
         step = timedelta(minutes=15)
         return [
             (start + i * step, start + (i + 1) * step)
@@ -121,7 +127,18 @@ def build_suite(today: date) -> tuple[Query, ...]:
 
 
 def select_suite(today: date, scope: str) -> tuple[Query, ...]:
-    """Select a fixed full suite or the six remaining timezone queries."""
+    """Select a fixed scope; daily repeats only the two disputed observations."""
+    if scope == "daily":
+        return (
+            Query(
+                type_id=2,
+                classification=2,
+                day=date(2026, 10, 25),
+                timezone_id=1,
+                granularity=6,
+            ),
+            Query(type_id=2, classification=2, day=date(2026, 11, 22), granularity=6),
+        )
     suite = build_suite(today)
     if scope == "full":
         return suite
@@ -221,6 +238,28 @@ def _metric_counts(records: list[dict[str, object]]) -> dict[str, dict[str, int]
     return result
 
 
+def _daily_timing(
+    expected: tuple[datetime, datetime],
+    intervals: list[tuple[datetime, datetime]],
+) -> dict[str, float | None]:
+    """Report only duration and signed boundary offsets, not raw timestamps."""
+    expected_start, expected_end = expected
+    result: dict[str, float | None] = {
+        "expected_duration_seconds": (expected_end - expected_start).total_seconds(),
+        "observed_duration_seconds": None,
+        "start_offset_seconds": None,
+        "end_offset_seconds": None,
+    }
+    if len(intervals) == 1:
+        actual_start, actual_end = intervals[0]
+        result.update(
+            observed_duration_seconds=(actual_end - actual_start).total_seconds(),
+            start_offset_seconds=(actual_start - expected_start).total_seconds(),
+            end_offset_seconds=(actual_end - expected_end).total_seconds(),
+        )
+    return result
+
+
 def observe(api_key: str, query: Query) -> bool:
     """Validate one or exactly two pages, printing only sanitized observations."""
     print(json.dumps({"query": query.dimensions(), "day": query.day.isoformat()}))
@@ -280,6 +319,11 @@ def observe(api_key: str, query: Query) -> bool:
                 "day": query.day.isoformat(),
                 "expected_records": len(expected),
                 "coverage_complete": complete,
+                **(
+                    _daily_timing(expected[0], intervals)
+                    if query.granularity == 6
+                    else {}
+                ),
                 "timezone_matches_request": timezone_ids <= {query.timezone_id},
             },
             sort_keys=True,
@@ -294,10 +338,10 @@ def main() -> int:
     if not api_key.isascii() or not api_key.isprintable() or not api_key.strip():
         print("Missing or invalid NED_API_KEY", file=sys.stderr)
         return 1
-    scope = os.environ.get("NED_CONTRACT_SCOPE", "full")
+    scope = os.environ.get("NED_CONTRACT_SCOPE", "daily")
     try:
         suite = select_suite(datetime.now(UTC).date(), scope)
-        budget = TIMEZONE_REQUESTS if scope == "timezone" else MAX_REQUESTS
+        budget = REQUEST_BUDGETS[scope]
         if sum(2 if query.page_size == 48 else 1 for query in suite) != budget:
             raise ProbeError("Invalid request budget")
         results = [observe(api_key, query) for query in suite]
