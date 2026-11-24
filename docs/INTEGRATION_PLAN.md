@@ -951,6 +951,11 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 ### 21.2 Fase 1 — API-client
 
+Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk starten vóór volledige BL-003-contractacceptatie: zelfstandige packageconfiguratie, teststructuur, exception-hiërarchie en generieke asynchrone transportlaag met uitsluitend synthetische tests. Datasetafhankelijke parsing, catalogus/meetsemantiek, authenticatie- en foutstatusmapping, API-specifieke rate limiting, revisies, kalenderaggregaties en live NED-aanvragen worden niet vrijgegeven zolang hun contractvoorwaarden ontbreken. BL-003 blijft open; volledige fase-1-acceptatie en volgende afhankelijke fasen blijven geblokkeerd. Geen wijziging aan coverage, CI-kwaliteitsdrempels, beveiliging, Platinum-doel of publicatietoestemming.
+
+- [ ] Contractonafhankelijke packagebasis en exception-hiërarchie: implementatie en negen lokale tests gereed op Python 3.13.5; exacte productie-baseline, wheelbouw en CI nog te bevestigen.
+- [ ] Generieke transportlaag met synthetische tests; geen NED-specifieke mapping.
+
 - [ ] Zelfstandig Python-package implementeren.
 - [ ] Zelfstandige API-test-extra en fixtures inrichten; offline Python-next-smoketest uitvoeren zodra de library beschikbaar is.
 - [ ] Enums en datasetcatalogus ontwikkelen.
@@ -1128,7 +1133,7 @@ Domainnaam, pollingintervallen, intern requestbudget, packagearchitectuur, entit
 
 ### 26.2 Volgende stap
 
-AGENTS.md en AI_POLICY.md zijn aanwezig. Rond de resterende fase-0-werkzaamheden af en valideer het API-contract voordat de API-client wordt geïmplementeerd. Houd dit plan actueel bij architectuurbeslissingen, contractwijzigingen en oplevering van fasen.
+AGENTS.md en AI_POLICY.md zijn aanwezig. Volg de beperkte parallelle fase-1-vrijgave in §21.2; voltooi BL-003 vóór contractafhankelijke implementatie en volledige faseacceptatie. Houd dit plan actueel bij architectuurbeslissingen, contractwijzigingen en oplevering van fasen.
 
 ### 26.3 Auteursrecht en distributiebesluit
 

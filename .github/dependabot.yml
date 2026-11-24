@@ -36,6 +36,15 @@ updates:
           - minor
           - patch
 
+  # Independent PEP 621 package manifest; requires manual review.
+  - package-ecosystem: pip
+    directory: /packages/ned-api
+    schedule:
+      interval: daily
+      time: "08:45"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 5
+
   - package-ecosystem: pre-commit
     directory: /
     schedule:
