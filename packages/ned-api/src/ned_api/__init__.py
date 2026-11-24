@@ -2,6 +2,7 @@
 
 from .authentication import NedAuthenticationClient
 from .exceptions import (
+    NedAccessDeniedError,
     NedApiError,
     NedAuthenticationError,
     NedConnectionError,
@@ -15,6 +16,7 @@ from .exceptions import (
 from .transport import NedTransport, TransportResponse
 
 __all__ = [
+    "NedAccessDeniedError",
     "NedApiError",
     "NedAuthenticationClient",
     "NedAuthenticationError",
