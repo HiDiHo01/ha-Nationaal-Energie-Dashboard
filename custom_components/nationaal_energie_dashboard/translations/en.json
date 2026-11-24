@@ -25,7 +25,11 @@
     },
     "error": {
       "contract_pending": "The NED API client is not ready for use. Configuration is blocked until contract validation and runtime distribution have been completed.",
-      "invalid_key_format": "Enter a non-empty API key without whitespace or control characters."
+      "invalid_key_format": "Enter a non-empty API key without whitespace or control characters.",
+      "invalid_auth": "Authentication was rejected. Check the API key.",
+      "access_denied": "NED denied access (HTTP 403). Check the key and access permissions.",
+      "cannot_connect": "Could not connect to NED. Try again later.",
+      "cannot_validate": "Access could not be established. Check NED availability and try again later."
     },
     "abort": {
       "already_configured": "Nationaal Energie Dashboard is already configured.",
