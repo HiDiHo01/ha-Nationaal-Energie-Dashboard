@@ -999,6 +999,8 @@ Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk start
 
 ### 21.3 Fase 2 — Integration Core
 
+Ontwikkelconcept op eigenaarsopdracht: de negen initiële integratiebestanden en acht sensordefinities zijn geschreven op een afzonderlijke branch, met een gemaskeerde Config Flow, een injecteerbare snapshotprovider en een afzonderlijke conceptauthenticatieclient. De providerfactory en de echte authenticatiekoppeling blokkeren actieve entries en NED-verkeer. De 30-minuten-stalegrens is voorlopig en vereist verificatie; het conceptmanifest bevat uitsluitend ontwikkelmetadata en nog geen gepubliceerde runtime-library. Geen faseacceptatie; de onderstaande checkboxes blijven open totdat de vereiste contract-, runtime- en testbewijzen beschikbaar zijn.
+
 - [ ] manifest.json configureren.
 - [ ] Config Flow implementeren.
 - [ ] Options Flow implementeren.
