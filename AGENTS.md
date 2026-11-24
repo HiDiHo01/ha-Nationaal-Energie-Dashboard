@@ -123,7 +123,7 @@ Baseline 24 november 2026: Home Assistant Core 2026.11.3, Python 3.14, upstream 
 Volg hoofdstukken 2, 3, 6, 7, 12 en 15 van het integratieplan en de actuele broncontrole in [API_REFERENCE.md](docs/API_REFERENCE.md).
 
 - Valideer dataset-ID's, activiteiten, regio's, classificaties, granulariteit, tijdzone-ID's, velden, headers, authenticatie, paginering, querygrenzen en limieten vóór productiegebruik.
-- Gedocumenteerd: HTTPS REST API v1 met /utilizations, X-AUTH-TOKEN en JSON-LD. Het machineleesbare schema is opgehaald; zie de vastgelegde verschillen. Live gedrag en semantiek blijven onbevestigd tot contractvalidatie.
+- Gedocumenteerd: HTTPS REST API v1 met /utilizations, X-AUTH-TOKEN en JSON-LD. Het machineleesbare schema is opgehaald; zie de vastgelegde verschillen. De eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; respecteer de gedocumenteerde runtimeveldtypen naast het OpenAPI-schema. Volledige live contractvalidatie en semantiek blijven open.
 - Gebruik DatasetKey, DatasetDefinition, EnergyRecord, EnergySeries, DatasetSnapshot, CoordinatorData en NedRuntimeData waar passend. Datasetidentificatie omvat type, point, activity, granularity, classification en granularity_timezone.
 - Centraliseer validatie en parsing. Onderscheid nul, null, ontbrekende velden en ongeldige waarden. Wijs NaN, oneindige waarden en ongeldige intervallen af; beoordeel negatieve waarden per metriek.
 - Sorteer chronologisch, dedupliceer op dataset plus geldigheidsinterval en verwerk revisies zonder dubbeltelling. Behandel lastupdate niet als automatisch bewijs van inhoudelijke wijziging.
@@ -243,6 +243,8 @@ pip-audit
 ### Autonoom documentatie- en taalbeheer
 
 **Verplichte regel: AI beheert documentatie autonoom.** Controleer bij iedere taak en faseovergang de impact op README, changelog, backlog, integratieplan, ontwikkelreferenties, skills en gebruikersdocumentatie. Werk alle geraakte documenten in dezelfde pull request bij zonder afzonderlijke opdracht. Baseer status, voorbeelden, versies en compatibiliteitsclaims op geverifieerde implementatie en testbewijs. Vermeld ontbrekende controles en onderhoud canonieke bronnen zonder duplicatie. Houd beide gebruikersdocumentatietalen inhoudelijk gelijkwaardig; gebruik README.md (NL), README.en.md (EN) en voor nieuwe gebruikershandleidingen gelijknamige bestanden onder docs/user/nl en docs/user/en. Changelog bevat beide talen; interne technische en beleidsdocumenten mogen Nederlands blijven. Verifieer verwijzingen, vertaalpariteit en inhoudelijke juistheid vóór oplevering. Wijzig geen rechten of kwaliteitscriteria.
+
+- Onderhoud de openbare tweetalige projectsite onder site/ bij relevante gebruikersgerichte wijzigingen. Publiceer alleen de expliciete allowlist via [Pages-workflow](.github/workflows/pages.yaml); houd de status gelijk aan de README-versies en link naar de canonieke gebruiksvoorwaarden. Geen interne documenten, secrets of ruwe testgegevens in het publicatiepakket.
 
 - Voer de [documentatievalidator](scripts/check_project_docs.py) en de regressietests via pre-commit uit. Controleer inhoud en externe verwijzingen aanvullend handmatig; bestandspariteit bewijst geen vertaal- of inhoudskwaliteit. Vertalingen zijn verplicht vanaf het manifest, of eerder zodra vertaalbestanden worden toegevoegd. Houd ontbrekende native gedragsevaluaties expliciet open.
 
