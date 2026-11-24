@@ -36,7 +36,7 @@ Deze backlog concretiseert de openstaande instellingen en vervolgstappen uit de 
 
 ## Actuele bewijzen en beperkingen
 
-- BL-004: opt-in contractworkflow en begrensde probe voorbereid; zes lokale offline unittest-tests geslaagd (Python 3.13.5). Definitieve CI-validatie open. Environment/secret en live-uitvoering blijven gebruikersactie.
+- BL-004: opt-in contractworkflow en begrensde probe voorbereid; zes lokale offline unittest-tests geslaagd (Python 3.13.5). Eerste Baseline CI-run 45467538518: offline tests, security-audit en documentatie geslaagd; Ruff-format en drie strict-mypy-mockimports gericht hersteld, zes lokale tests opnieuw geslaagd. Herhaalde CI-validatie open. Environment/secret en live-uitvoering blijven gebruikersactie.
 
 - BL-003: officiële productiehandleiding, datacatalogus en changelog gecontroleerd op 24 november 2026; zie [contractonderzoek](API_REFERENCE.md). OpenAPI 3.1.0 opgehaald via docs-route in [run 45466844487](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45466844487), ZIP/JSON-hash gecontroleerd en schema geparseerd. Schema-afwijkingen in numerieke velden en emissie-eenheid vastgelegd. Geen live geauthenticeerd API-request.
 

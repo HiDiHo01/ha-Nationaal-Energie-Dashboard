@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 
 HOST = "api.ned.nl"
 MAX_BYTES = 2 * 1024 * 1024
+TRANSPORT_ERRORS = (OSError, http.client.HTTPException, ValueError, RecursionError)
 FIELDS = (
     "id",
     "type",
@@ -137,7 +138,7 @@ def main() -> int:
     except ProbeError as error:
         print(f"Contract observation failed: {error}", file=sys.stderr)
         return 1
-    except (OSError, http.client.HTTPException, ValueError, RecursionError):
+    except TRANSPORT_ERRORS:
         print("Contract observation failed: transport or JSON error", file=sys.stderr)
         return 1
     print("Two bounded observations completed; full contract validation remains open.")

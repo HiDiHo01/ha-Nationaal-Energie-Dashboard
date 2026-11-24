@@ -1,7 +1,9 @@
 """Offline tests of the bounded contract probe; no real network or secrets."""
 
+import http.client
 import io
 import json
+import os
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import date
@@ -65,7 +67,7 @@ class ProbeTests(unittest.TestCase):
 
     def test_http_boundaries(self) -> None:
         """Reject redirects, unauthorized responses, media mismatch and oversize."""
-        with patch.object(ned.http.client, "HTTPSConnection") as factory:
+        with patch.object(http.client, "HTTPSConnection") as factory:
             connection = factory.return_value
             response = connection.getresponse.return_value
             for status in (302, 401, 403, 429, 500):
@@ -94,7 +96,7 @@ class ProbeTests(unittest.TestCase):
         """Fail before making requests when the key is absent or invalid."""
         for value in ("", " ", "invalid\nvalue"):
             with (
-                patch.dict(ned.os.environ, {"NED_API_KEY": value}),
+                patch.dict(os.environ, {"NED_API_KEY": value}),
                 patch.object(ned, "probe") as observe,
                 redirect_stderr(io.StringIO()),
             ):
@@ -104,7 +106,7 @@ class ProbeTests(unittest.TestCase):
     def test_main(self) -> None:
         """Use at most two queries and redact upstream exception text."""
         with (
-            patch.dict(ned.os.environ, {"NED_API_KEY": "synthetic"}),
+            patch.dict(os.environ, {"NED_API_KEY": "synthetic"}),
             patch.object(ned, "probe", return_value={"record_count": 1}) as observe,
             redirect_stdout(io.StringIO()) as output,
             redirect_stderr(io.StringIO()) as errors,
