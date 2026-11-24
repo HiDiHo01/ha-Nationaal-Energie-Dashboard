@@ -16,6 +16,10 @@ Lees eerst [AGENTS.md](../../../AGENTS.md), [AI_POLICY.md](../../../AI_POLICY.md
 5. Test grenswaarden, negatieve waarden waar geldig, null, nul, NaN, onvolledige dekking, gelijke scores en vroegste optimale vensters. Verifieer HA device/state classes tegen de actuele sensordocumentatie.
 6. Documenteer semantische keuzes, dekking, onzekerheid en tests; gebruik ha-quality-verification.
 
+## Meetsemantiek: relaties en eenheden
+
+De [NED-definities](https://ned.nl/nl/definities) documenteren capacity = 4 × volume bij kwartierdata. Vergelijk op recordniveau; marginale tellingen bewijzen geen numerieke gelijkheid. Voor type 27 is de emission-eenheid tegenstrijdig (kg versus ton). Gebruik alleen positieve waarden voor de twee diagnostische hypothesen tegen volume × emissionfactor; behandel 3 kW en 1% uit de [semantiekprobe](../../../docs/API_REFERENCE.md#gerichte-kwartiersemantiekprobe-scope-semantics) niet als productieacceptatiegrenzen. Onderscheid null, ontbrekend, nul, ongeldig en niet-toepasselijk; geen emissiemeting uit nul voor niet-ondersteunde velden. Current kan upstream forecasts bevatten. Geen automatische conversie zonder bewijs.
+
 ## Dagaggregatie: grenzen afzonderlijk valideren
 
 Controleer bij iedere kalenderaggregatie de verwachte start, het exclusieve einde en de duur onafhankelijk. Een juiste response-tijdzone-ID, recordtelling of duur bewijst geen juiste kalenderdekking. Bereken de verwachte kalendergrenzen in de gevraagde tijdzone en vergelijk in UTC; offsets zijn ontvangen minus verwacht. Gebruik 92/96/100 kwartieren voor de Nederlandse 23/24/25-uursdagen waar volledige kwartierdekking is bevestigd. Tel volumes pas op nadat ook de meetsemantiek is vastgesteld.

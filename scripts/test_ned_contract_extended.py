@@ -262,6 +262,73 @@ class ExtendedTests(unittest.TestCase):
                 self.assertEqual(summary["start_offset_seconds"], None if empty else 0)
                 self.assertEqual(summary["end_offset_seconds"], None if empty else 0)
 
+    def test_semantics_scope(self) -> None:
+        """Select six national UTC quarters without repeating daily probes."""
+        suite = extended.select_suite(date(2026, 11, 24), "semantics")
+        self.assertEqual(len(suite), 6)
+        self.assertEqual([query.type_id for query in suite], [1, 2, 51, 27, 59, 27])
+        self.assertEqual([query.classification for query in suite], [2] * 5 + [1])
+        self.assertEqual([query.day for query in suite[:5]], [date(2026, 11, 22)] * 5)
+        self.assertEqual(suite[-1].day, date(2026, 11, 25))
+        self.assertTrue(
+            all(
+                query.inspect_semantics
+                and query.granularity == 4
+                and query.timezone_id == 0
+                and query.page_size == 100
+                for query in suite
+            )
+        )
+
+    def test_semantic_counts(self) -> None:
+        """Distinguish unit hypotheses, missing data and diagnostic tolerances."""
+        query = extended.select_suite(date(2026, 11, 24), "semantics")[3]
+        records: list[dict[str, object]] = [
+            {"capacity": 4000, "volume": 1000, "emissionfactor": 0.2, "emission": 200},
+            {"capacity": 4002, "volume": 1000, "emissionfactor": 0.2, "emission": 0.2},
+            {"capacity": 4004, "volume": 1000, "emissionfactor": 0.2, "emission": 25},
+            {"capacity": 0, "volume": 0, "emissionfactor": 0.2, "emission": 0},
+            {"capacity": None, "volume": 1000},
+        ]
+        self.assertEqual(
+            extended._semantic_counts(records, query),  # pylint: disable=protected-access
+            {
+                "capacity_relation": {
+                    "exact": 2,
+                    "within_3_kw": 1,
+                    "outside_3_kw": 1,
+                    "unavailable": 1,
+                },
+                "emission_unit_hypothesis": {
+                    "kg_within_1_percent": 1,
+                    "tonne_within_1_percent": 1,
+                    "neither": 1,
+                    "nonpositive": 1,
+                    "unavailable": 1,
+                },
+            },
+        )
+
+    def test_semantics_redaction(self) -> None:
+        """Report category counts without exposing synthetic source values."""
+        query = extended.select_suite(date(2026, 11, 24), "semantics")[0]
+        document = self._response(query)
+        with (
+            patch.object(
+                extended, "fetch_body", return_value=json.dumps(document).encode()
+            ) as fetch,
+            redirect_stdout(io.StringIO()) as output,
+        ):
+            self.assertTrue(extended.observe("synthetic", query))
+            self.assertEqual(fetch.call_count, 1)
+            summary = json.loads(output.getvalue().splitlines()[1])
+            self.assertEqual(
+                summary["semantic_counts"]["capacity_relation"]["outside_3_kw"], 96
+            )
+            self.assertNotIn("emission_unit_hypothesis", summary["semantic_counts"])
+            self.assertNotIn("12345.67", output.getvalue())
+            self.assertNotIn("synthetic-private", output.getvalue())
+
     def test_main(self) -> None:
         """Enforce opt-in key injection, request budget and sanitized errors."""
         with (
@@ -291,3 +358,9 @@ class ExtendedTests(unittest.TestCase):
             os.environ["NED_CONTRACT_SCOPE"] = "daily"
             self.assertEqual(extended.main(), 1)
             self.assertEqual(observe.call_count, 2)
+            observe.reset_mock()
+            observe.side_effect = None
+            observe.return_value = True
+            os.environ["NED_CONTRACT_SCOPE"] = "semantics"
+            self.assertEqual(extended.main(), 0)
+            self.assertEqual(observe.call_count, 6)
