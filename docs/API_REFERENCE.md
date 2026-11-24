@@ -180,7 +180,30 @@ Nieuwe opt-in scope met zes afzonderlijke nationale UTC-kwartierqueries, page 1,
 - Alleen type 27: bij positieve volume, factor en emission toets emission versus volume × emissionfactor (kg) en emission × 1000 versus hetzelfde product (tonhypothese); tel overeenstemming binnen 1% relatieve afwijking, geen overeenstemming, niet-positieve en niet-beschikbare waarden. De 1%-band is uitsluitend een diagnostische keuze; geen unitgarantie of acceptatiegrens. Geen afleiding uit nulwaarden of vergelijking voor niet-ondersteunde datasets.
 - Bestaande metriek-, veldtype-, dimensie-, paginering- en intervaldekkingcontroles blijven behouden. De nieuwe uitvoer bevat alleen categorieaantallen; geen ruwe waarden, ratio's, residuals of identifiers. Een geslaagde workflow betekent alleen structurele contractobservatie; de semantische tellingen moeten apart worden beoordeeld.
 
-[Eerste Baseline CI van PR #21](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45484642366/job/138766646265): offline maintenance-tests, Ruff-lint, Pylint, strict mypy, documentatievalidatie en dependency-audit geslaagd op de gelockte baseline. Alleen Ruff-format faalde op scripts/test_ned_contract_extended.py:269 (assertEqual-aanroep over drie regels); exact de CI-formatterdiff toegepast, zonder testlogica te veranderen. [Herstelcommit 4a0bca6](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/commit/4a0bca648e68e50587a62f1d951df098cd50d0be); [herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45485551617/job/138769838010) geslaagd, inclusief Ruff-format, Ruff-lint, offline maintenance-tests, Pylint, strict mypy, documentatie, synthetische runtime-wheelproef en audit. Regressie vastgelegd in de [kwaliteitsverificatieskill](../.agents/skills/ha-quality-verification/SKILL.md). Deze probe is voorbereid, niet live uitgevoerd. Leveranciersverduidelijking blijft vereist voor emission-eenheid/afronding, percentage-schaal en niet-toepasselijke waarden, TZ-002/TZ-003, revisies, forecastgrenzen en fout-/ratelimitsemantiek. Geen nieuwe live-aanvragen zonder expliciete autorisatie.
+[Eerste Baseline CI van PR #21](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45484642366/job/138766646265): offline maintenance-tests, Ruff-lint, Pylint, strict mypy, documentatievalidatie en dependency-audit geslaagd op de gelockte baseline. Alleen Ruff-format faalde op scripts/test_ned_contract_extended.py:269 (assertEqual-aanroep over drie regels); exact de CI-formatterdiff toegepast, zonder testlogica te veranderen. [Herstelcommit 4a0bca6](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/commit/4a0bca648e68e50587a62f1d951df098cd50d0be); [herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45485551617/job/138769838010) geslaagd, inclusief Ruff-format, Ruff-lint, offline maintenance-tests, Pylint, strict mypy, documentatie, synthetische runtime-wheelproef en audit. Regressie vastgelegd in de [kwaliteitsverificatieskill](../.agents/skills/ha-quality-verification/SKILL.md). De probe is na merge van PR #21 live uitgevoerd; zie resultaten hieronder. Leveranciersverduidelijking blijft vereist voor emission-eenheid/afronding, percentage-schaal en niet-toepasselijke waarden, TZ-002/TZ-003, revisies, forecastgrenzen en fout-/ratelimitsemantiek. Geen nieuwe live-aanvragen zonder expliciete autorisatie.
+
+### Live-resultaat scope semantics — 24 november 2026
+
+[Live-job 138771818423](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45486109474/job/138771818423) op main (aef5851c0b681feb8676d544a870a5120d534889), handmatig gestart: success. Alle zes nationale UTC-kwartierqueries leveren 96 records, exacte dekking, correcte dimensies en response-timezone-ID 0, overeenkomende totalItems en geen volgende pagina. Voor alle 576 ontvangen records zijn de vijf metrieken aanwezig, niet-null, niet-negatief en eindig; percentage nergens boven één. Historie: 22 november 2026; type 27 forecast: 25 november 2026. Geen bewijs voor andere dagen, regio's, horizon of algemene nullability.
+
+| Type | Classificatie | Exact capacity = 4 × volume | Afwijking > 0 t/m 3 kW | Afwijking > 3 kW | Niet vergelijkbaar |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 1 | 2 | 14 | 58 | 24 | 0 |
+| 2 | 2 | 63 | 25 | 8 | 0 |
+| 51 | 2 | 23 | 73 | 0 | 0 |
+| 27 | 2 | 96 | 0 | 0 | 0 |
+| 59 | 2 | 22 | 74 | 0 | 0 |
+| 27 | 1 | 96 | 0 | 0 | 0 |
+| Totaal | | 314 | 230 | 32 | 0 |
+
+SEM-001: de gedocumenteerde exacte relatie is weerlegd als universele recordregel; 32 records (type 1 en 2) vallen buiten de diagnostische 3 kW-band. Ook de 230 kleinere afwijkingen bewijzen geen afrondingsmethode. Gebruik geldig API-volume als primaire energiebron; behoud capacity en volume onafhankelijk, geen automatische overschrijving, afgeleide fallback of afkeur uitsluitend op basis van deze diagnostiek. Vraag leverancier naar eenheden, precisie, model- en aggregatieverschillen. Dit is geen bewijs dat een van beide waarden onjuist is.
+
+| Type 27 | Kg binnen 1% | Ton binnen 1% | Geen overeenkomst | Niet-positief | Niet beschikbaar |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Current | 96 | 0 | 0 | 0 | 0 |
+| Forecast | 96 | 0 | 0 | 0 | 0 |
+
+SEM-002: alle 192 positieve vergelijkingen ondersteunen emission in kg bij de gedocumenteerde volume-eenheid kWh en emissionfactor kg/kWh; geen enkele ondersteunt ton. Sterk runtimebewijs voor de twee geteste type 27-queries, overeenkomstig de handleiding. De formele OpenAPI-tegenstrijdigheid en afronding blijven open; geen automatische kg/ton-detectie of tolerantie als productiecontract. De 1%-band is diagnostisch. Percentage-schaal, niet-toepasselijkheid, revisies, volledige forecasthorizon en foutsemantiek blijven open. Geen nieuwe live-aanvragen nodig voor registratie.
 
 ## Openstaande verificatie
 
@@ -191,7 +214,8 @@ Nieuwe opt-in scope met zes afzonderlijke nationale UTC-kwartierqueries, page 1,
 - [x] Voor nationale historische zonne-energie: Nederlandse kwartierdekking op 23-, 24- en 25-uursdagen, response-ID 0 bij query-ID 1 (TZ-001).
 - [x] Gerichte dagprobe uitgevoerd: TZ-002/TZ-003 reproduceerbaar aangetoond voor de twee vaste queries; geen bewijs van correct contractgedrag.
 - [ ] Verklaar TZ-002/TZ-003 met leveranciersinformatie; verifieer lege resultaten, overige datumfilters en dagaggregatiesemantiek.
-- [ ] Bevestig meetsemantiek, null versus nul, percentage-schaal, forecastdekking en revisies.
+- [x] Gerichte scope semantics uitgevoerd en beoordeeld: 576 records, 32 afwijkingen buiten 3 kW, 192 kg-hypotheseovereenkomsten.
+- [ ] Verklaar SEM-001 en bevestig SEM-002 formeel, afronding, null versus nul, percentage-schaal, volledige forecastdekking en revisies.
 - [ ] Bevestig authenticatie-/autorisatiefouten, rate-limit-scope en Retry-After indien gedocumenteerd of normaal waargenomen. Geen opzettelijke limietoverschrijding.
 - [ ] Leg geschoonde fixtures en concrete verificatieresultaten vast; onderscheid synthetische tests van live bewijs.
 
