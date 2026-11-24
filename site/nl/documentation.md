@@ -14,6 +14,8 @@ Op deze ontwikkelbranch staan de negen gevraagde integratiebestanden, acht senso
 
 ## NED API-sleutel
 
+Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De conceptclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de live koppeling blijft geblokkeerd.
+
 Maak voor toekomstig gebruik een account aan bij [NED](https://ned.nl/), open Mijn account → API en genereer een persoonlijke API-sleutel. Bewaar deze veilig. Deel nooit sleutels in issues of logs.
 
 ## Status van het API-contract
