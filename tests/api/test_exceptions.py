@@ -3,6 +3,7 @@
 import pytest
 
 from ned_api import (
+    NedAccessDeniedError,
     NedApiError,
     NedAuthenticationError,
     NedConnectionError,
@@ -18,6 +19,7 @@ from ned_api import (
 @pytest.mark.parametrize(
     "error_type",
     [
+        NedAccessDeniedError,
         NedAuthenticationError,
         NedConnectionError,
         NedPermissionError,
