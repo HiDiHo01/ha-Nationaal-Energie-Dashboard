@@ -32,6 +32,21 @@ Gebruik de prompts ongewijzigd, in een nieuwe sessie per scenario. De verwachte 
 4. Beoordeel selectie, onnodige activatie, proceduretrouw, resultaatkwaliteit en respect voor de bestaande bevoegdheden. Registreer ontbrekende prerequisites als geblokkeerd, niet als geslaagd. Voer geen betaalde externe evaluaties zonder toestemming uit.
 5. Herhaal relevante scenario's na wijzigingen in skillbeschrijvingen, metadata of instructies. Herstel aangetoonde tekortkomingen en bewaar de resultaten met trace-referenties. Een statische metadatacontrole is geen gedragsevaluatie.
 
+## Uitvoerbare runner
+
+Gebruik een Linux/Bash-omgeving met git, tar, awk en een geïnstalleerde, geauthenticeerde Codex CLI. Gebruik een afzonderlijke evaluatieomgeving zonder productiecredentials, niet-vertrouwde hooks, extra schrijfgebieden of verbonden tools met externe schrijfrechten. Controleer vooraf de gecommitteerde inhoud op secrets. Het gebruik van de CLI kan modelverbruik veroorzaken; voer alleen geautoriseerde evaluaties uit.
+
+Vanuit een checkout van de te beoordelen commit:
+
+```bash
+output_dir=$(mktemp -d)
+bash .agents/skills/run-native-eval.sh NL01 "$output_dir"
+```
+
+De runner selecteert de originele prompt op scenario-ID, exporteert alleen gecommitteerde bestanden naar een tijdelijke Git-repository zonder remote, voert een nieuwe Codex-sessie met JSONL-uitvoer en workspace-write sandbox zonder shellnetwerktoegang uit en bewaart metadata, stderr, trace en werkboomdiff buiten de bronrepository. De tijdelijke checkout wordt verwijderd. Niet-gecommitteerde bronwijzigingen worden niet geëvalueerd; genegeerde of binaire output vereist zo nodig een afzonderlijke inspectie in een geschikte evaluatieomgeving. Controleer de CLI-versie en het gebruikte model (uit de trace of sessie-informatie) bij de beoordeling. De sandbox is geen vervanging voor een afzonderlijke veilige omgeving.
+
+Beoordeel de opgeslagen trace aan de hand van de scenariotabel: verwachte skill-read/invocation aantoonbaar, ongewenste activatie, proceduretrouw, uitkomst en beleidsnaleving. Noteer per controle pass, fail, blocked of unverified, met concrete traceverwijzingen. Gebruik voor de negatieve controle bewijs dat de volledige relevante trace beschikbaar is. Bewaar de ruwe traces privé; commit alleen geschoonde resultaten, nooit secrets of ruwe traces. Een exitcode 0 betekent uitsluitend dat de CLI-aanroep is voltooid, niet dat de evaluatie is geslaagd. Exitcode 3 van de preflight betekent ontbrekende CLI.
+
 ## Status
 
-De scenario's zijn voorbereid; native activatie en proceduretrouw zijn nog niet empirisch geëvalueerd. Er is geen Codex-sessietrace beschikbaar vanuit de huidige GitHub-connectoromgeving. Rapporteer native en directe activatie afzonderlijk.
+De scenario's en runner zijn voorbereid; native activatie en proceduretrouw zijn nog niet empirisch geëvalueerd. Op 24 november 2026 is de runner syntactisch gecontroleerd met bash -n en getest met een gesimuleerde CLI (succes, foutcode, onbekend scenario, behoud van nieuwe en gecommitteerde testoutput); de ontbrekende echte CLI is correct gemeld. Dit zijn uitsluitend runnercontroles, geen native gedragsevaluaties. Er is geen Codex-sessietrace beschikbaar vanuit de huidige GitHub-connectoromgeving. Rapporteer native en directe activatie afzonderlijk.

@@ -904,7 +904,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] AGENTS.md opstellen.
 - [x] Home Assistant-ontwikkelreferentie en repositoryskills opstellen; zelfstandig gebruik en onderhoud verplicht stellen.
 - [x] Impliciete skillactivatie expliciet configureren en NL/EN-activatie-evaluaties voorbereiden.
-- [ ] Skills in concrete implementatietaken toepassen en gedrag verifiëren, inclusief native activatie met tracebewijs.
+- [x] Native evaluaties verplicht stellen en een geïsoleerde opt-in runner inrichten; runner statisch en met een gesimuleerde CLI controleren.
+- [ ] Skills in concrete implementatietaken toepassen en gedrag verifiëren, inclusief native activatie met tracebewijs (geblokkeerd: Codex CLI en authenticatie ontbreken in de huidige omgeving).
 - [x] AI_POLICY.md opstellen.
 - [x] Auteursrechtbeleid vastleggen: beperkte Home Assistant-gebruikstoestemming, overige rechten voorbehouden.
 - [ ] Actuele Marketplace-toelatingsvoorwaarden, waaronder eventuele licentievereisten, definitief bevestigen.

@@ -6,7 +6,7 @@ Lees eerst [AGENTS.md](../AGENTS.md), [AI_POLICY.md](../AI_POLICY.md) en het [in
 
 Lees [home-assistant.md](../home-assistant.md) bij Home Assistant-werkzaamheden. Gebruik de relevante [repositoryskills](../.agents/skills/README.md) door hun SKILL.md te lezen; Codex-omgevingen die repositoryskills ondersteunen kunnen ze ook automatisch ontdekken. Onderhoud beide proactief volgens AGENTS.md §1.1. De initiële skillstructuur is documentatie; daadwerkelijke selectie en effectiviteit in implementatietaken moeten nog worden geverifieerd.
 
-Automatische skillactivatie is standaard: native impliciete selectie waar ondersteund, anders zelfstandige selectie via de skill-index. Zie de [activatie-evaluaties](../.agents/skills/ACTIVATION_EVALS.md). Native gedrag moet afzonderlijk worden getest; metadata en directe selectie zijn geen native tracebewijs.
+Automatische skillactivatie is standaard: native impliciete selectie waar ondersteund, anders zelfstandige selectie via de skill-index. Zie de [activatie-evaluaties](../.agents/skills/ACTIVATION_EVALS.md). Native gedragsevaluaties zijn verplicht bij relevante skill- en agentwijzigingen; gebruik de geïsoleerde runner en beoordelingsprocedure in ACTIVATION_EVALS.md. De runner is met een gesimuleerde CLI gecontroleerd, niet met een echte Codex-sessie. Metadata en directe selectie zijn geen native tracebewijs.
 
 ## Compatibiliteitsbaseline
 
