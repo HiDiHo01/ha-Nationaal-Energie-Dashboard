@@ -28,7 +28,7 @@ Depending on the dataset, available intervals include 10 minutes, 15 minutes, on
 
 ## Planned functionality
 
-The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. These are planned features; renewable share requires additional confirmation of the source mix and BL-003 remains open.
+The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. These are planned features. Renewable share will be explicitly labelled as an estimate based on solar, wind, biomass cofiring and 53% of waste electricity (provisional 2025 CBS annual factor); other mixed sources are excluded. The six input datasets require contract and combined validation first; BL-003 remains open.
 
 - Configuration through the Home Assistant user interface.
 - Selectable energy datasets and sensors.
