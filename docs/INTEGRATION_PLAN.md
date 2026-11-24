@@ -958,7 +958,8 @@ Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk start
 - [x] Aanvullende loopback-HTTPS-regressietests: [herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45501051151/job/138824117653) en [Python-next](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45501051016/job/138824116332) op d283ad3 beide 54 geslaagd; 70 statements en 18 branches volledig gedekt op de baseline. Eerste HA-socketblokkade hersteld met gerichte socket_enabled-fixture en loopback-hostrestrictie. Zie [API-tests](../tests/api/README.md). Geen volledige fase-1-acceptatie.
 
 - [ ] Zelfstandig Python-package implementeren.
-- [ ] Zelfstandige API-test-extra en fixtures inrichten; offline Python-next-smoketest uitvoeren zodra de library beschikbaar is.
+- [x] Zelfstandige API-test-extra, fixtures en offline Python-next-smoketest ingericht; PR #34 is gemerged op main 481c9c33957e8343a77475ec5e3a305c29e06258; [laatste PR-baseline](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45501519525/job/138825768695) en [Python-next](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45501519667/job/138825769213) zijn geslaagd. Verdere contractafhankelijke fixtures blijven open.
+- [ ] Werkelijke API-wheel via de native requirements-manager installeren naast de synthetische proef; script uitgebreid, gelockte CI-validatie nog te bevestigen. Zie [runtimeproef](../scripts/check_runtime_distribution.sh).
 - [ ] Enums en datasetcatalogus ontwikkelen.
 - [ ] Datamodellen implementeren.
 - [ ] Authenticatie en HTTP-client toevoegen.
