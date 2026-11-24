@@ -1,6 +1,6 @@
 # Skillactivatie — evaluaties
 
-Doel: verifieer dat een agent de relevante skills zonder expliciete skillnaam selecteert, de volledige instructies leest en de juiste procedure toepast. De testmethodiek volgt [Testing Agent Skills Systematically with Evals](https://developers.openai.com/blog/eval-skills).
+Optionele evaluatieprocedure (geen acceptatiepoort sinds het eigenaarsbesluit van 24 november 2026, BL-012/BL-013). Doel bij afzonderlijk geautoriseerde uitvoering: verifieer dat een agent de relevante skills zonder expliciete skillnaam selecteert, de volledige instructies leest en de juiste procedure toepast. De testmethodiek volgt [Testing Agent Skills Systematically with Evals](https://developers.openai.com/blog/eval-skills).
 
 ## Scenario's
 
@@ -38,7 +38,7 @@ Gebruik de prompts ongewijzigd, in een nieuwe sessie per scenario. De verwachte 
 2. Start per scenario een nieuwe sessie zonder expliciete skillvermelding of vooraf geladen volledige SKILL.md. Registreer agentversie, model, commit en prompt-ID.
 3. Controleer in de beschikbare trace of de agent de verwachte SKILL.md-bestanden daadwerkelijk heeft geladen. Een vermelding in de eindtekst alleen is geen bewijs. Als de omgeving geen native discovery ondersteunt, evalueer de directe bestandsleesprocedure afzonderlijk.
 4. Beoordeel selectie, onnodige activatie, proceduretrouw, resultaatkwaliteit en respect voor de bestaande bevoegdheden. Registreer ontbrekende prerequisites als geblokkeerd, niet als geslaagd. Voer geen betaalde externe evaluaties zonder toestemming uit.
-5. Herhaal relevante scenario's na wijzigingen in skillbeschrijvingen, metadata of instructies. Herstel aangetoonde tekortkomingen en bewaar de resultaten met trace-referenties. Een statische metadatacontrole is geen gedragsevaluatie.
+5. Herhaal relevante scenario's uitsluitend na nieuwe expliciete toestemming, bijvoorbeeld na wijzigingen in skillbeschrijvingen, metadata of instructies. Herstel aangetoonde tekortkomingen en bewaar de resultaten met trace-referenties. Een statische metadatacontrole is geen gedragsevaluatie.
 
 ## Uitvoerbare runner
 
@@ -59,6 +59,6 @@ Beoordeel de opgeslagen trace aan de hand van de scenariotabel: verwachte skill-
 
 De scenario's en runner zijn voorbereid; native activatie en proceduretrouw zijn nog niet empirisch geëvalueerd. Op 24 november 2026 is de runner syntactisch gecontroleerd met bash -n en getest met een gesimuleerde CLI (succes, foutcode, onbekend scenario, behoud van nieuwe en gecommitteerde testoutput); de ontbrekende echte CLI is correct gemeld. Dit zijn uitsluitend runnercontroles, geen native gedragsevaluaties. Er is geen Codex-sessietrace beschikbaar vanuit de huidige GitHub-connectoromgeving. Rapporteer native en directe activatie afzonderlijk.
 
-### Eigenaarsbesluit BL-012 — 24 november 2026
+### Eigenaarsbesluiten BL-012 en BL-013 — 24 november 2026
 
-De afzonderlijke taak voor installatie en authenticatie van een Codex CLI-evaluatieomgeving vervalt. Vraag de eigenaar niet opnieuw om deze omgeving in te richten. Behoud de runner en alle 23 scenario's voor een eventueel reeds beschikbare, geschikte en geautoriseerde native omgeving. BL-013 blijft niet uitgevoerd en geblokkeerd zolang native tracebewijs ontbreekt; directe selectie, statische validatie en reguliere CI zijn geen vervangend native bewijs. De bestaande kwaliteitsacceptatiecriteria zijn niet gewijzigd. Geen betaalde evaluaties of nieuwe credentials.
+De eigenaar heeft zowel de afzonderlijke Codex CLI-omgevingstaak (BL-012) als de verplichte native gedragsevaluaties (BL-013) ingetrokken. Vraag niet opnieuw om deze taken uit te voeren. Behoud de runner en alle 23 scenario's uitsluitend voor eventueel vrijwillig gebruik na nieuwe expliciete toestemming in een geschikte, veilige omgeving. Native gedrag is niet uitgevoerd of bewezen; directe selectie, statische validatie en reguliere CI zijn geen native tracebewijs. De native evaluatiepoort vervalt voor alle fasen en releases; alle overige kwaliteits- en veiligheidscriteria blijven ongewijzigd. Geen betaalde evaluaties of nieuwe credentials.
