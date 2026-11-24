@@ -95,7 +95,7 @@ De integratie levert gegevens en bestuurt geen apparaten. Nationale opwek is gee
 
 ## 3. API-architectuur
 
-Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs.
+Actuele broncontrole en openstaande verificatiepunten: [API_REFERENCE.md](API_REFERENCE.md). De gedocumenteerde waarden en het opgehaalde OpenAPI-schema zijn geen live contractbewijs. Eerste geauthenticeerde zonne-energieobservaties zijn geslaagd; zie de vastgelegde veldtype-afwijkingen en resterende vragen in API_REFERENCE.md.
 
 ### 3.1 API-verbinding
 
@@ -930,7 +930,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [x] Afzonderlijke niet-blokkerende Python-next-smokeworkflow configureren en statisch valideren.
 - [x] Python-next-workflow op GitHub Actions uitvoeren en resultaat verifiëren (run 45447217991; Python-setup en baselinecontrole, nog geen librarycode/tests).
 - [x] OpenAPI-export ophalen en relevante schema's inspecteren; afwijkingen in [API_REFERENCE.md](API_REFERENCE.md) vastleggen.
-- [ ] Geautoriseerde live contractvalidatie afronden (BL-003/BL-004); emissie-eenheid, veldtypen, datasetcombinaties, paginering, tijdzones en foutsemantiek.
+- [x] Veilige API-authenticatie en eerste twee live-observaties valideren (BL-004; run 45469371205).
+- [ ] Geautoriseerde live contractvalidatie afronden (BL-003); emissie-eenheid, veldtypen, datasetcombinaties, paginering, tijdzones en foutsemantiek.
 - [x] Minimale Home Assistant-versie vaststellen: nieuwste stable, initiële baseline 2026.11.3.
 - [x] Python-baseline uit de bijbehorende Core-release vaststellen: 3.14, minimum 3.14.2, ontwikkelpin 3.14.10.
 
@@ -1098,7 +1099,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Repositorystructuur | Basismappen en ondersteunende bestanden aanwezig |
 | Marketplace | Doel vastgelegd; niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
-| Live API-contracttests | Niet uitgevoerd |
+| Live API-contracttests | Eerste twee begrensde zonne-energieobservaties geslaagd; volledige contractvalidatie open |
 | CI/CD | Basis-CI, pre-commit, dependency-audit en branchbescherming operationeel; inhoudelijke integratievalidatie nog niet uitgevoerd |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
