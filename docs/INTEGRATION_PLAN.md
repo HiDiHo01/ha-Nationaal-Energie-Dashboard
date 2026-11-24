@@ -870,8 +870,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 ### 21.1 Fase 0 — Repository Foundation
 
-- [ ] AGENTS.md opstellen.
-- [ ] AI_POLICY.md opstellen.
+- [x] AGENTS.md opstellen.
+- [x] AI_POLICY.md opstellen.
 - [ ] Licentiekeuze vastleggen.
 - [ ] Repositorystructuur aanmaken.
 - [ ] pyproject.toml configureren.
