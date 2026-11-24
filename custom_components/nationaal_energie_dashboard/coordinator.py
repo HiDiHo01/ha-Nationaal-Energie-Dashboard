@@ -42,10 +42,9 @@ class NedReading:
 
     def __post_init__(self) -> None:
         """Reject invalid interval boundaries and nonnumeric source values."""
-        if (
-            self.valid_from.utcoffset() != timedelta(0)
-            or self.valid_to.utcoffset() != timedelta(0)
-        ):
+        if self.valid_from.utcoffset() != timedelta(
+            0
+        ) or self.valid_to.utcoffset() != timedelta(0):
             raise ValueError("Expected a complete, aligned UTC quarter-hour.")
         if (
             self.valid_from.minute % 15
