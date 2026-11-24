@@ -35,3 +35,14 @@ De coverage-drempel bedraagt 95% voor de gecombineerde lijn- en branchdekking; d
 De TOML-syntaxis, versie-uitlijning en dependency-specifiers zijn statisch gevalideerd. Een geïsoleerde smoketest met synthetische testcode op Python 3.13.5 bevestigde async-testuitvoering, standaard uitsluiting van live_api en de 95%-coveragepoort. Dit is geen integratietest. Python 3.14.10 kon in de validatieomgeving niet worden geïnstalleerd; volledige dependencyresolutie, tooluitvoering en runtimevalidatie staan nog open.
 
 De huidige structuur bevat geen uitvoerbare integratie of repositorytests. Maak geen publieke releases zonder toestemming.
+
+## Forward Compatibility Testing
+
+- De Home Assistant/Python-baseline blijft leidend voor productiecode, linting, strict typing, volledige integratietests en de verplichte coveragepoorten.
+- Onderhoud de afzonderlijke workflow python-next-smoke.yaml voor de eerstvolgende Python-major.minor-generatie (momenteel 3.15, productie 3.14). Deze experimentele job is niet releaseblokkerend (continue-on-error: true); failures blijven zichtbaar in de jobdetails. Bij een Core/Python-upgrade schuift de experimentele versie mee. Introduceer geen next-only syntax in productiecode.
+- Draai op push, pull request en workflow_dispatch met alleen contents: read, zonder API-secrets of installatie van Home Assistant/het root-dev-dependencygroup.
+- Controleer de volgende-versierelatie met .python-version, compileer aanwezige Python-bronnen, installeer de zelfstandige ned_api-library vanuit packages/ned-api, voer pip check en een import uit en draai offline tests/api zonder de root-coveragepoort.
+- Voeg in fase 1 een zelfstandige test-extra toe aan packages/ned-api/pyproject.toml (pytest, pytest-asyncio en alle vereiste API-testdependencies, geen Home Assistant). API-tests en fixtures zijn onafhankelijk van Home Assistant; plaats noodzakelijke conftest-fixtures onder tests/api. Sluit live_api-tests uit.
+- Zolang broncode of tests ontbreken, rapporteert de workflow expliciet welke controles niet zijn uitgevoerd. Een groene experimentele job is geen bewijs van volledige runtimecompatibiliteit of Platinum.
+
+De workflow is opgeslagen in [python-next-smoke.yaml](../.github/workflows/python-next-smoke.yaml). YAML-structuur en Bash-syntaxis zijn lokaal gecontroleerd; de no-source-paden, succesvolle en mislukte syntaxcompilatie en afwijzing van een verkeerde versiebaseline zijn met synthetische bestanden en Python 3.13.5 getest. Dit is geen uitvoering op Python 3.15. De volledige GitHub Actions-run en librarytests moeten nog worden geverifieerd.

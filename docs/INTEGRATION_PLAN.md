@@ -194,6 +194,7 @@ ha-Nationaal-Energie-Dashboard/
 │   ├── ISSUE_TEMPLATE/
 │   ├── workflows/
 │   │   ├── ci.yaml
+│   │   ├── python-next-smoke.yaml
 │   │   ├── hassfest.yaml
 │   │   ├── hacs.yaml
 │   │   ├── api-contract.yaml
@@ -835,6 +836,15 @@ Security en kwaliteit:
 
 Reguliere CI gebruikt reproduceerbare fixtures en gemockte responses zonder persoonlijke API-key. Live contracttests zijn gescheiden, opt-in, begrensd en gebruiken veilig geïnjecteerde credentials.
 
+### 19.3 Forward Compatibility Testing
+
+- De Home Assistant/Python-baseline blijft leidend voor productiecode, linting, strict typing, volledige integratietests en de verplichte coveragepoorten.
+- Onderhoud de afzonderlijke workflow python-next-smoke.yaml voor de eerstvolgende Python-major.minor-generatie (momenteel 3.15, productie 3.14). Deze experimentele job is niet releaseblokkerend (continue-on-error: true); failures blijven zichtbaar in de jobdetails. Bij een Core/Python-upgrade schuift de experimentele versie mee. Introduceer geen next-only syntax in productiecode.
+- Draai op push, pull request en workflow_dispatch met alleen contents: read, zonder API-secrets of installatie van Home Assistant/het root-dev-dependencygroup.
+- Controleer de volgende-versierelatie met .python-version, compileer aanwezige Python-bronnen, installeer de zelfstandige ned_api-library vanuit packages/ned-api, voer pip check en een import uit en draai offline tests/api zonder de root-coveragepoort.
+- Voeg in fase 1 een zelfstandige test-extra toe aan packages/ned-api/pyproject.toml (pytest, pytest-asyncio en alle vereiste API-testdependencies, geen Home Assistant). API-tests en fixtures zijn onafhankelijk van Home Assistant; plaats noodzakelijke conftest-fixtures onder tests/api. Sluit live_api-tests uit.
+- Zolang broncode of tests ontbreken, rapporteert de workflow expliciet welke controles niet zijn uitgevoerd. Een groene experimentele job is geen bewijs van volledige runtimecompatibiliteit of Platinum.
+
 ## 20. CI/CD en kwaliteitscontroles
 
 ### 20.1 GitHub Actions
@@ -894,6 +904,8 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 - [ ] Dependencyresolutie, lockfile en toolconfiguratie op de exacte Python/Core-baseline valideren.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
 - [ ] Basis-CI configureren.
+- [x] Afzonderlijke niet-blokkerende Python-next-smokeworkflow configureren en statisch valideren.
+- [ ] Python-next-workflow op GitHub Actions uitvoeren en resultaat verifiëren.
 - [ ] OpenAPI-contract valideren.
 - [x] Minimale Home Assistant-versie vaststellen: nieuwste stable, initiële baseline 2026.11.3.
 - [x] Python-baseline uit de bijbehorende Core-release vaststellen: 3.14, minimum 3.14.2, ontwikkelpin 3.14.10.
@@ -901,6 +913,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 ### 21.2 Fase 1 — API-client
 
 - [ ] Zelfstandig Python-package implementeren.
+- [ ] Zelfstandige API-test-extra en fixtures inrichten; offline Python-next-smoketest uitvoeren zodra de library beschikbaar is.
 - [ ] Enums en datasetcatalogus ontwikkelen.
 - [ ] Datamodellen implementeren.
 - [ ] Authenticatie en HTTP-client toevoegen.

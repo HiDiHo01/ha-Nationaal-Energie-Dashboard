@@ -1,0 +1,62 @@
+name: Python next smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-next:
+    name: Python 3.15 (experimental)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up next Python generation
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.15'
+          allow-prereleases: false
+
+      - name: Check next-version policy and Python syntax
+        shell: bash
+        run: |
+          python --version
+          python -c 'from pathlib import Path; import sys; baseline = tuple(map(int, Path(".python-version").read_text().strip().split(".")[:2])); assert sys.version_info[:2] == (baseline[0], baseline[1] + 1), "Update the experimental Python version to the next minor generation"'
+          if [[ -n "$(find custom_components packages tests -name '*.py' -type f -print -quit)" ]]; then
+            python -m compileall -q custom_components packages tests
+            echo 'Python source compilation passed.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Python source compilation not run: no Python sources yet.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Smoke-test standalone NED API library
+        shell: bash
+        run: |
+          if [[ -z "$(find packages/ned-api/src/ned_api -name '*.py' -type f -print -quit)" ]]; then
+            echo 'NED API smoke tests not run: library not implemented yet.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          python -m pip install ./packages/ned-api
+          python -m pip check
+          python -I -c 'import ned_api'
+          echo 'Standalone library installation, dependency check and import passed.' >> "$GITHUB_STEP_SUMMARY"
+          if [[ -z "$(find tests/api -name 'test_*.py' -type f -print -quit)" ]]; then
+            echo 'API unit tests not run: no API tests yet.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          python -c 'import tomllib; from pathlib import Path; project = tomllib.loads(Path("packages/ned-api/pyproject.toml").read_text()); assert project["project"]["optional-dependencies"]["test"], "Define the standalone API test extra"'
+          python -m pip install './packages/ned-api[test]'
+          python -m pip check
+          python -m pytest -c pyproject.toml -o addopts= -o pythonpath= \
+            --strict-config --strict-markers --confcutdir=tests/api \
+            -m 'not live_api' tests/api
+          echo 'Offline standalone API tests passed.' >> "$GITHUB_STEP_SUMMARY"
