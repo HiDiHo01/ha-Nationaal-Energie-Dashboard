@@ -2,7 +2,7 @@
 
 | Workflow | Trigger | Doel |
 | --- | --- | --- |
-| [ci.yaml](ci.yaml) | Push, PR, handmatig | Exacte Python/Core-baseline, uv-lockfile, dependency-installatie, pre-commit, secret-scan, linting, strict typing, offline tests, coverage en pip-audit |
+| [ci.yaml](ci.yaml) | Push, PR, handmatig | Exacte Python/Core-baseline, uv-lockfile, dependency-installatie, pre-commit, secret-scan, linting, strict typing, offline tests, coverage, geïsoleerde runtime-wheelproef en pip-audit |
 | [python-next-smoke.yaml](python-next-smoke.yaml) | Push, PR, handmatig | Niet-blokkerende volgende Python-generatie, zelfstandige API-library |
 | [hassfest.yaml](hassfest.yaml) | Push, PR, handmatig | Officiële Hassfest-validatie zodra manifest bestaat |
 | [hacs.yaml](hacs.yaml) | Handmatig, gepubliceerde release | Marketplace-validatie zonder genegeerde checks |

@@ -48,7 +48,7 @@ The intended API base URL is https://api.ned.nl/v1. Never disclose API keys in G
 
 **Minimum Home Assistant Core version: 2026.11.3.** Each new integration release targets the latest stable Core release as its minimum. Older releases and prereleases need not be supported. The current baseline is a development target, not a tested runtime compatibility claim.
 
-Home Assistant Marketplace is the intended distribution channel. GPL-3.0-only, an OSI-approved license, has been chosen to meet the [HACS license check](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection and actual catalog admission still require confirmation. Runtime distribution still requires validation. Local testing will take place during development. There is no installable release yet. Officially offered versions may be used in Home Assistant subject to the usage terms.
+Home Assistant Marketplace is the intended distribution channel. GPL-3.0-only, an OSI-approved license, has been chosen to meet the [HACS license check](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection is confirmed; actual catalog admission still requires verification. Runtime distribution still requires validation. Local testing will take place during development. There is no installable release yet. Officially offered versions may be used in Home Assistant subject to the usage terms.
 
 ## Development and quality
 
