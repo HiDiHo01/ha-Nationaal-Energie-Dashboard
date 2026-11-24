@@ -9,7 +9,7 @@
 | Doelarchitectuur | Home Assistant Custom Integration |
 | Kwaliteitsdoel | Platinum |
 | Python | 3.14, afhankelijk van Home Assistant-compatibiliteit |
-| Distributie | HACS |
+| Distributie | Eigen gebruik; HACS-compatibiliteit waar mogelijk, geen publieke distributie |
 
 > Dit document legt het integratieplan vast. Ontwerpkeuzes zijn voorstellen, geen gerealiseerde functionaliteit. API-waarden zijn werkhypothesen totdat de actuele OpenAPI-specificatie, datacatalogus en geauthenticeerde contracttests deze bevestigen. De toepasselijke AGENTS.md en AI_POLICY.md zijn leidend zodra deze bestaan.
 
@@ -38,7 +38,7 @@ Ontwikkel een robuuste, schaalbare, volledig asynchrone Home Assistant-integrati
 | Linting | Ruff en Pylint |
 | Typecontrole | mypy strict |
 | CI/CD | GitHub Actions |
-| Distributie | HACS |
+| Distributie | Eigen gebruik; HACS-compatibiliteit waar mogelijk, geen publieke distributie |
 | Kwaliteitsnorm | Home Assistant Platinum |
 
 Platinum is vanaf het begin een ontwerpcriterium: asynchrone dependency, sessie-injectie, strikte typing en alle toepasselijke lagere kwaliteitscriteria. Er wordt geen officiële certificering geclaimd.
@@ -171,7 +171,7 @@ flowchart TD
 
 Single Responsibility, Separation of Concerns, Dependency Injection, composition over inheritance, immutable datamodellen waar mogelijk. Geen netwerkverzoeken in entity-properties, geen circulaire imports, geen blokkerende I/O en één centrale datasetcatalogus.
 
-De API-client is een zelfstandig Python-package zonder Home Assistant-afhankelijkheid. Ontwikkel en test het onafhankelijk; publiceer voor de publieke release en pin de dependency in manifest.json.
+De API-client is een zelfstandig Python-package zonder Home Assistant-afhankelijkheid. Ontwikkel, bouw en test het onafhankelijk voor eigen gebruik; pin de dependency met een reproduceerbare, geautoriseerde installatiemethode. Publieke packagepublicatie is niet toegestaan onder het huidige auteursrechtbeleid. Valideer de private of lokale installatiemethode in fase 0.
 
 ## 5. Voorgestelde repositorystructuur
 
@@ -245,7 +245,6 @@ ha-Nationaal-Energie-Dashboard/
 ├── CONTRIBUTING.md
 ├── SECURITY.md
 ├── CHANGELOG.md
-├── LICENSE
 ├── README.md
 ├── hacs.json
 ├── pyproject.toml
@@ -824,7 +823,7 @@ Reguliere CI gebruikt reproduceerbare fixtures en gemockte responses zonder pers
 
 ### 20.1 GitHub Actions
 
-Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → publicatie na goedgekeurde release.
+Push/PR → Python-omgeving en dependencies → Ruff → Pylint en mypy → unit- en integratietests → coverage en security scanning → Hassfest en HACS → build/releasevalidatie → interne oplevering na goedgekeurde release; geen publieke publicatie.
 
 ### 20.2 Beoogde lokale commando's
 
@@ -872,7 +871,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 - [x] AGENTS.md opstellen.
 - [x] AI_POLICY.md opstellen.
-- [ ] Licentiekeuze vastleggen.
+- [x] Auteursrechtbeleid vastleggen: geen gebruikslicentie, alle rechten voorbehouden.
 - [ ] Repositorystructuur aanmaken.
 - [ ] pyproject.toml configureren.
 - [ ] Ontwikkelomgeving en pre-commit inrichten.
@@ -943,13 +942,13 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 ### 21.8 Fase 7 — Release
 
-- [ ] Python-package publiceren.
+- [ ] Python-package intern bouwen en de geautoriseerde installatiemethode valideren.
 - [ ] Dependencyversie vastleggen.
 - [ ] HACS-validatie uitvoeren.
 - [ ] Installatieprocedure testen.
 - [ ] Upgrade en verwijdering testen.
 - [ ] README en changelog actualiseren.
-- [ ] Eerste stabiele release publiceren.
+- [ ] Eerste stabiele interne release voor eigen gebruik opleveren.
 
 ## 22. Versiestrategie
 
@@ -963,7 +962,7 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 | 0.6.0 | Diagnostics, repairs en robuustheid |
 | 0.9.0 | Feature-complete beta |
 | 1.0.0-rc.1 | Release candidate |
-| 1.0.0 | Eerste stabiele release |
+| 1.0.0 | Eerste stabiele interne release |
 
 Semantic Versioning voor integratie en zelfstandige API-library.
 
@@ -1029,22 +1028,29 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Repository | Gecontroleerd |
 | README.md | Aanwezig |
 | Integratieplan | Vastgelegd in dit document |
-| AGENTS.md | Ontbreekt |
-| AI_POLICY.md | Ontbreekt |
+| AGENTS.md | Aanwezig |
+| AI_POLICY.md | Aanwezig |
+| Auteursrechtbeleid | Geen licentie — alle rechten voorbehouden |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
 | Live API-contracttests | Niet uitgevoerd |
 | CI/CD | Niet ingericht |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
 
-De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie en licentie zijn nog niet vastgesteld.
+De machineleesbare OpenAPI-specificatie is in de eerdere planfase niet volledig opgehaald. Er is geen live geauthenticeerd API-verzoek uitgevoerd. Dataset-ID's, parameters, paginering, units, classificaties, rate-limitdetails en exacte responses moeten empirisch worden bevestigd. De minimale ondersteunde Home Assistant-versie is nog niet vastgesteld. Het auteursrechtbeleid is vastgesteld: geen gebruikslicentie, alle rechten voorbehouden.
 
 Domainnaam, pollingintervallen, intern requestbudget, packagearchitectuur, entitygroepering, testdoelen, branchbeleid en implementatiefasen zijn voorgestelde keuzes. Het plan is geen bewijs van werkende code of behaalde kwaliteitscriteria.
 
 ### 26.2 Volgende stap
 
-Stel AGENTS.md en AI_POLICY.md op en valideer het API-contract voordat de API-client wordt geïmplementeerd. Houd dit plan actueel bij architectuurbeslissingen, contractwijzigingen en oplevering van fasen.
+AGENTS.md en AI_POLICY.md zijn aanwezig. Rond de resterende fase-0-werkzaamheden af en valideer het API-contract voordat de API-client wordt geïmplementeerd. Houd dit plan actueel bij architectuurbeslissingen, contractwijzigingen en oplevering van fasen.
 
-### 26.3 Vastleggingsnotitie
+### 26.3 Auteursrecht en distributiebesluit
+
+De eigenaar heeft bepaald dat het project geen gebruikslicentie krijgt. Alle rechten voorbehouden. Dit project wordt zonder gebruikslicentie beschikbaar gesteld. De eigen broncode, documentatie en overige beschermde projectmaterialen mogen door derden niet zonder voorafgaande uitdrukkelijke toestemming van de rechthebbende worden gebruikt, gereproduceerd, gewijzigd, herverdeeld of in andere projecten verwerkt, behoudens wettelijke uitzonderingen en toepasselijke platformvoorwaarden. Dit beleid verandert de licenties en rechten van externe dependencies, Home Assistant, NED-data of andere materialen van derden niet. De GitHub-voorwaarden voor openbare repositories blijven gelden, waaronder het recht om de repository binnen GitHub te bekijken en te forken.
+
+HACS-compatibiliteit blijft een technisch doel voor eigen gebruik, voor zover haalbaar. Publieke releases, publicatie naar PyPI en publieke HACS-distributie zijn niet toegestaan onder dit beleid. Valideer in fase 0 hoe de zelfstandige API-library en integratie reproduceerbaar voor eigen gebruik worden geïnstalleerd. Er wordt geen LICENSE-bestand of licentieverlenende metadata toegevoegd. De repositoryzichtbaarheid blijft een afzonderlijke beslissing van de eigenaar.
+
+### 26.4 Vastleggingsnotitie
 
 Dit document is de Markdown-versie van het eerder in de projectchat uitgewerkte integratieplan. Interactieve calculators, demo's en checklists zijn omgezet naar formules, statische voorbeelden, Mermaid-diagrammen en GitHub-tasklists. Er is bij deze vastlegging geen nieuwe externe contractvalidatie of softwaretest uitgevoerd.
