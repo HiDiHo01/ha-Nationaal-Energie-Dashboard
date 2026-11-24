@@ -1,6 +1,7 @@
 """Regression tests for repository documentation checks."""
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,7 +14,8 @@ class DocumentationTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create a repository-shaped fixture with both required README files."""
-        self.root = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        self.root = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.root)
         self.tracked: set[Path] = set()
         self.write_file("README.md", "[English](README.en.md)\n")
         self.write_file("README.en.md", "[Nederlands](README.md)\n")
