@@ -4,7 +4,7 @@
 
 ### Nederlands
 
-- Uitgebreide opt-in contractprobe voor nationale P0-datasets, paginering, tijdzones en numerieke veldtypen; live-validatie blijft open.
+- Nationale P0-datasets en paginering live gevalideerd voor de geteste queries; aparte tijdzoneprobe voor de vastgestelde afwijking, verdere contractvalidatie blijft open.
 
 - Tweetalige projectsite gemigreerd naar Jekyll met gedeelde layouts, gelockte gems en gecontroleerde Pages-deployment.
 
@@ -20,7 +20,7 @@
 
 ### English
 
-- Extended opt-in contract probe for national P0 datasets, pagination, time zones and numeric field types; live validation remains pending.
+- National P0 datasets and pagination validated live for the tested queries; dedicated timezone probe for the observed mismatch, further contract validation remains pending.
 
 - Bilingual project site migrated to Jekyll with shared layouts, locked gems and guarded Pages deployment.
 

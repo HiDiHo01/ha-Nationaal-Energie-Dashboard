@@ -1099,7 +1099,7 @@ Per implementatieonderdeel gelden alle toepasselijke criteria:
 | Repositorystructuur | Basismappen en ondersteunende bestanden aanwezig |
 | Marketplace | Doel vastgelegd; niet aangemeld |
 | API-client en Home Assistant-integratie | Niet geïmplementeerd |
-| Live API-contracttests | Eerste twee begrensde zonne-energieobservaties geslaagd; volledige contractvalidatie open |
+| Live API-contracttests | Tien nationale P0-queries en paginering geslaagd; NL-tijdzoneafwijking, semantiek en volledige contractvalidatie open |
 | CI/CD | Basis-CI, pre-commit, dependency-audit en branchbescherming operationeel; inhoudelijke integratievalidatie nog niet uitgevoerd |
 
 ### 26.1 Beperkingen en ontwerpbeslissingen
