@@ -48,7 +48,7 @@ Het beoogde API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit v
 
 **Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
 
-Het distributiedoel is Home Assistant Marketplace. Voor de [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) is GPL-3.0-only gekozen, een OSI-goedgekeurde licentie. GitHub-licentieherkenning is bevestigd; daadwerkelijke catalogustoelating moet nog worden aangetoond. Runtime-distributie moet nog worden gevalideerd. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
+Het distributiedoel is Home Assistant Marketplace. Voor de [HACS-licentiecontrole](https://www.hacs.xyz/docs/publish/include/#check-license) is GPL-3.0-only gekozen, een OSI-goedgekeurde licentie. GitHub-licentieherkenning is bevestigd; daadwerkelijke catalogustoelating moet nog worden aangetoond. De runtime-distributiestrategie is gevalideerd met een synthetische wheel; volledige productie-installatie blijft open. Tijdens ontwikkeling wordt lokaal getest. Er is nog geen installeerbare release. Officieel aangeboden versies mogen volgens de gebruiksvoorwaarden binnen Home Assistant worden gebruikt.
 
 ## Ontwikkeling en kwaliteit
 
@@ -78,7 +78,7 @@ Zie de [geprioriteerde backlog](docs/BACKLOG.md) voor openstaande instellingen, 
 - [ ] Nederlandse en Engelse integratievertalingen, diagnostiek en foutafhandeling toevoegen.
 - [x] Ontwikkeltooling, pre-commit en basis-CI inrichten.
 - [ ] Inhoudelijke integratietests en volledige kwaliteitsvalidatie afronden.
-- [ ] Marketplace-toelatingsvoorwaarden en runtime-distributiestrategie bevestigen.
+- [x] Marketplace-toelatingsvoorwaarden en runtime-distributiestrategie bevestigen (fase 0; daadwerkelijke catalogustoelating en installatie blijven open).
 - [ ] Marketplace-compatibiliteit, metadata, branding en installatie-/updatetests realiseren.
 - [ ] HACS- en Hassfest-validatie en Platinum-criteria aantoonbaar afronden.
 - [ ] Na toestemming een volledige GitHub-release publiceren en een catalogus-PR bij hacs/default indienen.
