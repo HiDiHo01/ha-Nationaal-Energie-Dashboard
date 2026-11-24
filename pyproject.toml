@@ -26,7 +26,7 @@ dev = [
 ]
 
 # The repository is a development workspace, not an installable distribution.
-# The independent API package will have its own build metadata in phase 1.
+# The independent API package has its own build metadata under packages/ned-api.
 [tool.uv]
 package = false
 

@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Beperkte fase 1 gestart op eigenaarsbesluit: zelfstandige packagebasis, getypeerde exception-hiërarchie en eerste synthetische tests; BL-003 blijft open. Wheel- en kwaliteitsvalidatie op de productie-baseline volgt via CI.
+
 - Openbare documentatie in beide talen afgestemd op de waargenomen kwartiercontracten, de onbevestigde emissie-eenheid en de uitsluiting van upstream-dagaggregaten.
 
 - Gerichte dagaggregatieprobe voor TZ-002/TZ-003 met twee vaste aanvragen, intervalduur en afzonderlijke grensafwijkingen; beide afwijkingen live bevestigd, oorzaakanalyse blijft open.
@@ -24,6 +26,8 @@
 - Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
 
 ### English
+
+- Partial phase 1 started by owner decision: independent package foundation, typed exception hierarchy and initial synthetic tests; BL-003 remains open. Wheel and quality validation on the production baseline is pending CI.
 
 - Public documentation in both languages aligned with observed quarter-hour contracts, the unconfirmed emission unit and exclusion of upstream daily aggregates.
 
