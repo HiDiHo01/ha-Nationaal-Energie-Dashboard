@@ -7,7 +7,6 @@ import probatio
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -17,32 +16,23 @@ from ned_api import (
     NedAuthenticationClient,
     NedAuthenticationError,
     NedConnectionError,
+    NedRateLimitError,
     NedTimeoutError,
 )
 
-from .const import CONTRACT_PENDING, DOMAIN
+from .const import DOMAIN
+from .coordinator import get_request_budget
 
 API_KEY_SCHEMA = probatio.Schema(
     {probatio.Required(probatio.Secret(CONF_API_KEY)): cv.string}
 )
 
 
-def _ensure_authentication_ready() -> None:
-    """Prevent live validation until the runtime and phase gates are released."""
-    raise ConfigEntryError(
-        translation_domain=DOMAIN,
-        translation_key=CONTRACT_PENDING,
-    )
-
-
 async def async_validate_api_key(hass: HomeAssistant, api_key: str) -> None:
-    """Validate with the independent client and a borrowed Core HTTP session.
-
-    The readiness guard remains closed in this draft. Offline tests may
-    replace the guard and transport, never the production authentication logic.
-    """
-    _ensure_authentication_ready()
-    client = NedAuthenticationClient(async_get_clientsession(hass))
+    """Use the real bounded positive authentication check with Core's session."""
+    client = NedAuthenticationClient(
+        async_get_clientsession(hass), get_request_budget(hass)
+    )
     await client.async_validate_api_key(api_key)
 
 
@@ -109,14 +99,14 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 try:
                     await async_validate_api_key(self.hass, api_key)
-                except ConfigEntryError:
-                    errors["base"] = CONTRACT_PENDING
                 except NedAuthenticationError:
                     errors[CONF_API_KEY] = "invalid_auth"
                 except NedAccessDeniedError:
                     errors["base"] = "access_denied"
                 except NedConnectionError, NedTimeoutError:
                     errors["base"] = "cannot_connect"
+                except NedRateLimitError:
+                    errors["base"] = "rate_limited"
                 except NedApiError:
                     errors["base"] = "cannot_validate"
                 else:
