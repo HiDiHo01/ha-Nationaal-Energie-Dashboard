@@ -10,7 +10,7 @@ This project develops a custom integration for [Home Assistant](https://www.home
 
 > **Development status:** phase 1 has partially started with the contract-independent package foundation. BL-003 remains open for contract-dependent functionality. No working integration or installable release is available yet.
 
-This development branch contains the nine requested integration files, eight sensor descriptions, a masked API-key flow and a separate authentication client. This is an offline draft: the provider factory and authentication connection block real configuration and live data requests; no working integration or release. Existing phase gates remain in effect.
+The development branch contains a limited local alpha (0.1.0a1): real credential validation, an independent UTC quarter-hour parser and five national power sensors. Use only the exact matching locally built wheel for the test installation; no HACS installation or public release. CO₂, forecast and the estimated renewable share remain reserved until their contract conditions are met. New CI and live installation are not yet confirmed; BL-003 and the general phase gates remain open.
 
 ## Energy data
 
@@ -41,7 +41,7 @@ The first eight priority national sensors are CO₂ intensity, forecast CO₂ in
 
 ## API key
 
-Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The draft client and Config Flow distinguish 401 from 403 without logging error payloads; the live connection remains blocked.
+Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The alpha client and Config Flow distinguish 401 from 403 without logging error payloads; local owner testing requires successful CI and the exact wheel.
 
 Access to the NED API requires a personal API key.
 
@@ -53,6 +53,8 @@ Access to the NED API requires a personal API key.
 The intended API base URL is https://api.ned.nl/v1. Never disclose API keys in GitHub issues, commits or diagnostic information.
 
 ## Installation and configuration
+
+[Local alpha test (separate Core test environment only)](docs/user/en/alpha-test.md).
 
 **Minimum Home Assistant Core version: 2026.11.3.** Each new integration release targets the latest stable Core release as its minimum. Older releases and prereleases need not be supported. The current baseline is a development target, not a tested runtime compatibility claim.
 
