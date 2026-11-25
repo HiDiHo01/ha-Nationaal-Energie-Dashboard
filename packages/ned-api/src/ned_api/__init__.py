@@ -13,7 +13,12 @@ from .exceptions import (
     NedUnsupportedDatasetError,
     NedValidationError,
 )
-from .quarter import NedPowerDataset, NedPowerReading, NedQuarterClient
+from .quarter import (
+    NedPowerDataset,
+    NedPowerReading,
+    NedQuarterClient,
+    validate_key_format,
+)
 from .rate_limiter import NedRequestBudget
 from .transport import NedTransport, TransportResponse
 
@@ -35,4 +40,5 @@ __all__ = [
     "NedUnsupportedDatasetError",
     "NedValidationError",
     "TransportResponse",
+    "validate_key_format",
 ]
