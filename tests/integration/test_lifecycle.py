@@ -192,7 +192,9 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
             state = hass.states.get(entity_id)
             assert state is not None and state.state == STATE_UNAVAILABLE
             assert state.attributes.get("restored") is True
-        assert all(not platform.entities for platform in async_get_platforms(hass, DOMAIN))
+        assert all(
+            not platform.entities for platform in async_get_platforms(hass, DOMAIN)
+        )
         request_count = len(api.calls)
         async_fire_time_changed(hass, _NOW + timedelta(minutes=10))
         await hass.async_block_till_done()
