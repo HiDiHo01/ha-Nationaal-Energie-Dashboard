@@ -52,5 +52,7 @@ class NedRequestBudget:
         response = await transport.async_get(path, params=params, headers=headers)
         if response.status == 429:
             self._blocked_until = monotonic() + _WINDOW
-            raise NedRateLimitError("NED returned HTTP 429; polling temporarily paused.")
+            raise NedRateLimitError(
+                "NED returned HTTP 429; polling temporarily paused."
+            )
         return response
