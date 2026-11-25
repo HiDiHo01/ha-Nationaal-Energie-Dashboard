@@ -1,4 +1,4 @@
-"""Define the eight planned national energy sensors for offline validation."""
+"""Expose five alpha power sensors and preserve the reserved sensor descriptions."""
 
 from datetime import UTC, datetime
 
@@ -26,7 +26,13 @@ from .const import (
     WASTE_RENEWABLE_FACTOR,
     SensorKey,
 )
-from .coordinator import NedConfigEntry, NedReading, NedSnapshot, select_reading
+from .coordinator import (
+    POWER_DATASETS,
+    NedConfigEntry,
+    NedReading,
+    NedSnapshot,
+    select_reading,
+)
 
 _CO2_KEYS = frozenset((SensorKey.CO2_INTENSITY, SensorKey.CO2_FORECAST))
 
@@ -78,16 +84,15 @@ async def async_setup_entry(
     entry: NedConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Register all eight descriptions using their respective coordinator."""
+    """Register only the five validated power datasets in the local alpha."""
     async_add_entities(
         NedSensor(
-            entry.runtime_data.forecast
-            if SensorKey(description.key) is SensorKey.CO2_FORECAST
-            else entry.runtime_data.current,
+            entry.runtime_data.current,
             entry.entry_id,
             description,
         )
         for description in SENSOR_DESCRIPTIONS
+        if SensorKey(description.key) in POWER_DATASETS
     )
 
 
