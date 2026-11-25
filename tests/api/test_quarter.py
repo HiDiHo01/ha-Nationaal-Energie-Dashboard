@@ -105,9 +105,7 @@ async def test_empty_day() -> None:
         )
 
 
-@pytest.mark.parametrize(
-    "value", [None, 12, "", " ", "a b", "a\nb", "é", "abc\x7f"]
-)
+@pytest.mark.parametrize("value", [None, 12, "", " ", "a b", "a\nb", "é", "abc\x7f"])
 def test_invalid_key_format(value: object) -> None:
     """Reject absent and unsafe header values without including them in errors."""
     with pytest.raises(NedValidationError, match="printable ASCII"):
