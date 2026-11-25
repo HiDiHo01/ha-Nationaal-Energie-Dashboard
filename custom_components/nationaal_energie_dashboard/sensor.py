@@ -82,7 +82,7 @@ async def async_setup_entry(
     async_add_entities(
         NedSensor(
             entry.runtime_data.forecast
-            if description.key == SensorKey.CO2_FORECAST
+            if SensorKey(description.key) is SensorKey.CO2_FORECAST
             else entry.runtime_data.current,
             entry.entry_id,
             description,
