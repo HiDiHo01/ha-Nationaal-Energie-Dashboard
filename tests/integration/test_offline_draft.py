@@ -651,3 +651,23 @@ def test_received_at_clock_rollback() -> None:
     reading = NedReading(_START, _START + QUARTER, 1, _START + 2 * QUARTER)
     assert select_reading((reading,), _START + QUARTER, forecast=False) is None
     assert select_reading((reading,), _START + 2 * QUARTER, forecast=False) == reading
+
+
+@pytest.mark.parametrize("received_at", [_START, _START.replace(tzinfo=None)])
+def test_invalid_receipt(received_at: datetime) -> None:
+    """Reject naive timestamps and receipt before the interval has closed."""
+    with pytest.raises(ValueError, match="UTC receipt"):
+        NedReading(_START, _START + QUARTER, 1, received_at)
+
+
+def test_exact_staleness_boundary() -> None:
+    """Make the presentation cutoff explicit at the exact 30-minute boundary."""
+    reading = NedReading(_START, _START + QUARTER, 1, _START + QUARTER)
+    boundary = reading.valid_to + timedelta(minutes=30)
+    assert select_reading((reading,), boundary, forecast=False) == reading
+    assert (
+        select_reading(
+            (reading,), boundary + timedelta(microseconds=1), forecast=False
+        )
+        is None
+    )

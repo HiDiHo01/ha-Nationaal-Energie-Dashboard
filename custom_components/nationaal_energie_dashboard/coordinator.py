@@ -76,6 +76,11 @@ class NedReading:
             raise ValueError("Expected a complete, aligned UTC quarter-hour.")
         if isinstance(self.value, bool) or not isfinite(self.value) or self.value < 0:
             raise ValueError("Expected a finite, nonnegative reading.")
+        if self.received_at is not None and (
+            self.received_at.utcoffset() != timedelta(0)
+            or self.received_at < self.valid_to
+        ):
+            raise ValueError("Expected UTC receipt at or after interval closure.")
 
 
 # Values use kW, kg CO2/kWh or percent according to the sensor key.
@@ -126,7 +131,7 @@ class NedAlphaProvider:
                     item.valid_from, item.valid_to, item.capacity_kw, received_at
                 )
                 for item in page
-                if item.valid_to <= requested_at
+                if item.valid_to <= min(requested_at, received_at)
             )
         return tuple(readings)
 

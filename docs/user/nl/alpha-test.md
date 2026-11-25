@@ -1,31 +1,30 @@
 # Lokale alpha-test 0.1.0a1
 
-Deze proef is uitsluitend bedoeld voor een afzonderlijke, reeds werkende Home Assistant Core-testomgeving met Core 2026.11.3 en Python 3.14.10. Geen installatie op de productieomgeving, via HACS of via een publieke index. Wacht met een eigenaarstest totdat alle verplichte CI-controles op exact de te testen commit zijn geslaagd. Er is geen publieke release of PyPI-publicatie.
+Uitsluitend een afzonderlijke Home Assistant Core-testomgeving met Core 2026.11.3 en Python 3.14.10. Geen installatie via HACS, HA OS/Supervised of een publieke package-index. Wacht op alle verplichte controles op exact de geteste commit en de afhandeling van [PR #39-review](../../PR39_REVIEW.md). Geen publieke release.
 
-## Voorbereiding en installatie
+## Gecontroleerde voorbereiding en start
 
-Controleer de herkomst van de checkout en de exacte commit in PR #39; voer onderstaande opdrachten uit vanaf de repositoryroot op de testmachine. Stel de twee paden in op je afzonderlijke testomgeving (niet de productieomgeving).
+Gebruik een vertrouwde checkout van de beoordeelde commit en een afzonderlijke, reeds werkende Core-venv met alle UI-dependencies. Het configpad moet nieuw en absoluut zijn, met bestaande bovenliggende map. Gebruik nooit je productie-venv. Kies de volledige 40-teken-commit-SHA uit de geslaagde CI, niet een willekeurige branchversie.
 
 ```bash
 HA_PYTHON="/pad/naar/test-venv/bin/python"
-HA_CONFIG="/pad/naar/test-config"
-"$HA_PYTHON" -c 'import sys; from importlib.metadata import version; assert sys.version_info[:3] == (3, 14, 10); assert version("homeassistant") == "2026.11.3"'
-uv build --wheel --no-sources --out-dir wheelhouse packages/ned-api
-sha256sum wheelhouse/ned_api-0.1.0a1-py3-none-any.whl
-uv pip install --python "$HA_PYTHON" --no-index --no-deps --reinstall wheelhouse/ned_api-0.1.0a1-py3-none-any.whl
-uv pip check --python "$HA_PYTHON"
-"$HA_PYTHON" -c 'from importlib.metadata import version; assert version("ned-api") == "0.1.0a1"; import ned_api; print(ned_api.__file__)'
-mkdir -p "$HA_CONFIG/custom_components"
-cp -R custom_components/nationaal_energie_dashboard "$HA_CONFIG/custom_components/"
+HA_CONFIG="/pad/naar/nieuwe-test-config"
+COMMIT="<volledige-beoordeelde-commit-sha>"
+bash scripts/run_local_alpha.sh prepare "$HA_PYTHON" "$HA_CONFIG" "$COMMIT"
+bash scripts/run_local_alpha.sh launch "$HA_PYTHON" "$HA_CONFIG" "$COMMIT"
 ```
 
-Gebruik een schone testconfiguratie zonder oudere kopie van de integratie. Bouw de wheel zelf uit dezelfde commit; vergelijk de hash met je eigen buildadministratie en installeer geen gelijknamig package van een publieke index. De gelockte ontwikkelomgeving en de [native wheelproef](../../../scripts/check_runtime_distribution.sh) zijn de referentie voor dependencycompatibiliteit. Stop bij ontbrekende of conflicterende dependencies. De alpha veronderstelt dat Home Assistant en zijn overige vereisten al zijn geïnstalleerd; de installatie van HA OS/Supervised en HACS is nog niet gevalideerd. Herstart de testinstantie met `UV_NO_INDEX=1 UV_OFFLINE=1` om externe package-resolutie tijdens deze proef te voorkomen.
+De [launcher](../../../scripts/run_local_alpha.sh) gebruikt getrackte bestanden uit de exacte Git-commit, weigert een bestaande configuratiemap bij voorbereiding, bouwt de wheel lokaal en installeert uitsluitend die wheel zonder index, cache of dependency-resolutie. De [preflight](../../../scripts/verify_alpha_wheel.sh) controleert Core/Python, SHA256, manifestpin, geïnstalleerde packagebytes en importlocatie. Bij iedere start controleert de launcher de integratiekopie en de wheel opnieuw. De lokaal opgeslagen hash is provenancecontrole binnen deze vertrouwde testomgeving, geen onafhankelijke digitale handtekening. De start gebruikt UV_NO_INDEX=1, UV_OFFLINE=1, UV_NO_CACHE=1 en --skip-pip; ontbrekende UI-dependencies moeten vooraf in de test-venv zijn geïnstalleerd uit vertrouwde bronnen. --skip-pip is uitsluitend voor deze lokale eigenaarstest; de gewone CI test de echte requirements-manager afzonderlijk. De test-UI bindt standaard aan 127.0.0.1:8124. De launcherstap start Core; voorbereiding start geen proces of NED-verzoek.
 
 ## Functionele eigenaarstest
 
-1. Open Instellingen > Apparaten en diensten > Integratie toevoegen > Nationaal Energie Dashboard. Voer uitsluitend je eigen geldige API-key in via het gemaskeerde veld; deel de sleutel niet. Eén positieve historische zonnequery valideert toegang.
-2. Controleer de vijf sensoren: zon, wind land, wind zee, nationaal verbruik en nationale productie. Vergelijk eenheden (native kW, aanbevolen MW), geldigheidsgrenzen en waarden met NED. Current kan upstream geraamde waarden bevatten.
-3. Controleer dat ontbrekende, ongeldige of verouderde waarden unavailable worden en niet nul. Er worden per refresh maximaal vijf aanvragen gedaan, of tien bij UTC-dagoverlap. Vijf minuten tussen reguliere updates; geen applicatieretries. Stop bij ongewoon gedrag of HTTP 429, voer geen negatieve of belastingproeven uit.
-4. Test reload en unload in de testomgeving en controleer dat polling stopt. Deel uitsluitend geschoonde foutmeldingen, statuscodes en waarnemingen; geen credentials, ruwe responsebody of configuratieopslag.
+1. Open de test-UI: Instellingen > Apparaten en diensten > Integratie toevoegen > Nationaal Energie Dashboard. Voer uitsluitend je eigen geldige API-key in via het gemaskeerde veld. Een positieve historische zonnequery valideert toegang tot die query, niet alle datasets.
+2. Controleer de vijf sensoren: zon, wind land, wind zee, nationaal verbruik en nationale productie. Vergelijk native kW (aanbevolen MW), geldigheidsgrenzen, ontvangsttijd en waarden. Current kan upstream geraamde waarden bevatten. Alleen bij aanvang én ontvangst van de request afgesloten kwartieren komen in aanmerking; geen automatische promotie van eerder opgehaalde open kwartieren.
+3. Controleer afzonderlijke beschikbaarheid en herstel. Een mislukte dataset blijft unavailable; andere geslaagde datasets blijven bruikbaar. Geen nulvulling. Alle datasets mislukt, HTTP 401 of 429 blokkeert de batch; 403 blijft ambigu. Intervalgrens 30 minuten blijft voorlopig; cachecallback doet geen HTTP. Per refresh maximaal vijf logische dagqueries, of tien bij UTC-overlap; aiohttp kan intern een GET herhalen. Middleware telt iedere poging, inclusief fouten en interne retries. Proceslokaal budget 120 pogingen/300 seconden. HTTP 429 blokkeert nieuwe aanvragen minstens 300 seconden en respecteert een langere geldige Retry-After; boven 24 uur blijft de limiter voor dit proces geblokkeerd. Herstart niet om een serverbeperking te omzeilen. Geen negatieve of belastingproeven.
+4. Test reload, herconfiguratie en unload met normale geldige credentials; stop bij ongewoon gedrag. Deel uitsluitend geschoonde meldingen, statuscodes en waarnemingen.
 
-CO₂, forecast en geschat hernieuwbaar aandeel worden niet geregistreerd in deze alpha. Dagaggregatie, revisieverwerking, volledige autorisatiesemantiek en universele rate-limitgaranties zijn niet bevestigd. De 30-minuten-stalegrens en het proceslokale budget zijn conservatieve ontwerpkeuzes. Een geslaagde eigenaarstest is geen volledige faseacceptatie of productierelease.
+## Stoppen en terugdraaien
+
+Verwijder de integratie via de test-UI, stop de afzonderlijke Core-procesinstantie en controleer dat deze niet meer actief is. Bewaar desgewenst een veilige backup van de testconfiguratie; deze kan credentials bevatten. Verwijder daarna uitsluitend de eigen testconfiguratie en aparte test-venv indien niet meer nodig. De launcher verwijdert geen bestaande gebruikersconfiguratie. Start geen productie-installatie vanuit deze alpha.
+
+CO₂, forecast, geschat hernieuwbaar aandeel, dagaggregatie en revisieverwerking blijven buiten scope. Volledige autorisatiesemantiek, daadwerkelijke publicatielatency, upstream quota-scope en formele NED Retry-After-semantiek blijven onbevestigd. Een eigenaarstest is geen volledige faseacceptatie of productierelease.

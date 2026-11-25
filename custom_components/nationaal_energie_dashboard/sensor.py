@@ -34,6 +34,8 @@ from .coordinator import (
     select_reading,
 )
 
+PARALLEL_UPDATES = 0
+
 _CO2_KEYS = frozenset((SensorKey.CO2_INTENSITY, SensorKey.CO2_FORECAST))
 
 

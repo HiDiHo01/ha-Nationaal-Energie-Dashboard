@@ -136,7 +136,7 @@ Volg hoofdstukken 2, 3, 6, 7, 12 en 15 van het integratieplan en de actuele bron
 
 Volg hoofdstukken 7–9 van het integratieplan.
 
-- Gebruik aiohttp en injecteer Home Assistants sessie via async_get_clientsession. Sluit een geleende sessie nooit zelfstandig.
+- Gebruik aiohttp en injecteer Home Assistants sessie via async_get_clientsession. Indien per-attempt-middleware noodzakelijk is en de bestaande Core-middleware niet via een publieke API samengesteld kan worden (PR #39, aiohttp 3.14.5), gebruik Core's async_create_clientsession met aanvullende middleware, behoud de native connector/TLS/SSRF-beveiliging, detach een zelf aangemaakte flow-sessie in finally en laat Core de entry-sessie opruimen. Sluit een geleende sessie nooit zelfstandig.
 - Geen blokkerende I/O in de event loop en geen HTTP-aanroepen vanuit entity-properties. Gebruik executor-offloading uitsluitend voor noodzakelijke synchrone bewerkingen volgens HA-richtlijnen.
 - Eén centrale requestpipeline voor validatie, budget, timeout, HTTP-status, veilige begrensde paginering, parsing en resultaat.
 - Gebruik een gedeelde limiter en requestdeduplicatie voor setup, coordinators, actions, retries en pagina's. Respecteer de echte API-limiet en Retry-After.

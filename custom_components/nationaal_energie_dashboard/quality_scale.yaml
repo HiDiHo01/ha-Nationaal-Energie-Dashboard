@@ -1,0 +1,170 @@
+rules:
+  # Bronze
+  action-setup:
+    status: todo
+    comment: "Planned response actions are outside the current alpha."
+  appropriate-polling:
+    status: todo
+    comment: "Five-minute polling and bounded attempt budget implemented; final review CI and owner validation pending."
+  brands:
+    status: todo
+    comment: "Marketplace branding not validated."
+  common-modules:
+    status: done
+    comment: "Shared constants and a central coordinator separate independent API and entity logic."
+  config-flow:
+    status: todo
+    comment: "UI flow implemented; native lifecycle validation pending."
+  config-flow-test-coverage:
+    status: todo
+    comment: "Earlier 100% coverage does not establish the changed flow; exact-commit CI pending."
+  dependency-transparency:
+    status: todo
+    comment: "Exact manifest pin and local provenance preflight; no public package publication."
+  docs-actions:
+    status: todo
+    comment: "Planned response actions not implemented."
+  docs-conditions:
+    status: exempt
+    comment: "No conditions exposed by the integration."
+  docs-high-level-description:
+    status: done
+    comment: "README.md and README.en.md describe scope, national data and alpha limitations."
+  docs-installation-instructions:
+    status: todo
+    comment: "Local owner-test launcher documented; actual start and public installation not verified."
+  docs-removal-instructions:
+    status: todo
+    comment: "Local rollback documented; native removal and production lifecycle proof pending."
+  docs-triggers:
+    status: exempt
+    comment: "No triggers exposed by the integration."
+  entity-event-setup:
+    status: todo
+    comment: "Cache callback registers an entity removal callback; native lifecycle proof pending."
+  entity-unique-id:
+    status: done
+    comment: "Deterministic dataset identifiers; previous exact-commit tests verified all eight reserved identities."
+  has-entity-name:
+    status: done
+    comment: "NedSensor uses has_entity_name and translated descriptions."
+  runtime-data:
+    status: todo
+    comment: "Typed ConfigEntry runtime data uses one coordinator; final native tests pending."
+  test-before-configure:
+    status: todo
+    comment: "Positive historical solar query implemented; complete native flow proof pending."
+  test-before-setup:
+    status: todo
+    comment: "First refresh and setup-retry recovery test added; result pending."
+  unique-config-entry:
+    status: todo
+    comment: "Fixed service unique ID and abort logic; final native test pending."
+
+  # Silver
+  action-exceptions:
+    status: todo
+    comment: "Planned response actions not implemented."
+  config-entry-unloading:
+    status: todo
+    comment: "Native unload and no-late-requests test added; result pending."
+  docs-configuration-parameters:
+    status: todo
+    comment: "Config/reconfigure key documented; future options remain open."
+  docs-installation-parameters:
+    status: todo
+    comment: "Local installation parameters documented; test proof pending."
+  entity-unavailable:
+    status: todo
+    comment: "Partial snapshots and interval freshness implemented; native test result pending."
+  integration-owner:
+    status: done
+    comment: "Manifest codeowner identifies project maintainer."
+  log-when-unavailable:
+    status: todo
+    comment: "Sanitized per-dataset transition logs implemented; exact-commit proof pending."
+  parallel-updates:
+    status: todo
+    comment: "One coordinator and explicit PARALLEL_UPDATES=0; final CI pending."
+  reauthentication-flow:
+    status: todo
+    comment: "Native 401 reauth and 403 ambiguity test added; result pending."
+  test-coverage:
+    status: todo
+    comment: "Baseline 9370873 had 100%; changed commit not yet verified."
+
+  # Gold
+  devices:
+    status: todo
+    comment: "One logical service device; native registry test pending."
+  diagnostics:
+    status: todo
+    comment: "Redacted diagnostics not implemented."
+  discovery:
+    status: exempt
+    comment: "National cloud service requires a personal API key; no local device discovery."
+  discovery-update-info:
+    status: exempt
+    comment: "No device discovery or changing host address for the fixed API origin."
+  docs-data-update:
+    status: todo
+    comment: "Polling and freshness documented; latency and final test proof pending."
+  docs-examples:
+    status: todo
+    comment: "Full user examples beyond alpha test not completed."
+  docs-known-limitations:
+    status: done
+    comment: "API_REFERENCE.md and bilingual alpha instructions record known limitations."
+  docs-supported-devices:
+    status: todo
+    comment: "Service documentation to be reviewed against final scope."
+  docs-supported-functions:
+    status: todo
+    comment: "Five alpha sensors documented; reserved features incomplete."
+  docs-troubleshooting:
+    status: todo
+    comment: "Alpha failure cases and rollback documented; complete troubleshooting pending."
+  docs-use-cases:
+    status: todo
+    comment: "Full end-user use cases pending."
+  dynamic-devices:
+    status: exempt
+    comment: "Single fixed national service device."
+  entity-category:
+    status: todo
+    comment: "Primary power sensors only; final review pending."
+  entity-device-class:
+    status: done
+    comment: "Five registered power sensors use SensorDeviceClass.POWER and UnitOfPower.KILO_WATT."
+  entity-disabled-by-default:
+    status: todo
+    comment: "Review complete release entity scope before acceptance."
+  entity-translations:
+    status: todo
+    comment: "NL/EN translations including receipt timestamp; final parity and native validation pending."
+  exception-translations:
+    status: todo
+    comment: "Native exception translations implemented; final native tests pending."
+  icon-translations:
+    status: todo
+    comment: "Icon definitions present; final verification pending."
+  reconfiguration-flow:
+    status: todo
+    comment: "Key replacement via native flow; final lifecycle proof pending."
+  repair-issues:
+    status: todo
+    comment: "Concrete repair scenarios and diagnostics still to be reviewed."
+  stale-devices:
+    status: exempt
+    comment: "Fixed single national service device; no dynamic device discovery."
+
+  # Platinum
+  async-dependency:
+    status: done
+    comment: "Independent async aiohttp client, no synchronous network API."
+  inject-websession:
+    status: todo
+    comment: "Core-managed session injection implemented with per-attempt middleware; final CI proof pending."
+  strict-typing:
+    status: todo
+    comment: "Earlier strict mypy passed; exact review commit still to be validated."

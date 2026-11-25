@@ -70,6 +70,11 @@ class SyntheticApi:
         )
 
 
+def _assert_entry_state(entry: NedConfigEntry, expected: ConfigEntryState) -> None:
+    """Assert the current mutable Core state without stale static narrowing."""
+    assert entry.state is expected
+
+
 async def _configure(hass: HomeAssistant) -> NedConfigEntry:
     """Use the native flow manager, including config entry setup."""
     form = await hass.config_entries.flow.async_init(
@@ -96,7 +101,7 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
         side_effect=api.response,
     ):
         entry = await _configure(hass)
-        assert entry.state is ConfigEntryState.LOADED
+        _assert_entry_state(entry, ConfigEntryState.LOADED)
         registry = er.async_get(hass)
         entries = er.async_entries_for_config_entry(registry, entry.entry_id)
         assert len(entries) == 5
@@ -145,7 +150,7 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
         assert result["type"] is FlowResultType.ABORT
         assert result["reason"] == "reauth_successful"
         await hass.async_block_till_done()
-        assert entry.state is ConfigEntryState.LOADED
+        _assert_entry_state(entry, ConfigEntryState.LOADED)
         assert entry.data[CONF_API_KEY] == "replacement-key"
         form = await hass.config_entries.flow.async_init(
             DOMAIN,
@@ -166,7 +171,7 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
         } == ids
         assert await hass.config_entries.async_unload(entry.entry_id)
         await hass.async_block_till_done()
-        assert entry.state is ConfigEntryState.NOT_LOADED
+        _assert_entry_state(entry, ConfigEntryState.NOT_LOADED)
         assert all(hass.states.get(entity_id) is None for entity_id in ids)
         request_count = len(api.calls)
         async_fire_time_changed(hass, _NOW + timedelta(minutes=10))
@@ -186,12 +191,12 @@ async def test_native_failed_setup_and_recovery(hass: HomeAssistant) -> None:
         side_effect=api.response,
     ):
         entry = await _configure(hass)
-        assert entry.state is ConfigEntryState.SETUP_RETRY
+        _assert_entry_state(entry, ConfigEntryState.SETUP_RETRY)
         assert not er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
         api.statuses.clear()
         assert await hass.config_entries.async_reload(entry.entry_id)
         await hass.async_block_till_done()
-        assert entry.state is ConfigEntryState.LOADED
+        _assert_entry_state(entry, ConfigEntryState.LOADED)
         assert (
             len(er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id))
             == 5
