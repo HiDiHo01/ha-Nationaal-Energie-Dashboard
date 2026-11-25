@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Beperkte lokale alpha 0.1.0a1: echte sleutelvalidatie en vijf nationale vermogensdatasets, strikte UTC-kwartierparser, gedeeld proceslokaal verzoekbudget, exact gepinde lokale wheel en regressietests. Geen nieuwe live tests of packagepublicatie; CO₂, forecast en hernieuwbaar aandeel blijven gereserveerd. Nieuwe CI moet nog worden bevestigd.
+
 - Config Flow-adapter gekoppeld aan de echte authenticatieclient achter de bestaande gesloten vrijgavecontrole; uitgebreide offline regressietests. Gitleaks rapporteert alleen regel-ID en bronlocatie bij een fout; sensor-ID-opbouw behoudt identiteit, zonder scanuitzonderingen. Definitieve CI nog niet bevestigd.
 
 - AUTH-001–005: drie handmatig gerapporteerde observaties vastgelegd, conceptmapping 401/403, NL/EN-foutmeldingen en synthetische regressietests toegevoegd; autorisatie blijft open, geen live koppeling of fasevrijgave. Eerdere Ruff/Pylint-bevindingen aangepakt; CI nog niet bevestigd.
@@ -36,6 +38,8 @@
 - Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- Limited local alpha 0.1.0a1: real credential validation and five national power datasets, strict UTC quarter parser, shared process-local request budget, exact local wheel pin and regression tests. No new live tests or package publication; CO₂, forecast and renewable share remain reserved. New CI remains to be verified.
 
 - Connect the Config Flow adapter to the actual authentication client behind the existing closed release guard; expanded offline regression tests. Gitleaks reports only rule ID and source location on failure; sensor identifiers retain identity without scan exclusions. Final CI unconfirmed.
 
