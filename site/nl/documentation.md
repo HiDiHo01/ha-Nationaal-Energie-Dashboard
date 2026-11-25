@@ -8,13 +8,15 @@ other_url: /en/documentation/
 ---
 ## Installatie en vereisten
 
+Volg de lokale alpha-testinstructies in de Nederlandse repository-README; gebruik geen HACS of publieke package-index voor de alpha.
+
 De integratie is nog in ontwikkeling. Er is geen installeerbare release. De beoogde distributie verloopt via Home Assistant Marketplace. GPL-3.0-only is gekozen om te voldoen aan de [HACS-licentievoorwaarde](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub-licentieherkenning is bevestigd; daadwerkelijke catalogustoelating blijft open. De runtime-distributiestrategie is gevalideerd met een synthetische wheel; volledige productie-installatie moet nog worden aangetoond.
 
-Op deze ontwikkelbranch staan de negen gevraagde integratiebestanden, acht sensordefinities, een gemaskeerde API-keyflow en een afzonderlijke authenticatieclient. Dit is een offline concept: de providerfactory en de authenticatiekoppeling blokkeren echte configuratie en live dataverkeer; geen werkende integratie of release. De algemene fasepoorten blijven van kracht.
+De ontwikkelbranch bevat een beperkte lokale alpha (0.1.0a1): echte sleutelvalidatie, een zelfstandige UTC-kwartierparser en vijf nationale vermogenssensoren. Alleen de lokale, exact bijbehorende wheel is toegestaan voor de proefinstallatie; geen HACS-installatie of publieke release. CO₂, forecast en het geschatte hernieuwbare aandeel blijven gereserveerd totdat de contractvoorwaarden zijn vervuld. Nieuwe CI en live installatie zijn nog niet bevestigd; BL-003 en algemene fasepoorten blijven open.
 
 ## NED API-sleutel
 
-Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De conceptclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de live koppeling blijft geblokkeerd.
+Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De alphaclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de lokale eigenaarstest vereist geslaagde CI en de exacte wheel.
 
 Maak voor toekomstig gebruik een account aan bij [NED](https://ned.nl/), open Mijn account → API en genereer een persoonlijke API-sleutel. Bewaar deze veilig. Deel nooit sleutels in issues of logs.
 
