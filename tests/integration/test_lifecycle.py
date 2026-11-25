@@ -53,6 +53,7 @@ class SyntheticApi:
         """Initialize response status overrides and bounded call history."""
         self.statuses: dict[int, int] = {}
         self.calls: list[int] = []
+        self.empty: set[int] = set()
 
     def response(
         self, path: str, *, params: dict[str, str], headers: dict[str, str]
@@ -66,6 +67,10 @@ class SyntheticApi:
         status = 200 if day != _DAY else self.statuses.get(type_id, 200)
         if status != 200:
             return TransportResponse(status, b"")
+        if day == _DAY and type_id in self.empty:
+            return TransportResponse(
+                200, b'{"hydra:member":[],"hydra:totalItems":0}', "application/ld+json"
+            )
         start = datetime.combine(day, time(12, 15), tzinfo=UTC)
         record = {
             "point": "/v1/points/0",
@@ -149,6 +154,12 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
             assert state is not None and state.state != STATE_UNAVAILABLE
         assert not list(entry.async_get_active_flows(hass, {SOURCE_REAUTH}))
         api.statuses.clear()
+        api.empty.add(2)
+        await entry.runtime_data.current.async_refresh()
+        await hass.async_block_till_done()
+        state = hass.states.get(solar)
+        assert state is not None and state.state == STATE_UNAVAILABLE
+        api.empty.clear()
         await entry.runtime_data.current.async_refresh()
         await hass.async_block_till_done()
         state = hass.states.get(solar)
@@ -216,6 +227,10 @@ async def test_native_failed_setup_and_recovery(hass: HomeAssistant) -> None:
         _assert_entry_state(entry, ConfigEntryState.SETUP_RETRY)
         assert not er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
         api.statuses.clear()
+        api.empty = {dataset.value[0] for dataset in POWER_DATASETS.values()}
+        assert not await hass.config_entries.async_reload(entry.entry_id)
+        _assert_entry_state(entry, ConfigEntryState.SETUP_RETRY)
+        api.empty.clear()
         assert await hass.config_entries.async_reload(entry.entry_id)
         await hass.async_block_till_done()
         _assert_entry_state(entry, ConfigEntryState.LOADED)
@@ -223,4 +238,38 @@ async def test_native_failed_setup_and_recovery(hass: HomeAssistant) -> None:
             len(er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id))
             == 5
         )
+        assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+@pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")
+@pytest.mark.asyncio
+async def test_disabled_datasets(hass: HomeAssistant) -> None:
+    """Poll only enabled entity contexts after the explicit setup refresh."""
+    api = SyntheticApi()
+    with patch(
+        "ned_api.transport.NedTransport.async_get",
+        new_callable=AsyncMock,
+        side_effect=api.response,
+    ):
+        entry = await _configure(hass)
+        registry = er.async_get(hass)
+        entries = er.async_entries_for_config_entry(registry, entry.entry_id)
+        others = [item for item in entries if item.translation_key != "solar_power"]
+        for item in others:
+            registry.async_update_entity(
+                item.entity_id, disabled_by=er.RegistryEntryDisabler.USER
+            )
+        await hass.async_block_till_done()
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+        api.calls.clear()
+        await entry.runtime_data.current.async_refresh()
+        assert api.calls == [2]
+        registry.async_update_entity(others[0].entity_id, disabled_by=None)
+        await hass.async_block_till_done()
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+        api.calls.clear()
+        await entry.runtime_data.current.async_refresh()
+        assert len(api.calls) == 2 and 2 in api.calls
         assert await hass.config_entries.async_unload(entry.entry_id)

@@ -1,6 +1,7 @@
 """Provide bounded, contract-independent HTTPS transport."""
 
 import math
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -41,7 +42,15 @@ def parse_retry_after(value: str | None) -> float | None:
     except ValueError, TypeError, OverflowError:
         return None
     if date_value.tzinfo is None:
-        return None
+        # RFC 9110 section 5.6.7: obsolete asctime-date uses implicit GMT.
+        if not re.fullmatch(
+            r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) "
+            r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) "
+            r"(?:[0-9]{2}| [0-9]) [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4}",
+            header,
+        ):
+            return None
+        date_value = date_value.replace(tzinfo=UTC)
     return max(0.0, (date_value - datetime.now(UTC)).total_seconds())
 
 

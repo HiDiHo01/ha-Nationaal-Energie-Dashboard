@@ -20,6 +20,7 @@ from ned_api import (
     NedPowerDataset,
     NedQuarterClient,
     NedRateLimitError,
+    NedResponseError,
     NedRequestBudget,
     NedValidationError,
     validate_key_format,
@@ -135,13 +136,20 @@ class NedAlphaProvider:
             )
         return tuple(readings)
 
-    async def async_current(self) -> NedSnapshot:
+    async def async_current(
+        self, active_keys: frozenset[SensorKey] | None = None
+    ) -> NedSnapshot:
         """Isolate failed datasets, but stop the batch on authentication or 429."""
         now = datetime.now(UTC)
         snapshot: dict[SensorKey, tuple[NedReading, ...]] = {}
         for key, dataset in POWER_DATASETS.items():
+            if active_keys is not None and key not in active_keys:
+                continue
             try:
-                snapshot[key] = await self._async_read_dataset(dataset, now)
+                readings = await self._async_read_dataset(dataset, now)
+                if select_reading(readings, datetime.now(UTC), forecast=False) is None:
+                    raise NedResponseError("No fresh closed quarter available.")
+                snapshot[key] = readings
             except NedAuthenticationError as err:
                 raise ConfigEntryAuthFailed(
                     translation_domain=DOMAIN, translation_key="authentication_failed"
@@ -162,7 +170,7 @@ class NedAlphaProvider:
                 if key in self._failed:
                     _LOGGER.info("NED dataset %s recovered", key.value)
                     self._failed.discard(key)
-        if not snapshot:
+        if not snapshot and active_keys != frozenset():
             raise UpdateFailed(
                 translation_domain=DOMAIN, translation_key="update_failed"
             )
@@ -185,19 +193,33 @@ def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedAlphaProvi
 def create_runtime(
     hass: HomeAssistant,
     entry: NedConfigEntry,
-    update_method: Callable[[], Awaitable[NedSnapshot]],
+    update_method: Callable[[frozenset[SensorKey] | None], Awaitable[NedSnapshot]],
 ) -> NedRuntimeData:
     """Create the sole active entry-owned coordinator."""
-    return NedRuntimeData(
-        current=DataUpdateCoordinator(
-            hass,
-            _LOGGER,
-            config_entry=entry,
-            name=f"{DOMAIN}_current",
-            update_interval=CURRENT_INTERVAL,
-            update_method=update_method,
-        ),
+    first_refresh = True
+
+    async def async_update() -> NedSnapshot:
+        """Fetch all at setup, then only datasets with active listeners."""
+        nonlocal first_refresh
+        contexts = set(coordinator.async_contexts())
+        keys = (
+            None
+            if first_refresh
+            else frozenset(key for key in POWER_DATASETS if key in contexts)
+        )
+        snapshot = await update_method(keys)
+        first_refresh = False
+        return snapshot
+
+    coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        config_entry=entry,
+        name=f"{DOMAIN}_current",
+        update_interval=CURRENT_INTERVAL,
+        update_method=async_update,
     )
+    return NedRuntimeData(current=coordinator)
 
 
 def select_reading(
@@ -222,7 +244,7 @@ def select_reading(
         candidates = tuple(
             reading
             for reading in readings
-            if timedelta(0) <= utc_now - reading.valid_to <= MAX_CURRENT_AGE
+            if timedelta(0) <= utc_now - reading.valid_to < MAX_CURRENT_AGE
             and (reading.received_at is None or reading.received_at <= utc_now)
         )
         latest = max((reading.valid_to for reading in candidates), default=None)

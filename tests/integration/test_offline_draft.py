@@ -443,7 +443,7 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
     ):
         assert await async_setup_entry(hass, entry)
     forward.assert_awaited_once_with(entry, PLATFORMS)
-    provider.async_current.assert_awaited_once()
+    provider.async_current.assert_awaited_once_with(None)
     runtime = entry.runtime_data
     add_entities = MagicMock()
     await async_setup_sensors(hass, entry, add_entities)
@@ -531,7 +531,20 @@ async def test_actual_alpha_provider(
         """Return only synthetic records for the requested dataset and day."""
         assert headers["X-AUTH-TOKEN"] == "synthetic-key"
         dataset = NedPowerDataset((int(params["type"]), int(params["activity"])))
-        return _power_response(dataset, date.fromisoformat(params["validfrom[after]"]))
+        day = date.fromisoformat(params["validfrom[after]"])
+        response = _power_response(dataset, day)
+        document = json.loads(response.body)
+        start = (
+            now - QUARTER
+            if day == now.date()
+            else datetime.combine(day, time(23, 45), tzinfo=UTC)
+        )
+        document["hydra:member"][0].update(
+            validfrom=start.isoformat(), validto=(start + QUARTER).isoformat()
+        )
+        return TransportResponse(
+            200, json.dumps(document).encode(), response.media_type
+        )
 
     with (
         patch(
@@ -638,12 +651,8 @@ async def test_future_quarter_not_promoted() -> None:
         "custom_components.nationaal_energie_dashboard.coordinator.datetime"
     ) as clock:
         clock.now.return_value = _START
-        snapshot = await provider.async_current()
-    assert all(not series for series in snapshot.values())
-    assert (
-        select_reading(snapshot[SensorKey.SOLAR], _START + QUARTER, forecast=False)
-        is None
-    )
+        with pytest.raises(UpdateFailed):
+            await provider.async_current()
 
 
 def test_received_at_clock_rollback() -> None:
@@ -664,8 +673,21 @@ def test_exact_staleness_boundary() -> None:
     """Make the presentation cutoff explicit at the exact 30-minute boundary."""
     reading = NedReading(_START, _START + QUARTER, 1, _START + QUARTER)
     boundary = reading.valid_to + timedelta(minutes=30)
-    assert select_reading((reading,), boundary, forecast=False) == reading
+    assert select_reading((reading,), boundary, forecast=False) is None
+    assert (
+        select_reading((reading,), boundary - timedelta(microseconds=1), forecast=False)
+        == reading
+    )
     assert (
         select_reading((reading,), boundary + timedelta(microseconds=1), forecast=False)
         is None
     )
+
+
+@pytest.mark.asyncio
+async def test_no_active_datasets() -> None:
+    """An explicitly empty listener set must never trigger network requests."""
+    client = MagicMock(spec=NedQuarterClient)
+    provider = NedAlphaProvider(client, "synthetic-key", NedRequestBudget())
+    assert await provider.async_current(frozenset()) == {}
+    client.async_read_day.assert_not_called()

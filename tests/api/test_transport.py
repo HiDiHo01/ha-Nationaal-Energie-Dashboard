@@ -238,6 +238,9 @@ async def test_error_status_precedes_body(
         ("Wed, 25 Nov 2026 00:15:00 GMT", 900.0),
         ("Wed, 24 Nov 2026 23:00:00 GMT", 0.0),
         ("25 Nov 2026 00:15:00", None),
+        ("Wed Nov 25 00:15:00 2026", 900.0),
+        ("Sun Dec  6 00:00:00 2026", 950400.0),
+        ("Wed Nov 25 00:15:00 2026 -0000", None),
     ],
 )
 def test_retry_after(header: str | None, expected: float | None) -> None:
