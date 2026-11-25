@@ -14,3 +14,7 @@ Scope: lokale alpha 0.1.0a1, vijf nationale power-datasets. Geen nieuwe live NED
 | R39-08 | Quality Scale-matrix met criteria uit Core 2026.11.3, beide talen, backlog, plan, contractreferentie en kennisupdate. | Geen Platinum- of faseclaim; open criteria blijven todo. |
 
 Zie de [native lifecycle-tests](../tests/integration/test_lifecycle.py), [Quality Scale](../custom_components/nationaal_energie_dashboard/quality_scale.yaml) en [NL](user/nl/alpha-test.md)/[EN](user/en/alpha-test.md) installatie-instructies. Upstream basis: [Core sessiefactory](https://github.com/home-assistant/core/blob/2026.11.3/homeassistant/helpers/aiohttp_client.py), [aiohttp retrygedrag](https://github.com/aio-libs/aiohttp/blob/v3.14.5/aiohttp/client.py#L738-L742), [Core Quality Scale regels](https://github.com/home-assistant/core/blob/2026.11.3/script/hassfest/quality_scale.py). Definitieve exacte-commit CI moet opnieuw worden gecontroleerd. BL-003, BL-015 en BL-016 blijven open.
+
+## Tussentijdse CI
+
+De [Python-next-smoke](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45521339110) op f88347e slaagde met 150/150 zelfstandige tests. Formatter, lint, Gitleaks en Pylint waren groen in [Baseline 45521339121](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45521339121/job/138893677234); mypy meldde twee stale enum-type-narrowingfouten in lifecycle-tests, gecorrigeerd met een getypeerde asserthelper. Geen uitzondering of kwaliteitsverlaging. Nieuwe definitieve CI blijft vereist.

@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- R39-01–08: status-first foutafhandeling, Retry-After, per-attempt limiter, gedeeltelijke datasetbeschikbaarheid, ontvangsttijd en gesloten-intervalbeleid, één actieve coordinator, native lifecycle-tests, gecontroleerde lokale launcher en Quality Scale-matrix. Definitieve CI nog vereist; geen live NED-probes of publicatie.
+
 - Beperkte lokale alpha 0.1.0a1: echte sleutelvalidatie en vijf nationale vermogensdatasets, strikte UTC-kwartierparser, gedeeld proceslokaal verzoekbudget, exact gepinde lokale wheel en regressietests. Geen nieuwe live tests of packagepublicatie; CO₂, forecast en hernieuwbaar aandeel blijven gereserveerd. Nieuwe CI moet nog worden bevestigd.
 
 - Config Flow-adapter gekoppeld aan de echte authenticatieclient achter de bestaande gesloten vrijgavecontrole; uitgebreide offline regressietests. Gitleaks rapporteert alleen regel-ID en bronlocatie bij een fout; sensor-ID-opbouw behoudt identiteit, zonder scanuitzonderingen. Definitieve CI nog niet bevestigd.
@@ -38,6 +40,8 @@
 - Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- R39-01–08: status-first error handling, Retry-After, per-attempt limiter, partial dataset availability, receipt timestamp and closed-interval policy, single active coordinator, native lifecycle tests, controlled local launcher and Quality Scale matrix. Final CI required; no live NED probes or publication.
 
 - Limited local alpha 0.1.0a1: real credential validation and five national power datasets, strict UTC quarter parser, shared process-local request budget, exact local wheel pin and regression tests. No new live tests or package publication; CO₂, forecast and renewable share remain reserved. New CI remains to be verified.
 

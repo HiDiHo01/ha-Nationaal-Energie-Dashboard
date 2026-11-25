@@ -12,6 +12,8 @@ Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.h
 
 De ontwikkelbranch bevat een beperkte lokale alpha (0.1.0a1): echte sleutelvalidatie, een zelfstandige UTC-kwartierparser en vijf nationale vermogenssensoren. Alleen de lokale, exact bijbehorende wheel is toegestaan voor de proefinstallatie; geen HACS-installatie of publieke release. CO₂, forecast en het geschatte hernieuwbare aandeel blijven gereserveerd totdat de contractvoorwaarden zijn vervuld. Nieuwe CI en live installatie zijn nog niet bevestigd; BL-003 en algemene fasepoorten blijven open.
 
+Reviewherstel R39-01–08: status-first foutafhandeling, Retry-After, budget per HTTP-poging, afzonderlijke datasetbeschikbaarheid en ontvangsttijd. Gebruik de gecontroleerde lokale launcher voor de aparte testomgeving. De native lifecycle- en wheelpreflighttests moeten op de definitieve commit slagen. Geen nieuwe live probes of release.
+
 ## Energiedata
 
 De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De geteste nationale P0-kwartierqueries zijn gevalideerd op structuur en dekking; verdere contract- en meetsemantiekvalidatie blijft open. Ondersteuning door de integratie moet nog worden geïmplementeerd.

@@ -12,6 +12,8 @@ This project develops a custom integration for [Home Assistant](https://www.home
 
 The development branch contains a limited local alpha (0.1.0a1): real credential validation, an independent UTC quarter-hour parser and five national power sensors. Use only the exact matching locally built wheel for the test installation; no HACS installation or public release. CO₂, forecast and the estimated renewable share remain reserved until their contract conditions are met. New CI and live installation are not yet confirmed; BL-003 and the general phase gates remain open.
 
+Review remediation R39-01–08: status-first error handling, Retry-After, per-attempt budget, independent dataset availability and receipt timestamp. Use the controlled local launcher for the separate test environment. Native lifecycle and wheel preflight tests must pass on the final commit. No new live probes or release.
+
 ## Energy data
 
 According to the source description, the NED API provides the data below. The tested national P0 quarter-hour queries have been validated for structure and coverage; further contract and measurement semantics validation remains pending. Integration support is not implemented yet.

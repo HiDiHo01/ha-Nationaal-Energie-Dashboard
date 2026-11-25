@@ -14,6 +14,8 @@ The integration is still in development. No installable release is available. Di
 
 The development branch contains a limited local alpha (0.1.0a1): real credential validation, an independent UTC quarter-hour parser and five national power sensors. Use only the exact matching locally built wheel for the test installation; no HACS installation or public release. CO₂, forecast and the estimated renewable share remain reserved until their contract conditions are met. New CI and live installation are not yet confirmed; BL-003 and the general phase gates remain open.
 
+Review remediation R39-01–08: status-first error handling, Retry-After, per-attempt budget, independent dataset availability and receipt timestamp. Use the controlled local launcher for the separate test environment. Native lifecycle and wheel preflight tests must pass on the final commit. No new live probes or release.
+
 ## NED API key
 
 Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The alpha client and Config Flow distinguish 401 from 403 without logging error payloads; local owner testing requires successful CI and the exact wheel.
