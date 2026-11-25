@@ -13,6 +13,8 @@ from .exceptions import (
     NedUnsupportedDatasetError,
     NedValidationError,
 )
+from .quarter import NedPowerDataset, NedPowerReading, NedQuarterClient
+from .rate_limiter import NedRequestBudget
 from .transport import NedTransport, TransportResponse
 
 __all__ = [
@@ -22,7 +24,11 @@ __all__ = [
     "NedAuthenticationError",
     "NedConnectionError",
     "NedPermissionError",
+    "NedPowerDataset",
+    "NedPowerReading",
+    "NedQuarterClient",
     "NedRateLimitError",
+    "NedRequestBudget",
     "NedResponseError",
     "NedTimeoutError",
     "NedTransport",
