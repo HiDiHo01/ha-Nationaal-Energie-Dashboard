@@ -23,6 +23,19 @@ class NedRequestBudget:
         self._attempts: deque[float] = deque()
         self._blocked_until = 0.0
 
+    def _remaining(self, now: float) -> int:
+        """Expire attempts and report the remaining local budget."""
+        while self._attempts and self._attempts[0] <= now - _WINDOW:
+            self._attempts.popleft()
+        if now < self._blocked_until:
+            return 0
+        return _LIMIT - len(self._attempts)
+
+    @property
+    def remaining(self) -> int:
+        """Expose the number of immediately available local attempts."""
+        return self._remaining(monotonic())
+
     async def async_get(
         self,
         transport: NedTransport,
@@ -33,9 +46,7 @@ class NedRequestBudget:
     ) -> TransportResponse:
         """Reserve one attempt before I/O and stop on a rate-limit response."""
         now = monotonic()
-        while self._attempts and self._attempts[0] <= now - _WINDOW:
-            self._attempts.popleft()
-        if now < self._blocked_until or len(self._attempts) >= _LIMIT:
+        if not self._remaining(now):
             raise NedRateLimitError("Local NED request budget temporarily exhausted.")
         self._attempts.append(now)
         response = await transport.async_get(path, params=params, headers=headers)
