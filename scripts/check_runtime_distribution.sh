@@ -12,7 +12,9 @@ python_bin="$(command -v python)"
 "$python_bin" -I -c 'import sys; from pathlib import Path; assert ".".join(map(str, sys.version_info[:3])) == Path(".python-version").read_text().strip()'
 UV_PROJECT_ENVIRONMENT="$work/venv" uv sync --locked --python "$python_bin" --project "$root"
 runtime="$work/venv/bin/python"
-mkdir -p "$work/project/src/ned_api_runtime_probe" "$work/wheelhouse" "$work/config"
+mkdir -p "$work/project/src/ned_api_runtime_probe" "$work/wheelhouse" "$work/config/custom_components"
+cp -R "$root/custom_components/nationaal_energie_dashboard" "$work/config/custom_components/"
+find "$work/config/custom_components" -type d -name __pycache__ -prune -exec rm -rf {} +
 cp LICENSE "$work/project/LICENSE"
 cat > "$work/project/pyproject.toml" <<'TOML'
 [build-system]
@@ -76,6 +78,11 @@ assert importlib.util.find_spec("ned_api_runtime_probe") is None
 assert importlib.util.find_spec("ned_api") is None
 before = {item.metadata["Name"]: item.version for item in distributions()}
 api_version = sys.argv[3]
+config_dir = Path(sys.argv[1]).resolve()
+manifest_path = config_dir / "custom_components/nationaal_energie_dashboard/manifest.json"
+manifest = json.loads(manifest_path.read_text())
+assert manifest["requirements"] == [f"ned-api=={api_version}"]
+assert manifest["version"] == api_version
 
 
 async def main() -> None:
@@ -85,7 +92,7 @@ async def main() -> None:
         hass, "ned_api_runtime_probe", ["ned-api-runtime-probe==0.0.1"], is_built_in=False
     )
     await async_process_requirements(
-        hass, "nationaal_energie_dashboard", [f"ned-api=={api_version}"], is_built_in=False
+        hass, "nationaal_energie_dashboard", manifest["requirements"], is_built_in=False
     )
     importlib.invalidate_caches()
     api_module = importlib.import_module("ned_api")
@@ -93,6 +100,16 @@ async def main() -> None:
         transport = api_module.NedTransport(session, "https://example.invalid")
         assert str(transport.origin) == "https://example.invalid"
         assert not session.closed
+    # Import the copied integration, never the repository checkout or an editable API.
+    sys.path.insert(0, str(config_dir))
+    component = importlib.import_module("custom_components.nationaal_energie_dashboard")
+    assert Path(component.__file__).resolve().is_relative_to(config_dir)
+    flow_module = importlib.import_module("custom_components.nationaal_energie_dashboard.config_flow")
+    sensor_module = importlib.import_module("custom_components.nationaal_energie_dashboard.sensor")
+    assert callable(component.async_setup_entry)
+    assert callable(flow_module.NedConfigFlow.async_step_user)
+    assert callable(sensor_module.async_setup_entry)
+    print("Copied alpha integration and manifest-pinned dependency import passed.")
 
 
 asyncio.run(main())
@@ -118,4 +135,4 @@ assert set(after) - set(before) == {"ned-api", "ned-api-runtime-probe"}
 print("Native HA actual API wheel install, dependency preservation, typed import and session injection passed.")
 PY
 uv pip check --python "$runtime"
-echo "Synthetic and actual runtime wheel probes passed; full integration installation is not evaluated."
+echo "Synthetic and actual runtime wheel probes passed; copied alpha imports passed; full live setup is not evaluated."
