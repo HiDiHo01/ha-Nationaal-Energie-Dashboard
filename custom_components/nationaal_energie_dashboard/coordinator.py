@@ -125,7 +125,9 @@ class NedAlphaProvider:
             for key, dataset in POWER_DATASETS.items():
                 readings: list[NedReading] = []
                 for day in days:
-                    page = await self._client.async_read_day(self._api_key, dataset, day)
+                    page = await self._client.async_read_day(
+                        self._api_key, dataset, day
+                    )
                     readings.extend(
                         NedReading(item.valid_from, item.valid_to, item.capacity_kw)
                         for item in page
