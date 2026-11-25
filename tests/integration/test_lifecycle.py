@@ -1,7 +1,9 @@
 """Exercise the native Home Assistant config entry lifecycle offline."""
 
 import json
+import shutil
 from datetime import UTC, date, datetime, time, timedelta
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -29,6 +31,18 @@ from ned_api import TransportResponse
 
 _DAY = date(2026, 11, 22)
 _NOW = datetime(2026, 11, 22, 12, 30, tzinfo=UTC)
+
+
+@pytest.fixture
+def hass_config_dir(tmp_path: Path) -> str:
+    """Give the native loader an isolated configuration containing this integration."""
+    source = Path(__file__).resolve().parents[2] / "custom_components" / DOMAIN
+    shutil.copytree(
+        source,
+        tmp_path / "custom_components" / DOMAIN,
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
+    return str(tmp_path)
 
 
 class SyntheticApi:
