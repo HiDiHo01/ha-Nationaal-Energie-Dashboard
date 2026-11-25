@@ -35,15 +35,22 @@ class SensorKey(StrEnum):
     PRODUCTION = "electricity_production"
 
 
+def _dataset_identifier(
+    type_id: int, activity_id: int, classification: int, metric: str
+) -> str:
+    """Construct the stable identifier from the fixed dataset dimensions."""
+    return f"0_{type_id}_{activity_id}_4_0_{classification}_{metric}"
+
+
 # Point, type, activity, granularity, timezone, classification, metric.
 # The derived metric deliberately has no fictitious type/activity identifier.
 SENSOR_IDENTIFIERS: dict[SensorKey, str] = {
-    SensorKey.CO2_INTENSITY: "0_27_1_4_0_2_emissionfactor",
-    SensorKey.CO2_FORECAST: "0_27_1_4_0_1_emissionfactor",
+    SensorKey.CO2_INTENSITY: _dataset_identifier(27, 1, 2, "emissionfactor"),
+    SensorKey.CO2_FORECAST: _dataset_identifier(27, 1, 1, "emissionfactor"),
     SensorKey.RENEWABLE_SHARE: "0_4_0_2_renewable_electricity_share",
-    SensorKey.SOLAR: "0_2_1_4_0_2_capacity",
-    SensorKey.WIND_ONSHORE: "0_1_1_4_0_2_capacity",
-    SensorKey.WIND_OFFSHORE: "0_51_1_4_0_2_capacity",
-    SensorKey.CONSUMPTION: "0_59_2_4_0_2_capacity",
-    SensorKey.PRODUCTION: "0_27_1_4_0_2_capacity",
+    SensorKey.SOLAR: _dataset_identifier(2, 1, 2, "capacity"),
+    SensorKey.WIND_ONSHORE: _dataset_identifier(1, 1, 2, "capacity"),
+    SensorKey.WIND_OFFSHORE: _dataset_identifier(51, 1, 2, "capacity"),
+    SensorKey.CONSUMPTION: _dataset_identifier(59, 2, 2, "capacity"),
+    SensorKey.PRODUCTION: _dataset_identifier(27, 1, 2, "capacity"),
 }
