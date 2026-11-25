@@ -134,7 +134,16 @@ def test_eight_sensor_descriptions() -> None:
     """Require stable identities, appropriate units and no forecast statistics."""
     descriptions = {item.key: item for item in SENSOR_DESCRIPTIONS}
     assert set(descriptions) == set(SensorKey)
-    assert len(set(SENSOR_IDENTIFIERS.values())) == 8
+    assert tuple(SENSOR_IDENTIFIERS.values()) == (
+        "0_27_1_4_0_2_emissionfactor",
+        "0_27_1_4_0_1_emissionfactor",
+        "0_4_0_2_renewable_electricity_share",
+        "0_2_1_4_0_2_capacity",
+        "0_1_1_4_0_2_capacity",
+        "0_51_1_4_0_2_capacity",
+        "0_59_2_4_0_2_capacity",
+        "0_27_1_4_0_2_capacity",
+    )
     assert descriptions[SensorKey.CO2_FORECAST].state_class is None
     solar = descriptions[SensorKey.SOLAR]
     assert solar.native_unit_of_measurement == UnitOfPower.KILO_WATT
