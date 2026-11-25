@@ -10,9 +10,11 @@ This project develops a custom integration for [Home Assistant](https://www.home
 
 > **Development status:** phase 1 has partially started with the contract-independent package foundation. BL-003 remains open for contract-dependent functionality. No working integration or installable release is available yet.
 
-The development branch contains a limited local alpha (0.1.0a1): real credential validation, an independent UTC quarter-hour parser and five national power sensors. Use only the exact matching locally built wheel for the test installation; no HACS installation or public release. CO₂, forecast and the estimated renewable share remain reserved until their contract conditions are met. New CI and live installation are not yet confirmed; BL-003 and the general phase gates remain open.
+The development branch contains a limited local alpha (0.1.0a1): real credential validation, an independent UTC quarter-hour parser and five national power sensors. Use only the exact matching locally built wheel for the test installation; no HACS installation or public release. CO₂, forecast and the estimated renewable share remain reserved until their contract conditions are met. CI passed on 7a5956d; the new remediation commit and live installation require separate verification; BL-003 and the general phase gates remain open.
 
-Review remediation R39-01–08: status-first error handling, Retry-After, per-attempt budget, independent dataset availability and receipt timestamp. Use the controlled local launcher for the separate test environment. Native lifecycle and wheel preflight tests must pass on the final commit. No new live probes or release.
+Review remediation R39-01–08: status-first error handling, Retry-After, per-attempt budget, independent dataset availability and receipt timestamp. Use the controlled local launcher for the separate test environment. Native lifecycle and wheel preflight tests passed on 7a5956d; the new remediation requires revalidation. No new live probes or release.
+
+R39-09–12 and CodeRabbit: periodic polling only for active entity contexts (first refresh all five), half-open 30-minute freshness window, no recovery message without a fresh closed quarter; all active datasets lacking usable readings fail the update and trigger native setup retry. HTTP asctime-date is interpreted as UTC per RFC 9110 section 5.6.7. The launcher probe uses a temporary venv and minimal localhost HTTP configuration, no NED entry or key; full frontend and owner testing remain open.
 
 ## Energy data
 
@@ -32,7 +34,7 @@ Depending on the dataset, available intervals include 10 minutes, 15 minutes, on
 
 ## Planned functionality
 
-The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. These are planned features. Renewable share will be explicitly labelled as an estimate based on solar, wind, biomass cofiring and 53% of waste electricity (provisional 2025 CBS annual factor); other mixed sources are excluded. The six input datasets require contract and combined validation first; BL-003 remains open.
+The first eight priority national sensors are CO₂ intensity, forecast CO₂ intensity, renewable electricity generation share, solar, onshore wind, offshore wind, total electricity consumption and total electricity generation. The five power sensors are implemented in the alpha; CO₂, forecasts and renewable share remain planned. Renewable share will be explicitly labelled as an estimate based on solar, wind, biomass cofiring and 53% of waste electricity (provisional 2025 CBS annual factor); other mixed sources are excluded. The six input datasets require contract and combined validation first; BL-003 remains open.
 
 - Configuration through the Home Assistant user interface.
 - Selectable energy datasets and sensors.

@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- R39-09–12 en CodeRabbit: periodieke polling uitsluitend voor actieve entity-contexten (eerste refresh alle vijf), halfopen 30-minutenvenster, geen herstelmelding zonder vers gesloten kwartier; alle actieve datasets zonder bruikbare waarde geven een updatefout en bij setup een native retry. HTTP asctime-date wordt als UTC verwerkt volgens RFC 9110 §5.6.7. De launcherproef gebruikt een tijdelijke venv met minimale localhost-HTTP-configuratie, geen NED-entry of sleutel; volledige frontend- en eigenaarstest blijven open.
+
 - R39-01–08: status-first foutafhandeling, Retry-After, per-attempt limiter, gedeeltelijke datasetbeschikbaarheid, ontvangsttijd en gesloten-intervalbeleid, één actieve coordinator, native lifecycle-tests, gecontroleerde lokale launcher en Quality Scale-matrix. Definitieve CI nog vereist; geen live NED-probes of publicatie.
 
 - Beperkte lokale alpha 0.1.0a1: echte sleutelvalidatie en vijf nationale vermogensdatasets, strikte UTC-kwartierparser, gedeeld proceslokaal verzoekbudget, exact gepinde lokale wheel en regressietests. Geen nieuwe live tests of packagepublicatie; CO₂, forecast en hernieuwbaar aandeel blijven gereserveerd. Nieuwe CI moet nog worden bevestigd.
@@ -40,6 +42,8 @@
 - Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- R39-09–12 and CodeRabbit: periodic polling only for active entity contexts (first refresh all five), half-open 30-minute freshness window, no recovery message without a fresh closed quarter; all active datasets lacking usable readings fail the update and trigger native setup retry. HTTP asctime-date is interpreted as UTC per RFC 9110 section 5.6.7. The launcher probe uses a temporary venv and minimal localhost HTTP configuration, no NED entry or key; full frontend and owner testing remain open.
 
 - R39-01–08: status-first error handling, Retry-After, per-attempt limiter, partial dataset availability, receipt timestamp and closed-interval policy, single active coordinator, native lifecycle tests, controlled local launcher and Quality Scale matrix. Final CI required; no live NED probes or publication.
 

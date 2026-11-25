@@ -17,7 +17,7 @@ rules:
     comment: "UI flow implemented; native lifecycle validation pending."
   config-flow-test-coverage:
     status: todo
-    comment: "Earlier 100% coverage does not establish the changed flow; exact-commit CI pending."
+    comment: "100% coverage and native flow on 7a5956d; latest remediation revalidation pending."
   dependency-transparency:
     status: todo
     comment: "Exact manifest pin and local provenance preflight; no public package publication."
@@ -91,7 +91,7 @@ rules:
     comment: "Native 401 reauth and 403 ambiguity test added; result pending."
   test-coverage:
     status: todo
-    comment: "Baseline 9370873 had 100%; changed commit not yet verified."
+    comment: "Baseline 7a5956d: 199 tests, 537 statements and 120 branches fully covered; latest remediation pending."
 
   # Gold
   devices:
@@ -167,4 +167,4 @@ rules:
     comment: "Core-managed session injection implemented with per-attempt middleware; final CI proof pending."
   strict-typing:
     status: todo
-    comment: "Earlier strict mypy passed; exact review commit still to be validated."
+    comment: "Strict mypy passed on 7a5956d; latest remediation pending."

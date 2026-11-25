@@ -46,3 +46,7 @@ Volg [integratieplan §21.2](../../../docs/INTEGRATION_PLAN.md#212-fase-1--api-c
 ### Status-first en daadwerkelijke pogingen (R39-01/02)
 
 Zie [reviewherstel](../../../docs/PR39_REVIEW.md). Niet-200 status vóór bodyvalidatie, sluit foutresponse zonder payload te lezen. Normaliseer standaard Retry-After zonder ruwe header; extreme geldige delay leidt tot procesblok, geen NED-contractclaim. Core 2026.11.3 biedt async_create_clientsession met toegevoegde middleware; aiohttp 3.14.5 kan intern GET herhalen. Per-attempt reserveert vóór netwerk-I/O, geen private flags, geen verlies van Core SSRF-beveiliging. Gewone geleende sessies zonder extra retry-middleware reserveren twee slots. Test met echte loopback-TLS, concurrency, cancellation, corrupte foutbody en langere cooldown. Geen live tests.
+
+### HTTP asctime-date
+
+RFC 9110 §5.6.7 verplicht herkenning van de obsolete asctime-date als UTC; accepteer uitsluitend de exacte grammatica bij een naïeve datum, geen willekeurige tijdzoneloze datum. Synthetische regressietests voor enkele en dubbele dagcijfers; geen NED-contractclaim.
