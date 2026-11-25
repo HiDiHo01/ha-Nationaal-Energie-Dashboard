@@ -10,7 +10,7 @@ Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.h
 
 > **Ontwikkelstatus:** fase 1 is gedeeltelijk gestart met de contractonafhankelijke packagebasis. BL-003 blijft open voor contractafhankelijke functionaliteit. Er is nog geen werkende integratie of installeerbare release beschikbaar.
 
-Op deze ontwikkelbranch staan de negen gevraagde integratiebestanden, acht sensordefinities, een gemaskeerde API-keyflow en een afzonderlijke authenticatieclient. Dit is een offline concept: de providerfactory en de authenticatiekoppeling blokkeren echte configuratie en live dataverkeer; geen werkende integratie of release. De algemene fasepoorten blijven van kracht.
+De ontwikkelbranch bevat een beperkte lokale alpha (0.1.0a1): echte sleutelvalidatie, een zelfstandige UTC-kwartierparser en vijf nationale vermogenssensoren. Alleen de lokale, exact bijbehorende wheel is toegestaan voor de proefinstallatie; geen HACS-installatie of publieke release. CO₂, forecast en het geschatte hernieuwbare aandeel blijven gereserveerd totdat de contractvoorwaarden zijn vervuld. Nieuwe CI en live installatie zijn nog niet bevestigd; BL-003 en algemene fasepoorten blijven open.
 
 ## Energiedata
 
@@ -41,7 +41,7 @@ De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-inte
 
 ## API-sleutel
 
-Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De conceptclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de live koppeling blijft geblokkeerd.
+Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De alphaclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de lokale eigenaarstest vereist geslaagde CI en de exacte wheel.
 
 Voor toegang tot de NED API is een persoonlijke API-sleutel vereist.
 
@@ -53,6 +53,8 @@ Voor toegang tot de NED API is een persoonlijke API-sleutel vereist.
 Het beoogde API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit via GitHub-issues, commits of diagnostische gegevens.
 
 ## Installatie en configuratie
+
+[Lokale alpha-test (uitsluitend aparte Core-testomgeving)](docs/user/nl/alpha-test.md).
 
 **Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
 
