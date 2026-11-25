@@ -1,8 +1,4 @@
-"""Prepare offline-testable coordination of normalized NED quarter-hour data.
-
-No HTTP client or authentication behavior is implemented here. The provider
-boundary remains closed until the independent client is contract-validated.
-"""
+"""Coordinate the bounded local-alpha power datasets and reserved offline logic."""
 
 import logging
 from collections.abc import Mapping
@@ -12,12 +8,23 @@ from math import isfinite
 from typing import Protocol
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryError
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util.hass_dict import HassKey
+
+from ned_api import (
+    NedApiError,
+    NedAuthenticationError,
+    NedPowerDataset,
+    NedQuarterClient,
+    NedRateLimitError,
+    NedRequestBudget,
+)
 
 from .const import (
-    CONTRACT_PENDING,
     CURRENT_INTERVAL,
     DOMAIN,
     FORECAST_INTERVAL,
@@ -30,6 +37,19 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+_BUDGET: HassKey[NedRequestBudget] = HassKey(f"{DOMAIN}_request_budget")
+POWER_DATASETS = {
+    SensorKey.SOLAR: NedPowerDataset.SOLAR,
+    SensorKey.WIND_ONSHORE: NedPowerDataset.WIND_ONSHORE,
+    SensorKey.WIND_OFFSHORE: NedPowerDataset.WIND_OFFSHORE,
+    SensorKey.CONSUMPTION: NedPowerDataset.CONSUMPTION,
+    SensorKey.PRODUCTION: NedPowerDataset.PRODUCTION,
+}
+
+
+def get_request_budget(hass: HomeAssistant) -> NedRequestBudget:
+    """Share the budget for the lifetime of this Core process, including reloads."""
+    return hass.data.setdefault(_BUDGET, NedRequestBudget())
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,16 +105,60 @@ class NedRuntimeData:
 type NedConfigEntry = ConfigEntry[NedRuntimeData]
 
 
-def create_provider(_hass: HomeAssistant, _entry: NedConfigEntry) -> NedDataProvider:
-    """Fail closed until the independent client and distribution are ready.
+class NedAlphaProvider:
+    """Adapt independent validated power readings to the coordinator snapshot."""
 
-    This explicit boundary can be replaced by a validated client adapter.
-    It never reads credentials or performs a network request.
-    """
-    raise ConfigEntryError(
-        translation_domain=DOMAIN,
-        translation_key=CONTRACT_PENDING,
-    )
+    def __init__(self, client: NedQuarterClient, api_key: str) -> None:
+        """Retain the configured key privately and reuse the injected client."""
+        self._client = client
+        self._api_key = api_key
+
+    async def async_current(self) -> NedSnapshot:
+        """Fetch at most two UTC days per dataset, sequentially without retries."""
+        now = datetime.now(UTC)
+        first_day = (now - MAX_CURRENT_AGE - QUARTER).date()
+        days = (first_day,) if first_day == now.date() else (first_day, now.date())
+        snapshot: dict[SensorKey, tuple[NedReading, ...]] = {}
+        try:
+            for key, dataset in POWER_DATASETS.items():
+                readings: list[NedReading] = []
+                for day in days:
+                    page = await self._client.async_read_day(self._api_key, dataset, day)
+                    readings.extend(
+                        NedReading(item.valid_from, item.valid_to, item.capacity_kw)
+                        for item in page
+                    )
+                snapshot[key] = tuple(readings)
+        except NedAuthenticationError as err:
+            raise ConfigEntryAuthFailed(
+                translation_domain=DOMAIN, translation_key="authentication_failed"
+            ) from err
+        except NedRateLimitError as err:
+            raise UpdateFailed(
+                translation_domain=DOMAIN,
+                translation_key="rate_limited",
+                retry_after=300,
+            ) from err
+        except NedApiError as err:
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="update_failed"
+            ) from err
+        return snapshot
+
+    async def async_forecast(self) -> NedSnapshot:
+        """Return no forecast data; the alpha never requests unapproved datasets."""
+        return {}
+
+
+def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedDataProvider:
+    """Construct the alpha provider from the stored credential and shared session."""
+    api_key = entry.data.get(CONF_API_KEY)
+    if not isinstance(api_key, str) or not api_key:
+        raise ConfigEntryAuthFailed(
+            translation_domain=DOMAIN, translation_key="authentication_failed"
+        )
+    client = NedQuarterClient(async_get_clientsession(hass), get_request_budget(hass))
+    return NedAlphaProvider(client, api_key)
 
 
 def create_runtime(
