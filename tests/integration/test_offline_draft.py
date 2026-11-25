@@ -15,7 +15,8 @@ from homeassistant.const import CONF_API_KEY, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import AbortFlow, FlowResultType
 from homeassistant.exceptions import ConfigEntryError
-from pytest_homeassistant.common import MockConfigEntry
+# The pinned upstream test helper does not provide a py.typed marker.
+from pytest_homeassistant.common import MockConfigEntry  # type: ignore[import-untyped]
 
 from custom_components.nationaal_energie_dashboard import (
     async_setup_entry,
@@ -39,6 +40,8 @@ from custom_components.nationaal_energie_dashboard.coordinator import (
 from custom_components.nationaal_energie_dashboard.sensor import (
     SENSOR_DESCRIPTIONS,
     NedSensor,
+)
+from custom_components.nationaal_energie_dashboard.sensor import (
     async_setup_entry as async_setup_sensors,
 )
 from ned_api import (
@@ -390,9 +393,7 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
         SensorKey.RENEWABLE_SHARE: (_reading(70.3),),
         SensorKey.SOLAR: (_reading(1000),),
     }
-    forecast: NedSnapshot = {
-        SensorKey.CO2_FORECAST: (_reading(0.3, _START + QUARTER),)
-    }
+    forecast: NedSnapshot = {SensorKey.CO2_FORECAST: (_reading(0.3, _START + QUARTER),)}
     provider = MagicMock()
     provider.async_current = AsyncMock(return_value=current)
     provider.async_forecast = AsyncMock(return_value=forecast)
