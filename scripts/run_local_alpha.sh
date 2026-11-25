@@ -24,6 +24,7 @@ export UV_PYTHON_DOWNLOADS=never
 core_version=$("$runtime" -I -c 'import json,sys; print(json.load(open(sys.argv[1]))["homeassistant"])' "$work/hacs.json")
 python_version=$(cat "$work/.python-version")
 "$runtime" -I -c 'import sys; from importlib.metadata import version; assert sys.prefix != sys.base_prefix; assert ".".join(map(str,sys.version_info[:3])) == sys.argv[1]; assert version("homeassistant") == sys.argv[2]' "$python_version" "$core_version"
+runtime_prefix=$("$runtime" -I -c 'import sys; from pathlib import Path; print(Path(sys.prefix).resolve())')
 manifest="$work/custom_components/nationaal_energie_dashboard/manifest.json"
 api_version=$("$runtime" -I -c 'import json,sys; m=json.load(open(sys.argv[1])); assert m["requirements"] == ["ned-api=="+m["version"]]; print(m["version"])' "$manifest")
 if [[ "$mode" == prepare ]]; then
@@ -44,6 +45,7 @@ if [[ "$mode" == prepare ]]; then
     cp "$wheel" "$config/.ned-alpha/"
     printf '%s\n' "$hash" > "$config/.ned-alpha/sha256"
     printf '%s\n' "$expected_commit" > "$config/.ned-alpha/commit"
+    printf '%s\n' "$runtime_prefix" > "$config/.ned-alpha/venv"
     # Localhost-only UI on a separate port. The dedicated venv must already have UI dependencies.
     printf 'default_config:\nhttp:\n  server_host: 127.0.0.1\n  server_port: 8124\n' > "$config/configuration.yaml"
     echo "Local alpha prepared; no Home Assistant process or NED request started."
@@ -52,6 +54,7 @@ fi
 # Launch only an explicitly prepared isolated config from the same commit.
 [[ ! -L "$config" && -d "$config/.ned-alpha" ]]
 [[ "$(cat "$config/.ned-alpha/commit")" == "$expected_commit" ]]
+[[ "$(cat "$config/.ned-alpha/venv")" == "$runtime_prefix" ]]
 wheel="$config/.ned-alpha/ned_api-${api_version}-py3-none-any.whl"
 hash=$(cat "$config/.ned-alpha/sha256")
 diff -qr --exclude=__pycache__ "$work/custom_components/nationaal_energie_dashboard" "$config/custom_components/nationaal_energie_dashboard"
@@ -60,4 +63,6 @@ uv pip check --python "$runtime"
 bash "$root/scripts/verify_alpha_wheel.sh" "$runtime" "$wheel" "$hash" "$manifest" "$core_version" "$python_version"
 # No package-manager fallback, even if a requirement is absent. Missing UI dependencies fail.
 cd "$config"
-"$runtime" -I -m homeassistant --config "$config" --skip-pip
+rm -rf -- "$work"
+trap - EXIT
+exec "$runtime" -I -m homeassistant --config "$config" --skip-pip

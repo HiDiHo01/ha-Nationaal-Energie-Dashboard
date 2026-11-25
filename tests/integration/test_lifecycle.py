@@ -273,3 +273,48 @@ async def test_disabled_datasets(hass: HomeAssistant) -> None:
         await entry.runtime_data.current.async_refresh()
         assert len(api.calls) == 2 and 2 in api.calls
         assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+@pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")
+@pytest.mark.asyncio
+async def test_native_freshness_deadline(hass: HomeAssistant) -> None:
+    """Expire the actual HA state at the aligned boundary without polling."""
+    api = SyntheticApi()
+    with (
+        patch(
+            "ned_api.transport.NedTransport.async_get",
+            new_callable=AsyncMock,
+            side_effect=api.response,
+        ),
+        patch(
+            "custom_components.nationaal_energie_dashboard.sensor.datetime"
+        ) as clock,
+    ):
+        clock.now.return_value = _NOW
+        entry = await _configure(hass)
+        coordinator = entry.runtime_data.current
+        # Prevent regular polling from hiding a cache-only expiry transition.
+        coordinator.update_interval = timedelta(hours=1)
+        await coordinator.async_refresh()
+        entries = er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
+        ids = {item.entity_id for item in entries}
+        assert len(ids) == 5
+        deadline = _NOW + timedelta(minutes=30)
+        requests = len(api.calls)
+        clock.now.return_value = deadline - timedelta(minutes=5)
+        async_fire_time_changed(hass, deadline - timedelta(minutes=5))
+        await hass.async_block_till_done()
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state != STATE_UNAVAILABLE
+        clock.now.return_value = deadline
+        async_fire_time_changed(hass, deadline)
+        await hass.async_block_till_done()
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state == STATE_UNAVAILABLE
+        assert len(api.calls) == requests
+        assert await hass.config_entries.async_unload(entry.entry_id)
+        async_fire_time_changed(hass, deadline + timedelta(minutes=5))
+        await hass.async_block_till_done()
+        assert len(api.calls) == requests

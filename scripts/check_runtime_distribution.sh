@@ -149,3 +149,76 @@ if bash "$root/scripts/verify_alpha_wheel.sh" "$runtime" "$api_wheel" "invalid-h
 fi
 echo "Alpha preflight rejects invalid wheel hash."
 echo "Synthetic and actual runtime wheel probes passed; copied alpha imports passed; full live setup is not evaluated."
+
+# R39-11: exercise the actual launcher with no configured NED entry or credential.
+# The full default_config UI dependency set is not part of this locked test venv.
+# Use a minimal localhost-only Core configuration for process lifecycle evidence.
+cd "$root"
+commit=$(git rev-parse HEAD)
+alpha_config="$work/alpha-config"
+# Preparation may build with the pinned backend; package installation is offline.
+env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
+    bash scripts/run_local_alpha.sh prepare "$runtime" "$alpha_config" "$commit"
+printf 'http:\n  server_host: 127.0.0.1\n  server_port: 8124\n' > "$alpha_config/configuration.yaml"
+# Tampering with the tracked integration copy must fail before Core starts.
+manifest_copy="$alpha_config/custom_components/nationaal_energie_dashboard/manifest.json"
+cp "$manifest_copy" "$work/manifest-original.json"
+printf '\n' >> "$manifest_copy"
+if bash scripts/run_local_alpha.sh launch "$runtime" "$alpha_config" "$commit"; then
+    echo "Unexpected acceptance of changed manifest" >&2
+    exit 1
+fi
+cp "$work/manifest-original.json" "$manifest_copy"
+alpha_wheel="$alpha_config/.ned-alpha/ned_api-${api_version}-py3-none-any.whl"
+cp "$alpha_wheel" "$work/alpha-original.whl"
+printf 'tampered' >> "$alpha_wheel"
+if bash scripts/run_local_alpha.sh launch "$runtime" "$alpha_config" "$commit"; then
+    echo "Unexpected acceptance of changed wheel" >&2
+    exit 1
+fi
+cp "$work/alpha-original.whl" "$alpha_wheel"
+
+alpha_pid=""
+cleanup_alpha() {
+    if [[ -n "$alpha_pid" ]]; then
+        kill -TERM "$alpha_pid" 2>/dev/null || true
+        wait "$alpha_pid" 2>/dev/null || true
+    fi
+    rm -rf -- "$work"
+}
+trap cleanup_alpha EXIT
+for cycle in 1 2; do
+    bash scripts/run_local_alpha.sh launch "$runtime" "$alpha_config" "$commit" \
+        > "$work/core-${cycle}.log" 2>&1 &
+    alpha_pid=$!
+    ready=false
+    for _ in $(seq 1 60); do
+        if ! kill -0 "$alpha_pid" 2>/dev/null; then
+            cat "$work/core-${cycle}.log"
+            exit 1
+        fi
+        if curl --noproxy '*' --silent --max-time 1 --output /dev/null http://127.0.0.1:8124/; then
+            ready=true
+            break
+        fi
+        sleep 1
+    done
+    if [[ "$ready" != true ]]; then
+        cat "$work/core-${cycle}.log"
+        exit 1
+    fi
+    kill -TERM "$alpha_pid"
+    # Bound process shutdown without leaving a test Core instance running.
+    for _ in $(seq 1 30); do
+        kill -0 "$alpha_pid" 2>/dev/null || break
+        sleep 1
+    done
+    if kill -0 "$alpha_pid" 2>/dev/null; then
+        kill -KILL "$alpha_pid"
+        echo "Core shutdown exceeded the test deadline" >&2
+        exit 1
+    fi
+    wait "$alpha_pid"
+    alpha_pid=""
+done
+echo "Local alpha prepare/start/stop/restart passed with minimal HTTP-only Core; no NED entry."
