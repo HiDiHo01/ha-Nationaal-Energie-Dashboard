@@ -15,6 +15,7 @@ from homeassistant.const import CONF_API_KEY, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import AbortFlow, FlowResultType
 from homeassistant.exceptions import ConfigEntryError
+
 # The pinned upstream test helper does not provide a py.typed marker.
 from pytest_homeassistant.common import MockConfigEntry  # type: ignore[import-untyped]
 
