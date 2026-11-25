@@ -25,7 +25,6 @@ from custom_components.nationaal_energie_dashboard.coordinator import (
 )
 from custom_components.nationaal_energie_dashboard.sensor import SENSOR_DESCRIPTIONS
 from ned_api import (
-    NedAuthenticationClient,
     NedConnectionError,
     NedResponseError,
     NedTimeoutError,
@@ -181,16 +180,36 @@ async def test_invalid_key_input(hass: HomeAssistant, key: str | None) -> None:
 
 @pytest.mark.asyncio
 async def test_mock_validated_key(hass: HomeAssistant) -> None:
-    """Prepare entry data only after the injected validator succeeds."""
+    """Accept entry data only after the actual client validates a synthetic response."""
     flow = _flow(hass)
-    with patch(
-        "custom_components.nationaal_energie_dashboard.config_flow.async_validate_api_key",
-        new_callable=AsyncMock,
-    ) as validate:
+    session = MagicMock(spec=ClientSession)
+    response = TransportResponse(
+        200,
+        b'{"hydra:member":[{"point":"/v1/points/0","type":"/v1/types/2",'
+        b'"activity":"/v1/activities/1","classification":"/v1/classifications/2",'
+        b'"granularity":"/v1/granularities/4",'
+        b'"granularitytimezone":"/v1/granularity_time_zones/0"}]}',
+        "application/ld+json",
+    )
+    with (
+        patch(
+            "custom_components.nationaal_energie_dashboard.config_flow._ensure_authentication_ready",
+        ),
+        patch(
+            "custom_components.nationaal_energie_dashboard.config_flow.async_get_clientsession",
+            return_value=session,
+        ) as get_session,
+        patch(
+            "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
+        ) as get,
+    ):
+        get.return_value = response
         result = await flow.async_step_user({CONF_API_KEY: "synthetic-key"})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_API_KEY: "synthetic-key"}
-    validate.assert_awaited_once_with(hass, "synthetic-key")
+    get_session.assert_called_once_with(hass)
+    get.assert_awaited_once()
+    session.close.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
@@ -215,17 +234,15 @@ async def test_observed_denials_in_config_flow(
     expected_errors: dict[str, str],
 ) -> None:
     """Connect the real client to the flow through an offline injected validator."""
-    client = NedAuthenticationClient(MagicMock(spec=ClientSession))
-
-    async def validate(_hass: HomeAssistant, api_key: str) -> None:
-        """Exercise the client with the synthetic transport below."""
-        await client.async_validate_api_key(api_key)
-
+    session = MagicMock(spec=ClientSession)
     flow = _flow(hass)
     with (
         patch(
-            "custom_components.nationaal_energie_dashboard.config_flow.async_validate_api_key",
-            side_effect=validate,
+            "custom_components.nationaal_energie_dashboard.config_flow._ensure_authentication_ready",
+        ),
+        patch(
+            "custom_components.nationaal_energie_dashboard.config_flow.async_get_clientsession",
+            return_value=session,
         ),
         patch(
             "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
@@ -238,6 +255,7 @@ async def test_observed_denials_in_config_flow(
     assert "synthetic-key" not in repr(result)
     assert not hass.config_entries.async_entries(DOMAIN)
     get.assert_awaited_once()
+    session.close.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
