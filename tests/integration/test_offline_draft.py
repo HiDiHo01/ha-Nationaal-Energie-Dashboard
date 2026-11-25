@@ -5,25 +5,42 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aiohttp import ClientSession
-from homeassistant.config_entries import SOURCE_USER
+from homeassistant.config_entries import (
+    SOURCE_REAUTH,
+    SOURCE_RECONFIGURE,
+    SOURCE_USER,
+    ConfigEntryState,
+)
 from homeassistant.const import CONF_API_KEY, UnitOfPower
 from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.data_entry_flow import AbortFlow, FlowResultType
+from homeassistant.exceptions import ConfigEntryError
+from pytest_homeassistant.common import MockConfigEntry
 
+from custom_components.nationaal_energie_dashboard import (
+    async_setup_entry,
+    async_unload_entry,
+)
 from custom_components.nationaal_energie_dashboard.config_flow import NedConfigFlow
 from custom_components.nationaal_energie_dashboard.const import (
     CONTRACT_PENDING,
     DOMAIN,
+    PLATFORMS,
     QUARTER,
     SENSOR_IDENTIFIERS,
     SensorKey,
 )
 from custom_components.nationaal_energie_dashboard.coordinator import (
     NedReading,
+    NedSnapshot,
     estimate_renewable_share,
     select_reading,
 )
-from custom_components.nationaal_energie_dashboard.sensor import SENSOR_DESCRIPTIONS
+from custom_components.nationaal_energie_dashboard.sensor import (
+    SENSOR_DESCRIPTIONS,
+    NedSensor,
+    async_setup_entry as async_setup_sensors,
+)
 from ned_api import (
     NedConnectionError,
     NedResponseError,
@@ -299,3 +316,151 @@ def test_matching_flow(hass: HomeAssistant) -> None:
     assert not flow.is_matching(other)
     other.context["unique_id"] = DOMAIN
     assert flow.is_matching(other)
+
+
+@pytest.mark.parametrize("source", [SOURCE_REAUTH, SOURCE_RECONFIGURE])
+@pytest.mark.asyncio
+async def test_replace_credentials(hass: HomeAssistant, source: str) -> None:
+    """Keep entry identity and settings when replacement credentials validate."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=DOMAIN,
+        data={CONF_API_KEY: "old-synthetic", "location": "NL"},
+        options={"forecast": True},
+    )
+    entry.add_to_hass(hass)
+    flow = _flow(hass)
+    flow.context = {"source": source, "entry_id": entry.entry_id}
+    if source == SOURCE_REAUTH:
+        form = await flow.async_step_reauth(entry.data)
+        step = flow.async_step_reauth_confirm
+        reason = "reauth_successful"
+    else:
+        form = await flow.async_step_reconfigure()
+        step = flow.async_step_reconfigure
+        reason = "reconfigure_successful"
+    assert form["type"] is FlowResultType.FORM
+    assert "old-synthetic" not in repr(form)
+    blocked = await step({CONF_API_KEY: "new-synthetic"})
+    assert blocked["errors"] == {"base": CONTRACT_PENDING}
+    assert entry.data[CONF_API_KEY] == "old-synthetic"
+    with (
+        patch(
+            "custom_components.nationaal_energie_dashboard.config_flow.async_validate_api_key",
+            new_callable=AsyncMock,
+        ) as validate,
+        patch.object(hass.config_entries, "async_schedule_reload") as reload,
+    ):
+        result = await step({CONF_API_KEY: "new-synthetic"})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == reason
+    assert entry.data == {CONF_API_KEY: "new-synthetic", "location": "NL"}
+    assert entry.options == {"forecast": True}
+    assert entry.unique_id == DOMAIN
+    validate.assert_awaited_once_with(hass, "new-synthetic")
+    reload.assert_called_once_with(entry.entry_id)
+
+
+@pytest.mark.asyncio
+async def test_duplicate_service(hass: HomeAssistant) -> None:
+    """Abort a second configuration before requesting credentials."""
+    MockConfigEntry(domain=DOMAIN, unique_id=DOMAIN).add_to_hass(hass)
+    flow = _flow(hass)
+    with pytest.raises(AbortFlow) as raised:
+        await flow.async_step_user()
+    assert raised.value.reason == "already_configured"
+
+
+@pytest.mark.asyncio
+async def test_setup_gate(hass: HomeAssistant) -> None:
+    """Reject real setup before constructing coordinators or polling."""
+    entry = MockConfigEntry(domain=DOMAIN)
+    with pytest.raises(ConfigEntryError) as raised:
+        await async_setup_entry(hass, entry)
+    assert raised.value.translation_key == CONTRACT_PENDING
+
+
+@pytest.mark.asyncio
+async def test_synthetic_runtime(hass: HomeAssistant) -> None:
+    """Exercise setup, shared snapshots, all entities and unload without HTTP."""
+    entry = MockConfigEntry(domain=DOMAIN, state=ConfigEntryState.SETUP_IN_PROGRESS)
+    entry.add_to_hass(hass)
+    current: NedSnapshot = {
+        SensorKey.CO2_INTENSITY: (_reading(0.25),),
+        SensorKey.RENEWABLE_SHARE: (_reading(70.3),),
+        SensorKey.SOLAR: (_reading(1000),),
+    }
+    forecast: NedSnapshot = {
+        SensorKey.CO2_FORECAST: (_reading(0.3, _START + QUARTER),)
+    }
+    provider = MagicMock()
+    provider.async_current = AsyncMock(return_value=current)
+    provider.async_forecast = AsyncMock(return_value=forecast)
+    with (
+        patch(
+            "custom_components.nationaal_energie_dashboard.create_provider",
+            return_value=provider,
+        ),
+        patch.object(
+            hass.config_entries, "async_forward_entry_setups", new_callable=AsyncMock
+        ) as forward,
+    ):
+        assert await async_setup_entry(hass, entry)
+    forward.assert_awaited_once_with(entry, PLATFORMS)
+    provider.async_current.assert_awaited_once()
+    provider.async_forecast.assert_awaited_once()
+    runtime = entry.runtime_data
+    add_entities = MagicMock()
+    await async_setup_sensors(hass, entry, add_entities)
+    entities: list[NedSensor] = list(add_entities.call_args.args[0])
+    assert len(entities) == 8
+    sensors = {entity.entity_description.key: entity for entity in entities}
+    assert sensors[SensorKey.CO2_FORECAST].coordinator is runtime.forecast
+    solar = sensors[SensorKey.SOLAR]
+    renewable = sensors[SensorKey.RENEWABLE_SHARE]
+    assert solar.coordinator is runtime.current
+    assert solar.unique_id == f"{entry.entry_id}_0_2_1_4_0_2_capacity"
+    with patch(
+        "custom_components.nationaal_energie_dashboard.sensor.datetime"
+    ) as clock:
+        clock.now.return_value = _START + QUARTER
+        assert solar.available
+        assert solar.native_value == 1000
+        assert sensors[SensorKey.CO2_INTENSITY].native_value == 250
+        assert sensors[SensorKey.CO2_FORECAST].native_value == 300
+        assert renewable.native_value == pytest.approx(70.3)
+        assert renewable.extra_state_attributes == {
+            "valid_from": _START.isoformat(),
+            "valid_to": (_START + QUARTER).isoformat(),
+            "method_version": "2026-v1",
+            "waste_renewable_factor": 0.53,
+            "waste_factor_year": 2025,
+        }
+        assert not sensors[SensorKey.WIND_ONSHORE].available
+        assert sensors[SensorKey.WIND_ONSHORE].native_value is None
+        assert sensors[SensorKey.WIND_ONSHORE].extra_state_attributes == {}
+        runtime.current.last_update_success = False
+        assert not solar.available
+        runtime.current.last_update_success = True
+        clock.now.return_value = _START + timedelta(hours=2)
+        assert not solar.available
+    solar.hass = hass
+    with (
+        patch(
+            "custom_components.nationaal_energie_dashboard.sensor.async_track_utc_time_change"
+        ) as track,
+        patch.object(solar, "async_write_ha_state") as write,
+    ):
+        await solar.async_added_to_hass()
+        track.call_args.args[1](_START)
+        write.assert_called_once()
+        solar.add_to_platform_abort()
+        track.return_value.assert_called_once()
+    with patch.object(
+        hass.config_entries, "async_unload_platforms", new_callable=AsyncMock
+    ) as unload:
+        unload.return_value = True
+        assert await async_unload_entry(hass, entry)
+        unload.assert_awaited_once_with(entry, PLATFORMS)
+    await runtime.current.async_shutdown()
+    await runtime.forecast.async_shutdown()
