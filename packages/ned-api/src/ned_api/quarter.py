@@ -80,10 +80,21 @@ def _capacity(value: object) -> float:
     return capacity
 
 
-def _parse_day(
-    response: TransportResponse, dataset: NedPowerDataset, day: date
-) -> tuple[NedPowerReading, ...]:
-    """Validate a bounded single UTC day; never follow a pagination link."""
+def validate_key_format(value: object) -> str:
+    """Return a safe header value or raise a sanitized validation error."""
+    if (
+        not isinstance(value, str)
+        or not value
+        or not value.isascii()
+        or not value.isprintable()
+        or any(character.isspace() for character in value)
+    ):
+        raise NedValidationError("Provide a nonempty printable ASCII API key.")
+    return value
+
+
+def _collection_members(response: TransportResponse) -> list[object]:
+    """Decode only successful bounded collections; ignore all upstream error text."""
     if response.status == 401:
         raise NedAuthenticationError("NED did not accept authentication (HTTP 401).")
     if response.status == 403:
@@ -102,35 +113,55 @@ def _parse_day(
     if (
         not isinstance(members, list)
         or len(members) > 96
-        or type(total) is not int
+        or isinstance(total, bool)
+        or not isinstance(total, int)
         or total != len(members)
         or not isinstance(view, dict)
         or "hydra:next" in view
     ):
         raise NedResponseError("Incomplete or unexpected single-day collection.")
+    return members
+
+
+def _parse_record(
+    member: object,
+    dimensions: dict[str, tuple[str, int]],
+    lower: datetime,
+    upper: datetime,
+) -> NedPowerReading:
+    """Validate exact dimensions, boundaries and the independent capacity value."""
+    if not isinstance(member, dict):
+        raise NedResponseError("Invalid power collection member.")
+    for field, (resource, identifier) in dimensions.items():
+        iri = f"/v1/{resource}/{identifier}"
+        if member.get(field) not in (iri, f"{_ORIGIN}{iri}"):
+            raise NedResponseError("Unexpected power dataset dimension.")
+    start = _timestamp(member.get("validfrom"))
+    end = _timestamp(member.get("validto"))
+    if (
+        not lower <= start < end <= upper
+        or start.minute % 15
+        or start.second
+        or start.microsecond
+        or end - start != _QUARTER
+    ):
+        raise NedResponseError("Invalid UTC quarter interval.")
+    return NedPowerReading(start, end, _capacity(member.get("capacity")))
+
+
+def _parse_day(
+    response: TransportResponse, dataset: NedPowerDataset, day: date
+) -> tuple[NedPowerReading, ...]:
+    """Validate a bounded UTC day; reject duplicates and never follow next links."""
     lower = datetime.combine(day, time.min, tzinfo=UTC)
     upper = lower + timedelta(days=1)
     dimensions = _dimensions(dataset)
     readings: dict[datetime, NedPowerReading] = {}
-    for member in members:
-        if not isinstance(member, dict):
-            raise NedResponseError("Invalid power collection member.")
-        for field, (resource, identifier) in dimensions.items():
-            iri = f"/v1/{resource}/{identifier}"
-            if member.get(field) not in (iri, f"{_ORIGIN}{iri}"):
-                raise NedResponseError("Unexpected power dataset dimension.")
-        start = _timestamp(member.get("validfrom"))
-        end = _timestamp(member.get("validto"))
-        if (
-            not lower <= start < end <= upper
-            or start.minute % 15
-            or start.second
-            or start.microsecond
-            or end - start != _QUARTER
-            or start in readings
-        ):
-            raise NedResponseError("Invalid or ambiguous UTC quarter interval.")
-        readings[start] = NedPowerReading(start, end, _capacity(member.get("capacity")))
+    for member in _collection_members(response):
+        reading = _parse_record(member, dimensions, lower, upper)
+        if reading.valid_from in readings:
+            raise NedResponseError("Ambiguous duplicate UTC quarter interval.")
+        readings[reading.valid_from] = reading
     return tuple(readings[key] for key in sorted(readings))
 
 
@@ -142,17 +173,16 @@ class NedQuarterClient:
         self._transport = NedTransport(session, _ORIGIN)
         self._budget = budget
 
+    @property
+    def origin(self) -> str:
+        """Return the fixed API origin."""
+        return _ORIGIN
+
     async def async_read_day(
         self, api_key: str, dataset: NedPowerDataset, day: date
     ) -> tuple[NedPowerReading, ...]:
         """Request one UTC day, with no fallback, pagination or automatic retries."""
-        if (
-            not api_key
-            or not api_key.isascii()
-            or not api_key.isprintable()
-            or any(character.isspace() for character in api_key)
-        ):
-            raise NedValidationError("Provide a nonempty printable ASCII API key.")
+        credential = validate_key_format(api_key)
         params = {
             field: str(identifier)
             for field, (_, identifier) in _dimensions(dataset).items()
@@ -170,6 +200,6 @@ class NedQuarterClient:
             self._transport,
             "/v1/utilizations",
             params=params,
-            headers={"Accept": _MEDIA_TYPE, "X-AUTH-TOKEN": api_key},
+            headers={"Accept": _MEDIA_TYPE, "X-AUTH-TOKEN": credential},
         )
         return _parse_day(response, dataset, day)
