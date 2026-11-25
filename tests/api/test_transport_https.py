@@ -22,6 +22,8 @@ from pytest_socket import socket_allow_hosts
 
 from ned_api import (
     NedConnectionError,
+    NedRateLimitError,
+    NedRequestBudget,
     NedResponseError,
     NedTimeoutError,
     NedTransport,
@@ -100,6 +102,15 @@ async def _local_https(
     async def handle(request: web.Request) -> web.Response:
         """Return synthetic responses without accessing external resources."""
         paths.append(request.path)
+        if request.path == "/retry" and paths.count("/retry") == 1:
+            assert request.transport is not None
+            request.transport.abort()
+        if request.path == "/limited":
+            return web.Response(
+                status=429,
+                body=gzip.compress(b"synthetic"),
+                headers={"Content-Encoding": "gzip", "Retry-After": "900"},
+            )
         if request.path == "/redirect":
             return web.Response(status=302, headers={"Location": "/unexpected"})
         if request.path == "/encoded":
@@ -219,3 +230,27 @@ async def test_real_cancellation(local_https: LocalHttps) -> None:
         with suppress(asyncio.CancelledError):
             await task
         local_https.release.set()
+
+
+@pytest.mark.asyncio
+async def test_wire_attempt_budget(local_https: LocalHttps) -> None:
+    """Count actual aiohttp retry middleware calls against a local HTTPS server."""
+    budget = NedRequestBudget(instrumented=True)
+    # Borrow the test connector without changing its TLS trust configuration.
+    async with ClientSession(
+        connector=local_https.session.connector,
+        connector_owner=False,
+        middlewares=(budget.async_middleware,),
+    ) as session:
+        transport = NedTransport(session, local_https.origin)
+        result = await budget.async_get(transport, "/retry", params={}, headers={})
+        assert result.status == 200
+        assert local_https.paths == ["/retry", "/retry"]
+        assert budget.remaining == 118
+        with pytest.raises(NedRateLimitError):
+            await budget.async_get(transport, "/limited", params={}, headers={})
+        assert budget.remaining == 0
+        assert 899 <= budget.retry_after <= 900
+        with pytest.raises(NedRateLimitError):
+            await budget.async_get(transport, "/resource", params={}, headers={})
+        assert local_https.paths == ["/retry", "/retry", "/limited"]

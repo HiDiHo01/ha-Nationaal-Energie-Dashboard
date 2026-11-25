@@ -3,6 +3,8 @@
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 
 from aiohttp import ClientError, ClientPayloadError, ClientSession, ClientTimeout, hdrs
 from yarl import URL
@@ -23,6 +25,24 @@ class TransportResponse:
     status: int
     body: bytes = field(repr=False)
     media_type: str = field(default="", repr=False)
+    retry_after: float | None = None
+
+
+def parse_retry_after(value: str | None) -> float | None:
+    """Normalize HTTP delay-seconds or HTTP-date without retaining raw headers."""
+    if value is None:
+        return None
+    header = value.strip()
+    if header.isascii() and header.isdecimal():
+        digits = header.lstrip("0") or "0"
+        return math.inf if len(digits) > 6 else float(digits)
+    try:
+        date_value = parsedate_to_datetime(header)
+    except ValueError, TypeError, OverflowError:
+        return None
+    if date_value.tzinfo is None:
+        return None
+    return max(0.0, (date_value - datetime.now(UTC)).total_seconds())
 
 
 def _parse_origin(origin: str) -> URL:
@@ -87,8 +107,8 @@ class NedTransport:
     ) -> TransportResponse:
         """Fetch one path with non-secret query parameters, without redirects.
 
-        Return all HTTP statuses without assigning NED-specific meaning. Reject
-        encoded bodies and oversized responses. Never close the borrowed session.
+        Return error status and sanitized retry metadata without reading error bodies.
+        Reject encoded or oversized successful responses. Never close the borrowed session.
         Headers are supplied by trusted callers for this fixed origin only;
         redirects remain disabled and credentials must never be query parameters.
         """
@@ -125,6 +145,15 @@ class NedTransport:
                 auto_decompress=False,
                 headers=request_headers,
             ) as response:
+                if response.status != 200:
+                    # Status has priority over any malformed error body.
+                    retry_after = parse_retry_after(
+                        response.headers.get(hdrs.RETRY_AFTER)
+                    )
+                    response.close()
+                    return TransportResponse(
+                        status=response.status, body=b"", retry_after=retry_after
+                    )
                 encoding = response.headers.get(hdrs.CONTENT_ENCODING, "identity")
                 if encoding.lower() != "identity":
                     raise NedResponseError("Unsupported HTTP content encoding.")
