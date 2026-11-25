@@ -4,6 +4,8 @@
 
 ### Nederlands
 
+- Config Flow-adapter gekoppeld aan de echte authenticatieclient achter de bestaande gesloten vrijgavecontrole; uitgebreide offline regressietests. Gitleaks rapporteert alleen regel-ID en bronlocatie bij een fout; sensor-ID-opbouw behoudt identiteit, zonder scanuitzonderingen. Definitieve CI nog niet bevestigd.
+
 - AUTH-001–005: drie handmatig gerapporteerde observaties vastgelegd, conceptmapping 401/403, NL/EN-foutmeldingen en synthetische regressietests toegevoegd; autorisatie blijft open, geen live koppeling of fasevrijgave. Eerdere Ruff/Pylint-bevindingen aangepakt; CI nog niet bevestigd.
 
 - Offline ontwikkelconcept voor de acht sensoren, gemaskeerde Config Flow, vertalingen, en een begrensde afzonderlijke authenticatieclient; synthetische tests toegevoegd, CI en runtimevalidatie niet bevestigd. Geen live koppeling, fasevrijgave of publicatie.
@@ -34,6 +36,8 @@
 - Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- Connect the Config Flow adapter to the actual authentication client behind the existing closed release guard; expanded offline regression tests. Gitleaks reports only rule ID and source location on failure; sensor identifiers retain identity without scan exclusions. Final CI unconfirmed.
 
 - AUTH-001–005: record three manually reported observations, draft 401/403 mapping, NL/EN errors and synthetic regression tests; permission semantics remain open, no live connection or phase acceptance. Addressed previous Ruff/Pylint findings; CI unconfirmed.
 
