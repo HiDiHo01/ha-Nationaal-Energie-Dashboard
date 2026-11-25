@@ -14,7 +14,6 @@ from aiohttp import (
 )
 from yarl import URL
 
-
 from ned_api import (
     NedApiError,
     NedConnectionError,

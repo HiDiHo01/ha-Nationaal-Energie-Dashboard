@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Nationaal Energie Dashboard configureren",
-        "description": "Lokale alpha: voer je persoonlijke NED API-sleutel in voor de vijf nationale vermogenssensoren. De sleutel wordt pas opgeslagen na gevalideerde toegang.",
+        "description": "Lokale alpha: voer je persoonlijke NED API-sleutel in. Een historische zonnequery valideert toegang; andere datasets kunnen afzonderlijk onbeschikbaar zijn.",
         "data": {
           "api_key": "API-sleutel"
         }
@@ -101,6 +101,9 @@
           },
           "valid_to": {
             "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
           }
         }
       },
@@ -112,6 +115,9 @@
           },
           "valid_to": {
             "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
           }
         }
       },
@@ -123,6 +129,9 @@
           },
           "valid_to": {
             "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
           }
         }
       },
@@ -134,6 +143,9 @@
           },
           "valid_to": {
             "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
           }
         }
       },
@@ -145,6 +157,9 @@
           },
           "valid_to": {
             "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
           }
         }
       }

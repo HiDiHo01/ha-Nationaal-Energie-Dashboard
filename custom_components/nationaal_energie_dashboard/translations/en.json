@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Set up Nationaal Energie Dashboard",
-        "description": "Local alpha: enter your personal NED API key for the five national power sensors. The key is saved only after validated access.",
+        "description": "Local alpha: enter your personal NED API key. A historical solar query validates access; other datasets may be independently unavailable.",
         "data": {
           "api_key": "API key"
         }
@@ -101,6 +101,9 @@
           },
           "valid_to": {
             "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
           }
         }
       },
@@ -112,6 +115,9 @@
           },
           "valid_to": {
             "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
           }
         }
       },
@@ -123,6 +129,9 @@
           },
           "valid_to": {
             "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
           }
         }
       },
@@ -134,6 +143,9 @@
           },
           "valid_to": {
             "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
           }
         }
       },
@@ -145,6 +157,9 @@
           },
           "valid_to": {
             "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
           }
         }
       }

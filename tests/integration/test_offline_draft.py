@@ -266,7 +266,9 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
     assert result["data"] == {CONF_API_KEY: "synthetic-key"}
     session.detach.assert_called_once()
     get_session.assert_called_once_with(
-        hass, auto_cleanup=False, middlewares=(get_request_budget(hass).async_middleware,)
+        hass,
+        auto_cleanup=False,
+        middlewares=(get_request_budget(hass).async_middleware,),
     )
     get.assert_awaited_once()
     session.close.assert_not_awaited()
@@ -615,12 +617,14 @@ async def test_partial_recovery(caplog: pytest.LogCaptureFixture) -> None:
         clock.now.return_value = _START + QUARTER
         first = await provider.async_current()
         second = await provider.async_current()
+        assert provider.failed_datasets == {SensorKey.SOLAR}
         third = await provider.async_current()
+        assert not provider.failed_datasets
     assert SensorKey.SOLAR not in first
     assert first == second
     assert set(third) == set(POWER_DATASETS)
-    assert caplog.text.count("NED dataset solar unavailable") == 1
-    assert caplog.text.count("NED dataset solar recovered") == 1
+    assert caplog.text.count("NED dataset solar_power unavailable") == 1
+    assert caplog.text.count("NED dataset solar_power recovered") == 1
 
 
 @pytest.mark.asyncio
@@ -636,9 +640,10 @@ async def test_future_quarter_not_promoted() -> None:
         clock.now.return_value = _START
         snapshot = await provider.async_current()
     assert all(not series for series in snapshot.values())
-    assert select_reading(
-        snapshot[SensorKey.SOLAR], _START + QUARTER, forecast=False
-    ) is None
+    assert (
+        select_reading(snapshot[SensorKey.SOLAR], _START + QUARTER, forecast=False)
+        is None
+    )
 
 
 def test_received_at_clock_rollback() -> None:

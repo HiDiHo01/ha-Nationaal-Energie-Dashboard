@@ -1,11 +1,10 @@
 """Coordinate the bounded local-alpha power datasets and reserved offline logic."""
 
 import logging
-from collections.abc import Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from math import isfinite
-from typing import Protocol
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY
@@ -84,13 +83,6 @@ class NedReading:
 type NedSnapshot = Mapping[SensorKey, tuple[NedReading, ...]]
 
 
-class NedDataProvider(Protocol):
-    """Expose normalized data without coupling Home Assistant to HTTP parsing."""
-
-    async def async_current(self) -> NedSnapshot:
-        """Return current readings, including the derived estimate when valid."""
-        ...
-
 @dataclass(frozen=True, slots=True)
 class NedRuntimeData:
     """Hold the only coordinator active in the local alpha."""
@@ -112,6 +104,11 @@ class NedAlphaProvider:
         self._api_key = api_key
         self._budget = budget
         self._failed: set[SensorKey] = set()
+
+    @property
+    def failed_datasets(self) -> frozenset[SensorKey]:
+        """Return sanitized identifiers of datasets with unresolved failures."""
+        return frozenset(self._failed)
 
     async def _async_read_dataset(
         self, dataset: NedPowerDataset, now: datetime
@@ -167,7 +164,7 @@ class NedAlphaProvider:
         return snapshot
 
 
-def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedDataProvider:
+def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedAlphaProvider:
     """Construct the alpha provider from the stored credential and shared session."""
     try:
         api_key = validate_key_format(entry.data.get(CONF_API_KEY))
@@ -181,7 +178,9 @@ def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedDataProvid
 
 
 def create_runtime(
-    hass: HomeAssistant, entry: NedConfigEntry, provider: NedDataProvider
+    hass: HomeAssistant,
+    entry: NedConfigEntry,
+    update_method: Callable[[], Awaitable[NedSnapshot]],
 ) -> NedRuntimeData:
     """Create the sole active entry-owned coordinator."""
     return NedRuntimeData(
@@ -191,7 +190,7 @@ def create_runtime(
             config_entry=entry,
             name=f"{DOMAIN}_current",
             update_interval=CURRENT_INTERVAL,
-            update_method=provider.async_current,
+            update_method=update_method,
         ),
     )
 

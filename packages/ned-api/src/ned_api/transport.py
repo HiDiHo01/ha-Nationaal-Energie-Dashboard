@@ -108,7 +108,7 @@ class NedTransport:
         """Fetch one path with non-secret query parameters, without redirects.
 
         Return error status and sanitized retry metadata without reading error bodies.
-        Reject encoded or oversized successful responses. Never close the borrowed session.
+        Reject encoded or oversized successful responses. Never close the session.
         Headers are supplied by trusted callers for this fixed origin only;
         redirects remain disabled and credentials must never be query parameters.
         """
