@@ -666,8 +666,6 @@ def test_exact_staleness_boundary() -> None:
     boundary = reading.valid_to + timedelta(minutes=30)
     assert select_reading((reading,), boundary, forecast=False) == reading
     assert (
-        select_reading(
-            (reading,), boundary + timedelta(microseconds=1), forecast=False
-        )
+        select_reading((reading,), boundary + timedelta(microseconds=1), forecast=False)
         is None
     )
