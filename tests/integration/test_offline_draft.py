@@ -1,6 +1,7 @@
 """Exercise sensor logic and the draft configuration flow without live NED."""
 
-from datetime import UTC, datetime, timedelta
+import json
+from datetime import UTC, date, datetime, time, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -14,7 +15,8 @@ from homeassistant.config_entries import (
 from homeassistant.const import CONF_API_KEY, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import AbortFlow, FlowResultType
-from homeassistant.exceptions import ConfigEntryError
+from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers.update_coordinator import UpdateFailed
 
 # The pinned upstream test helper does not provide a py.typed marker.
 from pytest_homeassistant.common import MockConfigEntry  # type: ignore[import-untyped]
@@ -25,7 +27,6 @@ from custom_components.nationaal_energie_dashboard import (
 )
 from custom_components.nationaal_energie_dashboard.config_flow import NedConfigFlow
 from custom_components.nationaal_energie_dashboard.const import (
-    CONTRACT_PENDING,
     DOMAIN,
     PLATFORMS,
     QUARTER,
@@ -33,9 +34,13 @@ from custom_components.nationaal_energie_dashboard.const import (
     SensorKey,
 )
 from custom_components.nationaal_energie_dashboard.coordinator import (
+    POWER_DATASETS,
+    NedAlphaProvider,
     NedReading,
     NedSnapshot,
+    create_provider,
     estimate_renewable_share,
+    get_request_budget,
     select_reading,
 )
 from custom_components.nationaal_energie_dashboard.sensor import (
@@ -46,13 +51,40 @@ from custom_components.nationaal_energie_dashboard.sensor import (
     async_setup_entry as async_setup_sensors,
 )
 from ned_api import (
+    NedAccessDeniedError,
+    NedAuthenticationError,
     NedConnectionError,
+    NedPowerDataset,
+    NedQuarterClient,
+    NedRateLimitError,
     NedResponseError,
     NedTimeoutError,
     TransportResponse,
 )
 
 _START = datetime(2026, 11, 22, 12, tzinfo=UTC)
+
+
+def _power_response(dataset: NedPowerDataset, day: date) -> TransportResponse:
+    """Build one native capacity record with exact observed dimensions."""
+    start = datetime.combine(day, time.min, tzinfo=UTC)
+    type_id, activity = dataset.value
+    record = {
+        "point": "/v1/points/0",
+        "type": f"/v1/types/{type_id}",
+        "activity": f"/v1/activities/{activity}",
+        "classification": "/v1/classifications/2",
+        "granularity": "/v1/granularities/4",
+        "granularitytimezone": "/v1/granularity_time_zones/0",
+        "validfrom": start.isoformat(),
+        "validto": (start + QUARTER).isoformat(),
+        "capacity": 1234,
+    }
+    return TransportResponse(
+        200,
+        json.dumps({"hydra:member": [record], "hydra:totalItems": 1}).encode(),
+        "application/ld+json",
+    )
 
 
 def _reading(value: float, start: datetime = _START) -> NedReading:
@@ -183,14 +215,15 @@ def _flow(hass: HomeAssistant) -> NedConfigFlow:
 
 @pytest.mark.asyncio
 async def test_masked_key_flow(hass: HomeAssistant) -> None:
-    """Show the credential form; the blocked backend cannot create an entry."""
+    """Show the credential form without requesting data before submission."""
     flow = _flow(hass)
-    result = await flow.async_step_user()
+    with patch(
+        "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
+    ) as get:
+        result = await flow.async_step_user()
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
-    result = await flow.async_step_user({CONF_API_KEY: "synthetic-key"})
-    assert result["type"] is FlowResultType.FORM
-    assert result["errors"] == {"base": CONTRACT_PENDING}
+    get.assert_not_awaited()
     assert not hass.config_entries.async_entries(DOMAIN)
 
 
@@ -213,18 +246,9 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
     """Accept entry data only after the actual client validates a synthetic response."""
     flow = _flow(hass)
     session = MagicMock(spec=ClientSession)
-    response = TransportResponse(
-        200,
-        b'{"hydra:member":[{"point":"/v1/points/0","type":"/v1/types/2",'
-        b'"activity":"/v1/activities/1","classification":"/v1/classifications/2",'
-        b'"granularity":"/v1/granularities/4",'
-        b'"granularitytimezone":"/v1/granularity_time_zones/0"}]}',
-        "application/ld+json",
-    )
+    response = _power_response(NedPowerDataset.SOLAR, _START.date())
     with (
-        patch(
-            "custom_components.nationaal_energie_dashboard.config_flow._ensure_authentication_ready",
-        ),
+        patch("ned_api.authentication.datetime") as clock,
         patch(
             "custom_components.nationaal_energie_dashboard.config_flow.async_get_clientsession",
             return_value=session,
@@ -233,6 +257,7 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
             "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
         ) as get,
     ):
+        clock.now.return_value = _START + timedelta(days=2)
         get.return_value = response
         result = await flow.async_step_user({CONF_API_KEY: "synthetic-key"})
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -268,9 +293,6 @@ async def test_observed_denials_in_config_flow(
     flow = _flow(hass)
     with (
         patch(
-            "custom_components.nationaal_energie_dashboard.config_flow._ensure_authentication_ready",
-        ),
-        patch(
             "custom_components.nationaal_energie_dashboard.config_flow.async_get_clientsession",
             return_value=session,
         ),
@@ -294,6 +316,7 @@ async def test_observed_denials_in_config_flow(
         (NedConnectionError("synthetic"), "cannot_connect"),
         (NedTimeoutError("synthetic"), "cannot_connect"),
         (NedResponseError("synthetic"), "cannot_validate"),
+        (NedRateLimitError("synthetic"), "rate_limited"),
     ],
 )
 @pytest.mark.asyncio
@@ -345,8 +368,12 @@ async def test_replace_credentials(hass: HomeAssistant, source: str) -> None:
         reason = "reconfigure_successful"
     assert form["type"] is FlowResultType.FORM
     assert "old-synthetic" not in repr(form)
-    blocked = await step({CONF_API_KEY: "new-synthetic"})
-    assert blocked["errors"] == {"base": CONTRACT_PENDING}
+    with patch(
+        "custom_components.nationaal_energie_dashboard.config_flow.async_validate_api_key",
+        side_effect=NedAccessDeniedError("synthetic"),
+    ):
+        blocked = await step({CONF_API_KEY: "new-synthetic"})
+    assert blocked["errors"] == {"base": "access_denied"}
     assert entry.data[CONF_API_KEY] == "old-synthetic"
     with (
         patch(
@@ -376,12 +403,12 @@ async def test_duplicate_service(hass: HomeAssistant) -> None:
 
 
 @pytest.mark.asyncio
-async def test_setup_gate(hass: HomeAssistant) -> None:
-    """Reject real setup before constructing coordinators or polling."""
+async def test_setup_missing_key(hass: HomeAssistant) -> None:
+    """Reject setup with an absent credential before constructing a client."""
     entry = MockConfigEntry(domain=DOMAIN)
-    with pytest.raises(ConfigEntryError) as raised:
+    with pytest.raises(ConfigEntryAuthFailed) as raised:
         await async_setup_entry(hass, entry)
-    assert raised.value.translation_key == CONTRACT_PENDING
+    assert raised.value.translation_key == "authentication_failed"
 
 
 @pytest.mark.asyncio
@@ -415,7 +442,20 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
     add_entities = MagicMock()
     await async_setup_sensors(hass, entry, add_entities)
     entities: list[NedSensor] = list(add_entities.call_args.args[0])
-    assert len(entities) == 8
+    assert len(entities) == 5
+    assert {entity.entity_description.key for entity in entities} == set(POWER_DATASETS)
+    # Preserve coverage for the reserved, not registered sensor descriptions.
+    entities.extend(
+        NedSensor(
+            runtime.forecast
+            if SensorKey(description.key) is SensorKey.CO2_FORECAST
+            else runtime.current,
+            entry.entry_id,
+            description,
+        )
+        for description in SENSOR_DESCRIPTIONS
+        if SensorKey(description.key) not in POWER_DATASETS
+    )
     sensors = {entity.entity_description.key: entity for entity in entities}
     assert sensors[SensorKey.CO2_FORECAST].coordinator is runtime.forecast
     solar = sensors[SensorKey.SOLAR]
@@ -466,3 +506,86 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
         unload.assert_awaited_once_with(entry, PLATFORMS)
     await runtime.current.async_shutdown()
     await runtime.forecast.async_shutdown()
+
+
+@pytest.mark.parametrize(
+    ("now", "expected_days"),
+    [
+        (_START, 1),
+        (_START.replace(hour=0, minute=15), 2),
+    ],
+)
+@pytest.mark.asyncio
+async def test_actual_alpha_provider(
+    hass: HomeAssistant, now: datetime, expected_days: int
+) -> None:
+    """Exercise the real provider, session, parser and bounded UTC-day queries."""
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_API_KEY: "synthetic-key"})
+    session = MagicMock(spec=ClientSession)
+
+    def response_for_request(
+        _path: str, *, params: dict[str, str], headers: dict[str, str]
+    ) -> TransportResponse:
+        """Return only synthetic records for the requested dataset and day."""
+        assert headers["X-AUTH-TOKEN"] == "synthetic-key"
+        dataset = NedPowerDataset((int(params["type"]), int(params["activity"])))
+        return _power_response(dataset, date.fromisoformat(params["validfrom[after]"]))
+
+    with (
+        patch(
+            "custom_components.nationaal_energie_dashboard.coordinator.datetime"
+        ) as clock,
+        patch(
+            "custom_components.nationaal_energie_dashboard.coordinator.async_get_clientsession",
+            return_value=session,
+        ) as get_session,
+        patch(
+            "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
+        ) as get,
+    ):
+        clock.now.return_value = now
+        get.side_effect = response_for_request
+        provider = create_provider(hass, entry)
+        snapshot = await provider.async_current()
+        assert await provider.async_forecast() == {}
+    get_session.assert_called_once_with(hass)
+    assert set(snapshot) == set(POWER_DATASETS)
+    assert all(len(series) == expected_days for series in snapshot.values())
+    assert all(item.value == 1234 for series in snapshot.values() for item in series)
+    assert get.await_count == expected_days * 5
+    assert get_request_budget(hass) is get_request_budget(hass)
+    assert get_request_budget(hass).remaining == 120 - expected_days * 5
+    session.close.assert_not_awaited()
+
+
+@pytest.mark.parametrize(
+    ("error", "expected", "translation_key"),
+    [
+        (
+            NedAuthenticationError("synthetic"),
+            ConfigEntryAuthFailed,
+            "authentication_failed",
+        ),
+        (NedAccessDeniedError("synthetic"), UpdateFailed, "update_failed"),
+        (NedResponseError("synthetic"), UpdateFailed, "update_failed"),
+        (NedRateLimitError("synthetic"), UpdateFailed, "rate_limited"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_provider_denial(
+    error: Exception,
+    expected: type[Exception],
+    translation_key: str,
+) -> None:
+    """Stop the batch; do not treat ambiguous access denial as reauthentication."""
+    client = MagicMock(spec=NedQuarterClient)
+    client.async_read_day = AsyncMock(side_effect=error)
+    provider = NedAlphaProvider(client, "synthetic-key")
+    with pytest.raises(expected) as raised:
+        await provider.async_current()
+    assert isinstance(raised.value, ConfigEntryAuthFailed | UpdateFailed)
+    assert raised.value.translation_key == translation_key
+    if isinstance(error, NedRateLimitError):
+        assert isinstance(raised.value, UpdateFailed)
+        assert raised.value.retry_after == 300
+    client.async_read_day.assert_awaited_once()
