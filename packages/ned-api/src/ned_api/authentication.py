@@ -3,7 +3,7 @@
 Only a positive response to the fixed solar query is evidence of access.
 HTTP 401 and 403 have distinct, conservative mappings based on AUTH-002/003.
 A 403 does not establish whether credentials or permissions caused denial.
-This client remains an offline-tested draft until contract release.
+The bounded positive check is permitted for the local alpha scope.
 """
 
 import json
@@ -17,6 +17,7 @@ from .exceptions import (
     NedResponseError,
     NedValidationError,
 )
+from .rate_limiter import NedRequestBudget
 from .transport import NedTransport, TransportResponse
 
 _ORIGIN = "https://api.ned.nl"
@@ -69,9 +70,12 @@ def _validate_response(response: TransportResponse) -> None:
 class NedAuthenticationClient:
     """Validate access using a borrowed session and a fixed HTTPS origin."""
 
-    def __init__(self, session: ClientSession) -> None:
+    def __init__(
+        self, session: ClientSession, budget: NedRequestBudget | None = None
+    ) -> None:
         """Construct the transport without retaining credentials."""
         self._transport = NedTransport(session, _ORIGIN)
+        self._budget = budget if budget is not None else NedRequestBudget()
 
     @property
     def origin(self) -> str:
@@ -104,7 +108,8 @@ class NedAuthenticationClient:
                 "validfrom[strictly_before]": (day + timedelta(days=1)).isoformat(),
             }
         )
-        response = await self._transport.async_get(
+        response = await self._budget.async_get(
+            self._transport,
             _PATH,
             params=params,
             headers={"Accept": _MEDIA_TYPE, "X-AUTH-TOKEN": api_key},
