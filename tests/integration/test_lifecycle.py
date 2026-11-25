@@ -17,6 +17,9 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
+# The pinned upstream test helper lacks a py.typed marker.
+from pytest_homeassistant.common import async_fire_time_changed  # type: ignore[import-untyped]
+
 from custom_components.nationaal_energie_dashboard.const import DOMAIN, QUARTER
 from custom_components.nationaal_energie_dashboard.coordinator import (
     POWER_DATASETS,
@@ -165,6 +168,10 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
         await hass.async_block_till_done()
         assert entry.state is ConfigEntryState.NOT_LOADED
         assert all(hass.states.get(entity_id) is None for entity_id in ids)
+        request_count = len(api.calls)
+        async_fire_time_changed(hass, _NOW + timedelta(minutes=10))
+        await hass.async_block_till_done()
+        assert len(api.calls) == request_count
 
 
 @pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")

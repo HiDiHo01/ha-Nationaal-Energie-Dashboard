@@ -254,3 +254,33 @@ async def test_wire_attempt_budget(local_https: LocalHttps) -> None:
         with pytest.raises(NedRateLimitError):
             await budget.async_get(transport, "/resource", params={}, headers={})
         assert local_https.paths == ["/retry", "/retry", "/limited"]
+
+
+@pytest.mark.asyncio
+async def test_wire_budget_cancellation(local_https: LocalHttps) -> None:
+    """Count concurrent requests once and keep cancelled attempts reserved."""
+    budget = NedRequestBudget(instrumented=True)
+    async with ClientSession(
+        connector=local_https.session.connector,
+        connector_owner=False,
+        middlewares=(budget.async_middleware,),
+    ) as session:
+        transport = NedTransport(session, local_https.origin)
+        pending = asyncio.create_task(
+            budget.async_get(transport, "/slow", params={}, headers={})
+        )
+        try:
+            await asyncio.wait_for(local_https.received.wait(), timeout=2)
+            assert budget.remaining == 119
+            result = await budget.async_get(
+                transport, "/resource", params={}, headers={}
+            )
+            assert result.status == 200
+            assert budget.remaining == 118
+        finally:
+            pending.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await pending
+            local_https.release.set()
+        assert budget.remaining == 118
+        assert local_https.paths == ["/slow", "/resource"]

@@ -135,4 +135,16 @@ assert set(after) - set(before) == {"ned-api", "ned-api-runtime-probe"}
 print("Native HA actual API wheel install, dependency preservation, typed import and session injection passed.")
 PY
 uv pip check --python "$runtime"
+# Verify the actual installed wheel bytes with the same owner-test preflight.
+api_hash=$(sha256sum "$api_wheel" | cut -d ' ' -f 1)
+core_version=$("$runtime" -I -c 'import json,sys; print(json.load(open(sys.argv[1]))["homeassistant"])' "$root/hacs.json")
+python_version=$(cat "$root/.python-version")
+manifest_path="$work/config/custom_components/nationaal_energie_dashboard/manifest.json"
+bash -n "$root/scripts/run_local_alpha.sh" "$root/scripts/verify_alpha_wheel.sh"
+bash "$root/scripts/verify_alpha_wheel.sh" "$runtime" "$api_wheel" "$api_hash" "$manifest_path" "$core_version" "$python_version"
+if bash "$root/scripts/verify_alpha_wheel.sh" "$runtime" "$api_wheel" "invalid-hash" "$manifest_path" "$core_version" "$python_version"; then
+    echo "Unexpected acceptance of invalid wheel hash" >&2
+    exit 1
+fi
+echo "Alpha preflight rejects invalid wheel hash."
 echo "Synthetic and actual runtime wheel probes passed; copied alpha imports passed; full live setup is not evaluated."
