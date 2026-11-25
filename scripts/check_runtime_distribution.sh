@@ -150,16 +150,91 @@ fi
 echo "Alpha preflight rejects invalid wheel hash."
 echo "Synthetic and actual runtime wheel probes passed; copied alpha imports passed; full live setup is not evaluated."
 
+# R39-11: Core loads default integrations even with an HTTP-only YAML file.
+# Extend only this disposable venv, after proving the locked wheel installation.
+# Read requirements from the installed, exact Core release, including its
+# dependency and after-dependency closure. Preserve every existing version.
+"$runtime" -I - "$work" <<'PY'
+"""Collect the pinned Core startup dependencies and preserve the baseline."""
+
+import json
+import sys
+from importlib.metadata import distributions
+from pathlib import Path
+
+import homeassistant
+from homeassistant.bootstrap import CORE_INTEGRATIONS, DEFAULT_INTEGRATIONS
+from homeassistant.const import BASE_PLATFORMS
+from packaging.requirements import Requirement
+
+work = Path(sys.argv[1])
+core_dir = Path(homeassistant.__file__).resolve().parent
+pending = set(CORE_INTEGRATIONS) | set(DEFAULT_INTEGRATIONS) | set(BASE_PLATFORMS)
+pending.add("http")
+seen: set[str] = set()
+requirements: set[str] = set()
+while pending:
+    domain = pending.pop()
+    if domain in seen:
+        continue
+    seen.add(domain)
+    manifest_path = core_dir / "components" / domain / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["domain"] == domain, f"Unexpected Core manifest: {domain}"
+    pending.update(set(manifest.get("dependencies", ())) - seen)
+    pending.update(set(manifest.get("after_dependencies", ())) - seen)
+    for raw in manifest.get("requirements", ()):
+        requirement = Requirement(raw)
+        assert requirement.url is None, f"Unexpected direct URL in {domain}"
+        requirements.add(str(requirement))
+assert any(item.startswith("home-assistant-frontend==") for item in requirements)
+(work / "startup-requirements.txt").write_text(
+    "\n".join(sorted(requirements)) + "\n", encoding="utf-8"
+)
+baseline = {item.metadata["Name"]: item.version for item in distributions()}
+(work / "startup-baseline.json").write_text(json.dumps(baseline), encoding="utf-8")
+(work / "startup-baseline.txt").write_text(
+    "".join(f"{name}=={version}\n" for name, version in sorted(baseline.items())),
+    encoding="utf-8",
+)
+(work / "core-constraints-path").write_text(
+    str(core_dir / "package_constraints.txt"), encoding="utf-8"
+)
+print(f"Resolved {len(seen)} Core manifests and {len(requirements)} startup requirements.")
+PY
+# Package downloads are allowed only during dependency preparation, not launch.
+env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
+    uv pip install --python "$runtime" \
+    --constraint "$(cat "$work/core-constraints-path")" \
+    --constraint "$work/startup-baseline.txt" \
+    --requirement "$work/startup-requirements.txt"
+"$runtime" -I - "$work/startup-baseline.json" <<'PY'
+"""Verify that extra Core dependencies did not replace any baseline package."""
+
+import json
+import sys
+from importlib.metadata import distributions
+from pathlib import Path
+
+before = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+after = {item.metadata["Name"]: item.version for item in distributions()}
+assert all(after.get(name) == version for name, version in before.items())
+print(f"Preserved {len(before)} baseline distributions; added {len(after) - len(before)}.")
+PY
+uv pip check --python "$runtime"
+# Audit the additional dependencies as well as the unchanged locked baseline.
+"$runtime" -I -m pip_audit --local
+
 # R39-11: exercise the actual launcher with no configured NED entry or credential.
-# The full default_config UI dependency set is not part of this locked test venv.
-# Use a minimal localhost-only Core configuration for process lifecycle evidence.
+# Keep the localhost configuration minimal; Core's mandatory frontend is installed.
+# The full default_config and configured NED entry are not part of this test.
 cd "$root"
 commit=$(git rev-parse HEAD)
 alpha_config="$work/alpha-config"
 # Preparation may build with the pinned backend; package installation is offline.
 env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
     bash scripts/run_local_alpha.sh prepare "$runtime" "$alpha_config" "$commit"
-printf 'http:\n  server_host: 127.0.0.1\n  server_port: 8124\n' > "$alpha_config/configuration.yaml"
+printf 'logger:\n  default: info\nhttp:\n  server_host: 127.0.0.1\n  server_port: 8124\n' > "$alpha_config/configuration.yaml"
 # Tampering with the tracked integration copy must fail before Core starts.
 manifest_copy="$alpha_config/custom_components/nationaal_energie_dashboard/manifest.json"
 cp "$manifest_copy" "$work/manifest-original.json"
@@ -197,13 +272,18 @@ for cycle in 1 2; do
             cat "$work/core-${cycle}.log"
             exit 1
         fi
-        if curl --noproxy '*' --silent --max-time 1 --output /dev/null http://127.0.0.1:8124/; then
+        if grep -Fq 'Home Assistant initialized in' "$work/core-${cycle}.log" && \
+            curl --noproxy '*' --fail --silent --max-time 1 --output /dev/null http://127.0.0.1:8124/; then
             ready=true
             break
         fi
         sleep 1
     done
     if [[ "$ready" != true ]]; then
+        cat "$work/core-${cycle}.log"
+        exit 1
+    fi
+    if grep -Eq 'Activating recovery mode|Starting in recovery mode|Setup failed for|Error during setup of component' "$work/core-${cycle}.log"; then
         cat "$work/core-${cycle}.log"
         exit 1
     fi
@@ -221,4 +301,4 @@ for cycle in 1 2; do
     wait "$alpha_pid"
     alpha_pid=""
 done
-echo "Local alpha prepare/start/stop/restart passed with minimal HTTP-only Core; no NED entry."
+echo "Local alpha prepare/start/stop/restart passed with mandatory Core frontend and minimal localhost configuration; no NED entry."
