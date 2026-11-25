@@ -151,15 +151,14 @@ echo "Alpha preflight rejects invalid wheel hash."
 echo "Synthetic and actual runtime wheel probes passed; copied alpha imports passed; full live setup is not evaluated."
 
 # R39-11: Core loads default integrations even with an HTTP-only YAML file.
-# Extend only this disposable venv, after proving the locked wheel installation.
+# Use a second disposable venv for Core startup, leaving the locked wheel-probe venv intact.
 # Read requirements from the installed, exact Core release, including its
-# dependency and after-dependency closure. Preserve every existing version.
+# dependency and after-dependency closure, using the upstream Core constraints.
 "$runtime" -I - "$work" <<'PY'
-"""Collect the pinned Core startup dependencies and preserve the baseline."""
+"""Collect startup requirements from the exact installed Core release."""
 
 import json
 import sys
-from importlib.metadata import distributions
 from pathlib import Path
 
 import homeassistant
@@ -191,39 +190,25 @@ assert any(item.startswith("home-assistant-frontend==") for item in requirements
 (work / "startup-requirements.txt").write_text(
     "\n".join(sorted(requirements)) + "\n", encoding="utf-8"
 )
-baseline = {item.metadata["Name"]: item.version for item in distributions()}
-(work / "startup-baseline.json").write_text(json.dumps(baseline), encoding="utf-8")
-(work / "startup-baseline.txt").write_text(
-    "".join(f"{name}=={version}\n" for name, version in sorted(baseline.items())),
-    encoding="utf-8",
-)
 (work / "core-constraints-path").write_text(
     str(core_dir / "package_constraints.txt"), encoding="utf-8"
 )
 print(f"Resolved {len(seen)} Core manifests and {len(requirements)} startup requirements.")
 PY
-# Package downloads are allowed only during dependency preparation, not launch.
+# The development lock can conflict with upstream startup constraints (e.g. cffi).
+# Resolve the real Core environment separately instead of changing either pin set.
+uv venv --python "$python_bin" "$work/launch-venv"
+launch_runtime="$work/launch-venv/bin/python"
 env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
-    uv pip install --python "$runtime" \
+    uv pip install --python "$launch_runtime" \
     --constraint "$(cat "$work/core-constraints-path")" \
-    --constraint "$work/startup-baseline.txt" \
-    --requirement "$work/startup-requirements.txt"
-"$runtime" -I - "$work/startup-baseline.json" <<'PY'
-"""Verify that extra Core dependencies did not replace any baseline package."""
-
-import json
-import sys
-from importlib.metadata import distributions
-from pathlib import Path
-
-before = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-after = {item.metadata["Name"]: item.version for item in distributions()}
-assert all(after.get(name) == version for name, version in before.items())
-print(f"Preserved {len(before)} baseline distributions; added {len(after) - len(before)}.")
-PY
-uv pip check --python "$runtime"
-# Audit the additional dependencies as well as the unchanged locked baseline.
-"$runtime" -I -m pip_audit --local
+    --requirement "$work/startup-requirements.txt" "homeassistant==$core_version"
+"$launch_runtime" -I -c 'import sys; from importlib.metadata import version; assert version("homeassistant") == sys.argv[1]; assert ".".join(map(str, sys.version_info[:3])) == sys.argv[2]' "$core_version" "$python_version"
+uv pip check --python "$launch_runtime"
+# Audit the actual startup environment before the locally built NED wheel is installed.
+# The audit tool itself remains in the unchanged locked development environment.
+launch_site=$("$launch_runtime" -I -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+"$runtime" -I -m pip_audit --path "$launch_site"
 
 # R39-11: exercise the actual launcher with no configured NED entry or credential.
 # Keep the localhost configuration minimal; Core's mandatory frontend is installed.
@@ -233,13 +218,13 @@ commit=$(git rev-parse HEAD)
 alpha_config="$work/alpha-config"
 # Preparation may build with the pinned backend; package installation is offline.
 env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
-    bash scripts/run_local_alpha.sh prepare "$runtime" "$alpha_config" "$commit"
+    bash scripts/run_local_alpha.sh prepare "$launch_runtime" "$alpha_config" "$commit"
 printf 'logger:\n  default: info\nhttp:\n  server_host: 127.0.0.1\n  server_port: 8124\n' > "$alpha_config/configuration.yaml"
 # Tampering with the tracked integration copy must fail before Core starts.
 manifest_copy="$alpha_config/custom_components/nationaal_energie_dashboard/manifest.json"
 cp "$manifest_copy" "$work/manifest-original.json"
 printf '\n' >> "$manifest_copy"
-if bash scripts/run_local_alpha.sh launch "$runtime" "$alpha_config" "$commit"; then
+if bash scripts/run_local_alpha.sh launch "$launch_runtime" "$alpha_config" "$commit"; then
     echo "Unexpected acceptance of changed manifest" >&2
     exit 1
 fi
@@ -247,7 +232,7 @@ cp "$work/manifest-original.json" "$manifest_copy"
 alpha_wheel="$alpha_config/.ned-alpha/ned_api-${api_version}-py3-none-any.whl"
 cp "$alpha_wheel" "$work/alpha-original.whl"
 printf 'tampered' >> "$alpha_wheel"
-if bash scripts/run_local_alpha.sh launch "$runtime" "$alpha_config" "$commit"; then
+if bash scripts/run_local_alpha.sh launch "$launch_runtime" "$alpha_config" "$commit"; then
     echo "Unexpected acceptance of changed wheel" >&2
     exit 1
 fi
@@ -263,7 +248,7 @@ cleanup_alpha() {
 }
 trap cleanup_alpha EXIT
 for cycle in 1 2; do
-    bash scripts/run_local_alpha.sh launch "$runtime" "$alpha_config" "$commit" \
+    bash scripts/run_local_alpha.sh launch "$launch_runtime" "$alpha_config" "$commit" \
         > "$work/core-${cycle}.log" 2>&1 &
     alpha_pid=$!
     ready=false

@@ -5,7 +5,7 @@ rules:
     comment: "Planned response actions are outside the current alpha."
   appropriate-polling:
     status: todo
-    comment: "Five-minute polling and bounded attempt budget implemented; final review CI and owner validation pending."
+    comment: "Five-minute polling, active listener contexts and attempt budget tested on 0d3175f; supplier quota and owner validation pending."
   brands:
     status: todo
     comment: "Marketplace branding not validated."
@@ -13,11 +13,11 @@ rules:
     status: done
     comment: "Shared constants and a central coordinator separate independent API and entity logic."
   config-flow:
-    status: todo
-    comment: "UI flow implemented; native lifecycle validation pending."
+    status: done
+    comment: "Native config flow and real entry creation passed on 0d3175f; local alpha scope."
   config-flow-test-coverage:
-    status: todo
-    comment: "100% coverage and native flow on 7a5956d; latest remediation revalidation pending."
+    status: done
+    comment: "Baseline 45526697569 on 0d3175f: config flow and all current sources fully covered, native flow tests passed."
   dependency-transparency:
     status: todo
     comment: "Exact manifest pin and local provenance preflight; no public package publication."
@@ -32,7 +32,7 @@ rules:
     comment: "README.md and README.en.md describe scope, national data and alpha limitations."
   docs-installation-instructions:
     status: todo
-    comment: "Local owner-test launcher documented; actual start and public installation not verified."
+    comment: "Native wheel preflight passed on 0d3175f; separate Core startup probe and public installation remain open."
   docs-removal-instructions:
     status: todo
     comment: "Local rollback documented; native removal and production lifecycle proof pending."
@@ -40,8 +40,8 @@ rules:
     status: exempt
     comment: "No triggers exposed by the integration."
   entity-event-setup:
-    status: todo
-    comment: "Cache callback registers an entity removal callback; native lifecycle proof pending."
+    status: done
+    comment: "Native cache expiry and unload cleanup tests passed on 0d3175f."
   entity-unique-id:
     status: done
     comment: "Deterministic dataset identifiers; previous exact-commit tests verified all eight reserved identities."
@@ -49,25 +49,25 @@ rules:
     status: done
     comment: "NedSensor uses has_entity_name and translated descriptions."
   runtime-data:
-    status: todo
-    comment: "Typed ConfigEntry runtime data uses one coordinator; final native tests pending."
+    status: done
+    comment: "Typed ConfigEntry runtime data and one coordinator verified by native lifecycle and strict mypy on 0d3175f."
   test-before-configure:
-    status: todo
-    comment: "Positive historical solar query implemented; complete native flow proof pending."
+    status: done
+    comment: "Positive historical solar validation precedes entry creation; synthetic native flow and auth regressions passed on 0d3175f."
   test-before-setup:
-    status: todo
-    comment: "First refresh and setup-retry recovery test added; result pending."
+    status: done
+    comment: "Native first refresh, no fresh data setup retry and recovery passed on 0d3175f."
   unique-config-entry:
-    status: todo
-    comment: "Fixed service unique ID and abort logic; final native test pending."
+    status: done
+    comment: "Fixed service ID and duplicate flow abort verified by native lifecycle on 0d3175f."
 
   # Silver
   action-exceptions:
     status: todo
     comment: "Planned response actions not implemented."
   config-entry-unloading:
-    status: todo
-    comment: "Native unload and no-late-requests test added; result pending."
+    status: done
+    comment: "Native unload, restored unavailable states, empty platforms and no late requests verified on 0d3175f."
   docs-configuration-parameters:
     status: todo
     comment: "Config/reconfigure key documented; future options remain open."
@@ -75,28 +75,28 @@ rules:
     status: todo
     comment: "Local installation parameters documented; test proof pending."
   entity-unavailable:
-    status: todo
-    comment: "Partial snapshots and interval freshness implemented; native test result pending."
+    status: done
+    comment: "Native partial failure, empty response, recovery and freshness expiry verified on 0d3175f."
   integration-owner:
     status: done
     comment: "Manifest codeowner identifies project maintainer."
   log-when-unavailable:
     status: todo
-    comment: "Sanitized per-dataset transition logs implemented; exact-commit proof pending."
+    comment: "Dataset transition logging and recovery tests passed on 0d3175f; complete release-wide logging behavior remains open."
   parallel-updates:
-    status: todo
-    comment: "One coordinator and explicit PARALLEL_UPDATES=0; final CI pending."
+    status: done
+    comment: "One current coordinator, PARALLEL_UPDATES=0 and active listener polling verified on 0d3175f."
   reauthentication-flow:
-    status: todo
-    comment: "Native 401 reauth and 403 ambiguity test added; result pending."
+    status: done
+    comment: "Native 401 reauth, replacement key and 403 without reauth verified on 0d3175f."
   test-coverage:
-    status: todo
-    comment: "Baseline 7a5956d: 199 tests, 537 statements and 120 branches fully covered; latest remediation pending."
+    status: done
+    comment: "205 tests, 553 statements and 126 branches fully covered on 0d3175f; process startup gate remains separate."
 
   # Gold
   devices:
-    status: todo
-    comment: "One logical service device; native registry test pending."
+    status: done
+    comment: "One logical service device verified in the native registry on 0d3175f."
   diagnostics:
     status: todo
     comment: "Redacted diagnostics not implemented."
@@ -141,16 +141,16 @@ rules:
     comment: "Review complete release entity scope before acceptance."
   entity-translations:
     status: todo
-    comment: "NL/EN translations including receipt timestamp; final parity and native validation pending."
+    comment: "NL/EN parity validator and native state tests passed on 0d3175f; full release entity translations remain open."
   exception-translations:
     status: todo
-    comment: "Native exception translations implemented; final native tests pending."
+    comment: "Native exception mapping and recovery tests passed on 0d3175f; full release translation proof remains open."
   icon-translations:
     status: todo
     comment: "Icon definitions present; final verification pending."
   reconfiguration-flow:
-    status: todo
-    comment: "Key replacement via native flow; final lifecycle proof pending."
+    status: done
+    comment: "Native reconfigure and stable entity IDs across reload verified on 0d3175f."
   repair-issues:
     status: todo
     comment: "Concrete repair scenarios and diagnostics still to be reviewed."
@@ -163,8 +163,8 @@ rules:
     status: done
     comment: "Independent async aiohttp client, no synchronous network API."
   inject-websession:
-    status: todo
-    comment: "Core-managed session injection implemented with per-attempt middleware; final CI proof pending."
+    status: done
+    comment: "Core-managed session injection, middleware and loopback attempts verified on 0d3175f."
   strict-typing:
-    status: todo
-    comment: "Strict mypy passed on 7a5956d; latest remediation pending."
+    status: done
+    comment: "Strict mypy passed on 0d3175f (Core 2026.11.3 / Python 3.14.10)."
