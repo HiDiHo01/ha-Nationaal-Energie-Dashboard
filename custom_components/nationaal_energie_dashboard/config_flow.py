@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResu
 from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from ned_api import (
     NedAccessDeniedError,
@@ -18,6 +18,8 @@ from ned_api import (
     NedConnectionError,
     NedRateLimitError,
     NedTimeoutError,
+    NedValidationError,
+    validate_key_format,
 )
 
 from .const import DOMAIN
@@ -30,10 +32,14 @@ API_KEY_SCHEMA = probatio.Schema(
 
 async def async_validate_api_key(hass: HomeAssistant, api_key: str) -> None:
     """Use the real bounded positive authentication check with Core's session."""
-    client = NedAuthenticationClient(
-        async_get_clientsession(hass), get_request_budget(hass)
+    budget = get_request_budget(hass)
+    session = async_create_clientsession(
+        hass, auto_cleanup=False, middlewares=(budget.async_middleware,)
     )
-    await client.async_validate_api_key(api_key)
+    try:
+        await NedAuthenticationClient(session, budget).async_validate_api_key(api_key)
+    finally:
+        session.detach()
 
 
 class NedConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -87,14 +93,9 @@ class NedConfigFlow(ConfigFlow, domain=DOMAIN):
         """Save only authenticated credentials; never log or echo a secret."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            api_key = user_input.get(CONF_API_KEY)
-            if (
-                not isinstance(api_key, str)
-                or not api_key
-                or not api_key.isascii()
-                or not api_key.isprintable()
-                or any(char.isspace() for char in api_key)
-            ):
+            try:
+                api_key = validate_key_format(user_input.get(CONF_API_KEY))
+            except NedValidationError:
                 errors[CONF_API_KEY] = "invalid_key_format"
             else:
                 try:

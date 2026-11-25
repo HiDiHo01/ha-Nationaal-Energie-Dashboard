@@ -11,7 +11,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util.hass_dict import HassKey
 
@@ -29,7 +29,6 @@ from ned_api import (
 from .const import (
     CURRENT_INTERVAL,
     DOMAIN,
-    FORECAST_INTERVAL,
     MAX_CURRENT_AGE,
     QUARTER,
     RENEWABLE_TYPES,
@@ -51,7 +50,7 @@ POWER_DATASETS = {
 
 def get_request_budget(hass: HomeAssistant) -> NedRequestBudget:
     """Share the budget for the lifetime of this Core process, including reloads."""
-    return hass.data.setdefault(_BUDGET, NedRequestBudget())
+    return hass.data.setdefault(_BUDGET, NedRequestBudget(instrumented=True))
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +60,7 @@ class NedReading:
     valid_from: datetime
     valid_to: datetime
     value: float
+    received_at: datetime | None = None
 
     def __post_init__(self) -> None:
         """Reject invalid interval boundaries and nonnumeric source values."""
@@ -91,17 +91,11 @@ class NedDataProvider(Protocol):
         """Return current readings, including the derived estimate when valid."""
         ...
 
-    async def async_forecast(self) -> NedSnapshot:
-        """Return forecast readings covering future quarter-hour intervals."""
-        ...
-
-
 @dataclass(frozen=True, slots=True)
 class NedRuntimeData:
-    """Hold independent current and forecast coordinators."""
+    """Hold the only coordinator active in the local alpha."""
 
     current: DataUpdateCoordinator[NedSnapshot]
-    forecast: DataUpdateCoordinator[NedSnapshot]
 
 
 type NedConfigEntry = ConfigEntry[NedRuntimeData]
@@ -110,48 +104,67 @@ type NedConfigEntry = ConfigEntry[NedRuntimeData]
 class NedAlphaProvider:
     """Adapt independent validated power readings to the coordinator snapshot."""
 
-    def __init__(self, client: NedQuarterClient, api_key: str) -> None:
+    def __init__(
+        self, client: NedQuarterClient, api_key: str, budget: NedRequestBudget
+    ) -> None:
         """Retain the configured key privately and reuse the injected client."""
         self._client = client
         self._api_key = api_key
+        self._budget = budget
+        self._failed: set[SensorKey] = set()
 
-    async def async_current(self) -> NedSnapshot:
-        """Fetch at most two UTC days per dataset, sequentially without retries."""
-        now = datetime.now(UTC)
+    async def _async_read_dataset(
+        self, dataset: NedPowerDataset, now: datetime
+    ) -> tuple[NedReading, ...]:
+        """Publish only quarters closed before their request began."""
         first_day = (now - MAX_CURRENT_AGE - QUARTER).date()
         days = (first_day,) if first_day == now.date() else (first_day, now.date())
+        readings: list[NedReading] = []
+        for day in days:
+            requested_at = datetime.now(UTC)
+            page = await self._client.async_read_day(self._api_key, dataset, day)
+            received_at = datetime.now(UTC)
+            readings.extend(
+                NedReading(
+                    item.valid_from, item.valid_to, item.capacity_kw, received_at
+                )
+                for item in page
+                if item.valid_to <= requested_at
+            )
+        return tuple(readings)
+
+    async def async_current(self) -> NedSnapshot:
+        """Isolate failed datasets, but stop the batch on authentication or 429."""
+        now = datetime.now(UTC)
         snapshot: dict[SensorKey, tuple[NedReading, ...]] = {}
-        try:
-            for key, dataset in POWER_DATASETS.items():
-                readings: list[NedReading] = []
-                for day in days:
-                    page = await self._client.async_read_day(
-                        self._api_key, dataset, day
+        for key, dataset in POWER_DATASETS.items():
+            try:
+                snapshot[key] = await self._async_read_dataset(dataset, now)
+            except NedAuthenticationError as err:
+                raise ConfigEntryAuthFailed(
+                    translation_domain=DOMAIN, translation_key="authentication_failed"
+                ) from err
+            except NedRateLimitError as err:
+                raise UpdateFailed(
+                    translation_domain=DOMAIN,
+                    translation_key="rate_limited",
+                    retry_after=self._budget.retry_after,
+                ) from err
+            except NedApiError as err:
+                if key not in self._failed:
+                    _LOGGER.warning(
+                        "NED dataset %s unavailable (%s)", key.value, type(err).__name__
                     )
-                    readings.extend(
-                        NedReading(item.valid_from, item.valid_to, item.capacity_kw)
-                        for item in page
-                    )
-                snapshot[key] = tuple(readings)
-        except NedAuthenticationError as err:
-            raise ConfigEntryAuthFailed(
-                translation_domain=DOMAIN, translation_key="authentication_failed"
-            ) from err
-        except NedRateLimitError as err:
-            raise UpdateFailed(
-                translation_domain=DOMAIN,
-                translation_key="rate_limited",
-                retry_after=300,
-            ) from err
-        except NedApiError as err:
+                    self._failed.add(key)
+            else:
+                if key in self._failed:
+                    _LOGGER.info("NED dataset %s recovered", key.value)
+                    self._failed.discard(key)
+        if not snapshot:
             raise UpdateFailed(
                 translation_domain=DOMAIN, translation_key="update_failed"
-            ) from err
+            )
         return snapshot
-
-    async def async_forecast(self) -> NedSnapshot:
-        """Return no forecast data; the alpha never requests unapproved datasets."""
-        return {}
 
 
 def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedDataProvider:
@@ -162,14 +175,15 @@ def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedDataProvid
         raise ConfigEntryAuthFailed(
             translation_domain=DOMAIN, translation_key="authentication_failed"
         ) from err
-    client = NedQuarterClient(async_get_clientsession(hass), get_request_budget(hass))
-    return NedAlphaProvider(client, api_key)
+    budget = get_request_budget(hass)
+    session = async_create_clientsession(hass, middlewares=(budget.async_middleware,))
+    return NedAlphaProvider(NedQuarterClient(session, budget), api_key, budget)
 
 
 def create_runtime(
     hass: HomeAssistant, entry: NedConfigEntry, provider: NedDataProvider
 ) -> NedRuntimeData:
-    """Create two entry-owned coordinators around an injected data provider."""
+    """Create the sole active entry-owned coordinator."""
     return NedRuntimeData(
         current=DataUpdateCoordinator(
             hass,
@@ -178,14 +192,6 @@ def create_runtime(
             name=f"{DOMAIN}_current",
             update_interval=CURRENT_INTERVAL,
             update_method=provider.async_current,
-        ),
-        forecast=DataUpdateCoordinator(
-            hass,
-            _LOGGER,
-            config_entry=entry,
-            name=f"{DOMAIN}_forecast",
-            update_interval=FORECAST_INTERVAL,
-            update_method=provider.async_forecast,
         ),
     )
 
@@ -213,6 +219,7 @@ def select_reading(
             reading
             for reading in readings
             if timedelta(0) <= utc_now - reading.valid_to <= MAX_CURRENT_AGE
+            and (reading.received_at is None or reading.received_at <= utc_now)
         )
         latest = max((reading.valid_to for reading in candidates), default=None)
         matches = tuple(reading for reading in candidates if reading.valid_to == latest)

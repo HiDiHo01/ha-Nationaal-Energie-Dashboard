@@ -168,6 +168,8 @@ class NedSensor(CoordinatorEntity[DataUpdateCoordinator[NedSnapshot]], SensorEnt
         if reading is not None:
             attributes["valid_from"] = reading.valid_from.isoformat()
             attributes["valid_to"] = reading.valid_to.isoformat()
+            if reading.received_at is not None:
+                attributes["received_at"] = reading.received_at.isoformat()
         if self._key == SensorKey.RENEWABLE_SHARE:
             attributes["method_version"] = RENEWABLE_METHOD_VERSION
             attributes["waste_renewable_factor"] = WASTE_RENEWABLE_FACTOR

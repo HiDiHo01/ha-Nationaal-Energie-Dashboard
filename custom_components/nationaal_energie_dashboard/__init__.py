@@ -11,7 +11,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: NedConfigEntry) -> bool:
     provider = create_provider(hass, entry)
     runtime = create_runtime(hass, entry, provider)
     await runtime.current.async_config_entry_first_refresh()
-    await runtime.forecast.async_refresh()
     entry.runtime_data = runtime
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

@@ -55,8 +55,10 @@ from ned_api import (
     NedAuthenticationError,
     NedConnectionError,
     NedPowerDataset,
+    NedPowerReading,
     NedQuarterClient,
     NedRateLimitError,
+    NedRequestBudget,
     NedResponseError,
     NedTimeoutError,
     TransportResponse,
@@ -250,7 +252,7 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
     with (
         patch("ned_api.authentication.datetime") as clock,
         patch(
-            "custom_components.nationaal_energie_dashboard.config_flow.async_get_clientsession",
+            "custom_components.nationaal_energie_dashboard.config_flow.async_create_clientsession",
             return_value=session,
         ) as get_session,
         patch(
@@ -262,7 +264,10 @@ async def test_mock_validated_key(hass: HomeAssistant) -> None:
         result = await flow.async_step_user({CONF_API_KEY: "synthetic-key"})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_API_KEY: "synthetic-key"}
-    get_session.assert_called_once_with(hass)
+    session.detach.assert_called_once()
+    get_session.assert_called_once_with(
+        hass, auto_cleanup=False, middlewares=(get_request_budget(hass).async_middleware,)
+    )
     get.assert_awaited_once()
     session.close.assert_not_awaited()
 
@@ -293,7 +298,7 @@ async def test_observed_denials_in_config_flow(
     flow = _flow(hass)
     with (
         patch(
-            "custom_components.nationaal_energie_dashboard.config_flow.async_get_clientsession",
+            "custom_components.nationaal_energie_dashboard.config_flow.async_create_clientsession",
             return_value=session,
         ),
         patch(
@@ -307,6 +312,7 @@ async def test_observed_denials_in_config_flow(
     assert "synthetic-key" not in repr(result)
     assert not hass.config_entries.async_entries(DOMAIN)
     get.assert_awaited_once()
+    session.detach.assert_called_once()
     session.close.assert_not_awaited()
 
 
@@ -420,11 +426,10 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
         SensorKey.CO2_INTENSITY: (_reading(0.25),),
         SensorKey.RENEWABLE_SHARE: (_reading(70.3),),
         SensorKey.SOLAR: (_reading(1000),),
+        SensorKey.CO2_FORECAST: (_reading(0.3, _START + QUARTER),),
     }
-    forecast: NedSnapshot = {SensorKey.CO2_FORECAST: (_reading(0.3, _START + QUARTER),)}
     provider = MagicMock()
     provider.async_current = AsyncMock(return_value=current)
-    provider.async_forecast = AsyncMock(return_value=forecast)
     with (
         patch(
             "custom_components.nationaal_energie_dashboard.create_provider",
@@ -437,7 +442,6 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
         assert await async_setup_entry(hass, entry)
     forward.assert_awaited_once_with(entry, PLATFORMS)
     provider.async_current.assert_awaited_once()
-    provider.async_forecast.assert_awaited_once()
     runtime = entry.runtime_data
     add_entities = MagicMock()
     await async_setup_sensors(hass, entry, add_entities)
@@ -447,9 +451,7 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
     # Preserve coverage for the reserved, not registered sensor descriptions.
     entities.extend(
         NedSensor(
-            runtime.forecast
-            if SensorKey(description.key) is SensorKey.CO2_FORECAST
-            else runtime.current,
+            runtime.current,
             entry.entry_id,
             description,
         )
@@ -457,7 +459,6 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
         if SensorKey(description.key) not in POWER_DATASETS
     )
     sensors = {entity.entity_description.key: entity for entity in entities}
-    assert sensors[SensorKey.CO2_FORECAST].coordinator is runtime.forecast
     solar = sensors[SensorKey.SOLAR]
     renewable = sensors[SensorKey.RENEWABLE_SHARE]
     assert solar.coordinator is runtime.current
@@ -505,7 +506,6 @@ async def test_synthetic_runtime(hass: HomeAssistant) -> None:
         assert await async_unload_entry(hass, entry)
         unload.assert_awaited_once_with(entry, PLATFORMS)
     await runtime.current.async_shutdown()
-    await runtime.forecast.async_shutdown()
 
 
 @pytest.mark.parametrize(
@@ -536,7 +536,7 @@ async def test_actual_alpha_provider(
             "custom_components.nationaal_energie_dashboard.coordinator.datetime"
         ) as clock,
         patch(
-            "custom_components.nationaal_energie_dashboard.coordinator.async_get_clientsession",
+            "custom_components.nationaal_energie_dashboard.coordinator.async_create_clientsession",
             return_value=session,
         ) as get_session,
         patch(
@@ -547,14 +547,16 @@ async def test_actual_alpha_provider(
         get.side_effect = response_for_request
         provider = create_provider(hass, entry)
         snapshot = await provider.async_current()
-        assert await provider.async_forecast() == {}
-    get_session.assert_called_once_with(hass)
+    get_session.assert_called_once_with(
+        hass, middlewares=(get_request_budget(hass).async_middleware,)
+    )
     assert set(snapshot) == set(POWER_DATASETS)
     assert all(len(series) == expected_days for series in snapshot.values())
     assert all(item.value == 1234 for series in snapshot.values() for item in series)
     assert get.await_count == expected_days * 5
     assert get_request_budget(hass) is get_request_budget(hass)
-    assert get_request_budget(hass).remaining == 120 - expected_days * 5
+    # The mocked transport bypasses aiohttp's physical attempt middleware.
+    assert get_request_budget(hass).remaining == 120
     session.close.assert_not_awaited()
 
 
@@ -580,7 +582,7 @@ async def test_provider_denial(
     """Stop the batch; do not treat ambiguous access denial as reauthentication."""
     client = MagicMock(spec=NedQuarterClient)
     client.async_read_day = AsyncMock(side_effect=error)
-    provider = NedAlphaProvider(client, "synthetic-key")
+    provider = NedAlphaProvider(client, "synthetic-key", NedRequestBudget())
     with pytest.raises(expected) as raised:
         await provider.async_current()
     assert isinstance(raised.value, ConfigEntryAuthFailed | UpdateFailed)
@@ -588,4 +590,59 @@ async def test_provider_denial(
     if isinstance(error, NedRateLimitError):
         assert isinstance(raised.value, UpdateFailed)
         assert raised.value.retry_after == 300
-    client.async_read_day.assert_awaited_once()
+    expected_attempts = (
+        1 if isinstance(error, NedAuthenticationError | NedRateLimitError) else 5
+    )
+    assert client.async_read_day.await_count == expected_attempts
+
+
+@pytest.mark.asyncio
+async def test_partial_recovery(caplog: pytest.LogCaptureFixture) -> None:
+    """Keep successful datasets available and log one failure and one recovery."""
+    client = MagicMock(spec=NedQuarterClient)
+    provider = NedAlphaProvider(client, "synthetic-key", NedRequestBudget())
+    reading = NedPowerReading(_START, _START + QUARTER, 1234)
+    client.async_read_day = AsyncMock(
+        side_effect=[NedAccessDeniedError("synthetic"), *[(reading,)] * 4] * 2
+        + [(reading,)] * 5
+    )
+    with (
+        caplog.at_level("INFO"),
+        patch(
+            "custom_components.nationaal_energie_dashboard.coordinator.datetime"
+        ) as clock,
+    ):
+        clock.now.return_value = _START + QUARTER
+        first = await provider.async_current()
+        second = await provider.async_current()
+        third = await provider.async_current()
+    assert SensorKey.SOLAR not in first
+    assert first == second
+    assert set(third) == set(POWER_DATASETS)
+    assert caplog.text.count("NED dataset solar unavailable") == 1
+    assert caplog.text.count("NED dataset solar recovered") == 1
+
+
+@pytest.mark.asyncio
+async def test_future_quarter_not_promoted() -> None:
+    """Never publish a quarter that was open when its request started."""
+    client = MagicMock(spec=NedQuarterClient)
+    provider = NedAlphaProvider(client, "synthetic-key", NedRequestBudget())
+    reading = NedPowerReading(_START, _START + QUARTER, 1234)
+    client.async_read_day = AsyncMock(return_value=(reading,))
+    with patch(
+        "custom_components.nationaal_energie_dashboard.coordinator.datetime"
+    ) as clock:
+        clock.now.return_value = _START
+        snapshot = await provider.async_current()
+    assert all(not series for series in snapshot.values())
+    assert select_reading(
+        snapshot[SensorKey.SOLAR], _START + QUARTER, forecast=False
+    ) is None
+
+
+def test_received_at_clock_rollback() -> None:
+    """Do not publish a cached reading from a later clock position."""
+    reading = NedReading(_START, _START + QUARTER, 1, _START + 2 * QUARTER)
+    assert select_reading((reading,), _START + QUARTER, forecast=False) is None
+    assert select_reading((reading,), _START + 2 * QUARTER, forecast=False) == reading
