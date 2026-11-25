@@ -286,9 +286,7 @@ async def test_native_freshness_deadline(hass: HomeAssistant) -> None:
             new_callable=AsyncMock,
             side_effect=api.response,
         ),
-        patch(
-            "custom_components.nationaal_energie_dashboard.sensor.datetime"
-        ) as clock,
+        patch("custom_components.nationaal_energie_dashboard.sensor.datetime") as clock,
     ):
         clock.now.return_value = _NOW
         entry = await _configure(hass)
