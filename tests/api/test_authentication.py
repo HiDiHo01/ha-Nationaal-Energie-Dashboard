@@ -1,7 +1,7 @@
 """Test bounded credential verification with synthetic responses only."""
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -12,6 +12,8 @@ from ned_api import (
     NedApiError,
     NedAuthenticationClient,
     NedAuthenticationError,
+    NedRateLimitError,
+    NedRequestBudget,
     NedResponseError,
     NedValidationError,
     TransportResponse,
@@ -34,8 +36,17 @@ async def test_positive_access() -> None:
     session = MagicMock(spec=ClientSession)
     client = NedAuthenticationClient(session)
     assert client.origin == "https://api.ned.nl"
+    day = datetime.now(UTC).date() - timedelta(days=2)
+    start = datetime.combine(day, time.min, tzinfo=UTC)
+    record = _RECORD | {
+        "validfrom": start.isoformat(),
+        "validto": (start + timedelta(minutes=15)).isoformat(),
+        "capacity": 0,
+    }
     result = TransportResponse(
-        200, json.dumps({"hydra:member": [_RECORD]}).encode(), _MEDIA_TYPE
+        200,
+        json.dumps({"hydra:member": [record], "hydra:totalItems": 1}).encode(),
+        _MEDIA_TYPE,
     )
     with patch(
         "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
@@ -50,7 +61,6 @@ async def test_positive_access() -> None:
         "X-AUTH-TOKEN": "synthetic-key",
     }
     params = kwargs["params"]
-    day = datetime.now(UTC).date() - timedelta(days=2)
     assert params["validfrom[after]"] == day.isoformat()
     assert params["validfrom[strictly_before]"] == (day + timedelta(days=1)).isoformat()
     assert params["type"] == "2"
@@ -75,15 +85,14 @@ async def test_invalid_key_format(key: str) -> None:
 @pytest.mark.parametrize(
     "response",
     [
-        TransportResponse(429, b"synthetic-key", _MEDIA_TYPE),
         TransportResponse(503, b"synthetic-key", _MEDIA_TYPE),
         TransportResponse(200, b"{}", "text/html"),
         TransportResponse(200, b"not-json", _MEDIA_TYPE),
         TransportResponse(200, b"[]", _MEDIA_TYPE),
         TransportResponse(200, b"{}", _MEDIA_TYPE),
-        TransportResponse(200, b'{"hydra:member":[]}', _MEDIA_TYPE),
-        TransportResponse(200, b'{"hydra:member":[0]}', _MEDIA_TYPE),
-        TransportResponse(200, b'{"hydra:member":[{}]}', _MEDIA_TYPE),
+        TransportResponse(200, b'{"hydra:member":[],"hydra:totalItems":0}', _MEDIA_TYPE),
+        TransportResponse(200, b'{"hydra:member":[0],"hydra:totalItems":1}', _MEDIA_TYPE),
+        TransportResponse(200, b'{"hydra:member":[{}],"hydra:totalItems":1}', _MEDIA_TYPE),
     ],
 )
 @pytest.mark.asyncio
@@ -140,3 +149,22 @@ async def test_access_denial(
     assert raised.value.__cause__ is None
     assert raised.value.__context__ is None
     get.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_authentication_shares_budget() -> None:
+    """Pause a second verifier after the first receives HTTP 429."""
+    budget = NedRequestBudget()
+    session = MagicMock(spec=ClientSession)
+    first = NedAuthenticationClient(session, budget)
+    second = NedAuthenticationClient(session, budget)
+    with patch(
+        "ned_api.transport.NedTransport.async_get", new_callable=AsyncMock
+    ) as get:
+        get.return_value = TransportResponse(429, b"synthetic", _MEDIA_TYPE)
+        with pytest.raises(NedRateLimitError):
+            await first.async_validate_api_key("synthetic-key")
+        assert budget.remaining == 0
+        with pytest.raises(NedRateLimitError):
+            await second.async_validate_api_key("synthetic-key")
+        get.assert_awaited_once()
