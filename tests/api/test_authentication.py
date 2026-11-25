@@ -90,9 +90,15 @@ async def test_invalid_key_format(key: str) -> None:
         TransportResponse(200, b"not-json", _MEDIA_TYPE),
         TransportResponse(200, b"[]", _MEDIA_TYPE),
         TransportResponse(200, b"{}", _MEDIA_TYPE),
-        TransportResponse(200, b'{"hydra:member":[],"hydra:totalItems":0}', _MEDIA_TYPE),
-        TransportResponse(200, b'{"hydra:member":[0],"hydra:totalItems":1}', _MEDIA_TYPE),
-        TransportResponse(200, b'{"hydra:member":[{}],"hydra:totalItems":1}', _MEDIA_TYPE),
+        TransportResponse(
+            200, b'{"hydra:member":[],"hydra:totalItems":0}', _MEDIA_TYPE
+        ),
+        TransportResponse(
+            200, b'{"hydra:member":[0],"hydra:totalItems":1}', _MEDIA_TYPE
+        ),
+        TransportResponse(
+            200, b'{"hydra:member":[{}],"hydra:totalItems":1}', _MEDIA_TYPE
+        ),
     ],
 )
 @pytest.mark.asyncio
