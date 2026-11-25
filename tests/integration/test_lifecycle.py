@@ -1,0 +1,318 @@
+"""Exercise the native Home Assistant config entry lifecycle offline."""
+
+import json
+import shutil
+from datetime import UTC, date, datetime, time, timedelta
+from pathlib import Path
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from homeassistant.config_entries import (
+    SOURCE_REAUTH,
+    SOURCE_RECONFIGURE,
+    SOURCE_USER,
+    ConfigEntryState,
+)
+from homeassistant.const import CONF_API_KEY, STATE_UNAVAILABLE, UnitOfPower
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity_platform import async_get_platforms
+
+# The pinned upstream test helper lacks a py.typed marker.
+from pytest_homeassistant.common import async_fire_time_changed  # type: ignore[import-untyped]
+
+from custom_components.nationaal_energie_dashboard.const import DOMAIN, QUARTER
+from custom_components.nationaal_energie_dashboard.coordinator import (
+    POWER_DATASETS,
+    NedConfigEntry,
+)
+from ned_api import TransportResponse
+
+_DAY = date(2026, 11, 22)
+_NOW = datetime(2026, 11, 22, 12, 30, tzinfo=UTC)
+
+
+@pytest.fixture
+def hass_config_dir(tmp_path: Path) -> str:
+    """Give the native loader an isolated configuration containing this integration."""
+    source = Path(__file__).resolve().parents[2] / "custom_components" / DOMAIN
+    shutil.copytree(
+        source,
+        tmp_path / "custom_components" / DOMAIN,
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
+    return str(tmp_path)
+
+
+class SyntheticApi:
+    """Return only fabricated data and record the requested dataset identifiers."""
+
+    def __init__(self) -> None:
+        """Initialize response status overrides and bounded call history."""
+        self.statuses: dict[int, int] = {}
+        self.calls: list[int] = []
+        self.empty: set[int] = set()
+
+    def response(
+        self, path: str, *, params: dict[str, str], headers: dict[str, str]
+    ) -> TransportResponse:
+        """Return one closed interval, or a sanitized synthetic HTTP denial."""
+        assert path == "/v1/utilizations"
+        assert headers["X-AUTH-TOKEN"] in {"synthetic-key", "replacement-key"}
+        type_id = int(params["type"])
+        self.calls.append(type_id)
+        day = date.fromisoformat(params["validfrom[after]"])
+        status = 200 if day != _DAY else self.statuses.get(type_id, 200)
+        if status != 200:
+            return TransportResponse(status, b"")
+        if day == _DAY and type_id in self.empty:
+            return TransportResponse(
+                200, b'{"hydra:member":[],"hydra:totalItems":0}', "application/ld+json"
+            )
+        start = datetime.combine(day, time(12, 15), tzinfo=UTC)
+        record = {
+            "point": "/v1/points/0",
+            "type": f"/v1/types/{type_id}",
+            "activity": f"/v1/activities/{params['activity']}",
+            "classification": "/v1/classifications/2",
+            "granularity": "/v1/granularities/4",
+            "granularitytimezone": "/v1/granularity_time_zones/0",
+            "validfrom": start.isoformat(),
+            "validto": (start + QUARTER).isoformat(),
+            "capacity": 1234,
+        }
+        return TransportResponse(
+            200,
+            json.dumps({"hydra:member": [record], "hydra:totalItems": 1}).encode(),
+            "application/ld+json",
+        )
+
+
+def _assert_entry_state(entry: NedConfigEntry, expected: ConfigEntryState) -> None:
+    """Assert the current mutable Core state without stale static narrowing."""
+    assert entry.state is expected
+
+
+async def _configure(hass: HomeAssistant) -> NedConfigEntry:
+    """Use the native flow manager, including config entry setup."""
+    form = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    assert form["type"] is FlowResultType.FORM
+    result = await hass.config_entries.flow.async_configure(
+        form["flow_id"], {CONF_API_KEY: "synthetic-key"}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    entry: NedConfigEntry = result["result"]
+    return entry
+
+
+@pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")
+@pytest.mark.asyncio
+async def test_native_lifecycle(hass: HomeAssistant) -> None:
+    """Configure, register, update, reauth, reload and unload real HA entities."""
+    api = SyntheticApi()
+    with patch(
+        "ned_api.transport.NedTransport.async_get",
+        new_callable=AsyncMock,
+        side_effect=api.response,
+    ):
+        entry = await _configure(hass)
+        _assert_entry_state(entry, ConfigEntryState.LOADED)
+        registry = er.async_get(hass)
+        entries = er.async_entries_for_config_entry(registry, entry.entry_id)
+        assert len(entries) == 5
+        assert {item.translation_key for item in entries} == set(POWER_DATASETS)
+        devices = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
+        assert len(devices) == 1
+        ids = {item.entity_id for item in entries}
+        solar = next(
+            item.entity_id for item in entries if item.translation_key == "solar_power"
+        )
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None
+            unit = state.attributes["unit_of_measurement"]
+            assert unit in {UnitOfPower.KILO_WATT, UnitOfPower.MEGA_WATT}
+            expected = 1.234 if unit == UnitOfPower.MEGA_WATT else 1234
+            assert float(state.state) == pytest.approx(expected)
+            assert state.attributes["received_at"] == _NOW.isoformat()
+        duplicate = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": SOURCE_USER}
+        )
+        assert duplicate["type"] is FlowResultType.ABORT
+        api.statuses[2] = 403
+        await entry.runtime_data.current.async_refresh()
+        await hass.async_block_till_done()
+        state = hass.states.get(solar)
+        assert state is not None and state.state == STATE_UNAVAILABLE
+        for entity_id in ids - {solar}:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state != STATE_UNAVAILABLE
+        assert not list(entry.async_get_active_flows(hass, {SOURCE_REAUTH}))
+        api.statuses.clear()
+        api.empty.add(2)
+        await entry.runtime_data.current.async_refresh()
+        await hass.async_block_till_done()
+        state = hass.states.get(solar)
+        assert state is not None and state.state == STATE_UNAVAILABLE
+        api.empty.clear()
+        await entry.runtime_data.current.async_refresh()
+        await hass.async_block_till_done()
+        state = hass.states.get(solar)
+        assert state is not None and state.state != STATE_UNAVAILABLE
+        api.statuses[2] = 401
+        await entry.runtime_data.current.async_refresh()
+        await hass.async_block_till_done()
+        flows = list(entry.async_get_active_flows(hass, {SOURCE_REAUTH}))
+        assert len(flows) == 1
+        api.statuses.clear()
+        result = await hass.config_entries.flow.async_configure(
+            flows[0]["flow_id"], {CONF_API_KEY: "replacement-key"}
+        )
+        assert result["type"] is FlowResultType.ABORT
+        assert result["reason"] == "reauth_successful"
+        await hass.async_block_till_done()
+        _assert_entry_state(entry, ConfigEntryState.LOADED)
+        assert entry.data[CONF_API_KEY] == "replacement-key"
+        form = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+        )
+        assert form["type"] is FlowResultType.FORM
+        result = await hass.config_entries.flow.async_configure(
+            form["flow_id"], {CONF_API_KEY: "synthetic-key"}
+        )
+        assert result["type"] is FlowResultType.ABORT
+        await hass.async_block_till_done()
+        assert entry.data[CONF_API_KEY] == "synthetic-key"
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+        assert {
+            item.entity_id
+            for item in er.async_entries_for_config_entry(registry, entry.entry_id)
+        } == ids
+        assert await hass.config_entries.async_unload(entry.entry_id)
+        await hass.async_block_till_done()
+        _assert_entry_state(entry, ConfigEntryState.NOT_LOADED)
+        # Core preserves registered entities as restored, unavailable states.
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state == STATE_UNAVAILABLE
+            assert state.attributes.get("restored") is True
+        assert all(
+            not platform.entities for platform in async_get_platforms(hass, DOMAIN)
+        )
+        request_count = len(api.calls)
+        async_fire_time_changed(hass, _NOW + timedelta(minutes=10))
+        await hass.async_block_till_done()
+        assert len(api.calls) == request_count
+
+
+@pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")
+@pytest.mark.asyncio
+async def test_native_failed_setup_and_recovery(hass: HomeAssistant) -> None:
+    """Recover a native setup retry without reconstructing the config entry."""
+    api = SyntheticApi()
+    api.statuses = {dataset.value[0]: 503 for dataset in POWER_DATASETS.values()}
+    with patch(
+        "ned_api.transport.NedTransport.async_get",
+        new_callable=AsyncMock,
+        side_effect=api.response,
+    ):
+        entry = await _configure(hass)
+        _assert_entry_state(entry, ConfigEntryState.SETUP_RETRY)
+        assert not er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
+        api.statuses.clear()
+        api.empty = {dataset.value[0] for dataset in POWER_DATASETS.values()}
+        assert not await hass.config_entries.async_reload(entry.entry_id)
+        _assert_entry_state(entry, ConfigEntryState.SETUP_RETRY)
+        api.empty.clear()
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+        _assert_entry_state(entry, ConfigEntryState.LOADED)
+        assert (
+            len(er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id))
+            == 5
+        )
+        assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+@pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")
+@pytest.mark.asyncio
+async def test_disabled_datasets(hass: HomeAssistant) -> None:
+    """Poll only enabled entity contexts after the explicit setup refresh."""
+    api = SyntheticApi()
+    with patch(
+        "ned_api.transport.NedTransport.async_get",
+        new_callable=AsyncMock,
+        side_effect=api.response,
+    ):
+        entry = await _configure(hass)
+        registry = er.async_get(hass)
+        entries = er.async_entries_for_config_entry(registry, entry.entry_id)
+        others = [item for item in entries if item.translation_key != "solar_power"]
+        for item in others:
+            registry.async_update_entity(
+                item.entity_id, disabled_by=er.RegistryEntryDisabler.USER
+            )
+        await hass.async_block_till_done()
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+        api.calls.clear()
+        await entry.runtime_data.current.async_refresh()
+        assert api.calls == [2]
+        registry.async_update_entity(others[0].entity_id, disabled_by=None)
+        await hass.async_block_till_done()
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+        api.calls.clear()
+        await entry.runtime_data.current.async_refresh()
+        assert len(api.calls) == 2 and 2 in api.calls
+        assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+@pytest.mark.freeze_time("2026-11-22 12:30:00+00:00")
+@pytest.mark.asyncio
+async def test_native_freshness_deadline(hass: HomeAssistant) -> None:
+    """Expire the actual HA state at the aligned boundary without polling."""
+    api = SyntheticApi()
+    with (
+        patch(
+            "ned_api.transport.NedTransport.async_get",
+            new_callable=AsyncMock,
+            side_effect=api.response,
+        ),
+        patch("custom_components.nationaal_energie_dashboard.sensor.datetime") as clock,
+    ):
+        clock.now.return_value = _NOW
+        entry = await _configure(hass)
+        coordinator = entry.runtime_data.current
+        # Prevent regular polling from hiding a cache-only expiry transition.
+        coordinator.update_interval = timedelta(hours=1)
+        await coordinator.async_refresh()
+        entries = er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
+        ids = {item.entity_id for item in entries}
+        assert len(ids) == 5
+        deadline = _NOW + timedelta(minutes=30)
+        requests = len(api.calls)
+        clock.now.return_value = deadline - timedelta(minutes=5)
+        async_fire_time_changed(hass, deadline - timedelta(minutes=5))
+        await hass.async_block_till_done()
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state != STATE_UNAVAILABLE
+        clock.now.return_value = deadline
+        async_fire_time_changed(hass, deadline)
+        await hass.async_block_till_done()
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state == STATE_UNAVAILABLE
+        assert len(api.calls) == requests
+        assert await hass.config_entries.async_unload(entry.entry_id)
+        async_fire_time_changed(hass, deadline + timedelta(minutes=5))
+        await hass.async_block_till_done()
+        assert len(api.calls) == requests

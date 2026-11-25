@@ -1,0 +1,168 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Nationaal Energie Dashboard",
+        "description": "Local alpha: enter your personal NED API key. A historical solar query validates access; other datasets may be independently unavailable.",
+        "data": {
+          "api_key": "API key"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Renew API key",
+        "description": "Enter your personal NED API key. The key is saved only after authentication has been validated.",
+        "data": {
+          "api_key": "API key"
+        }
+      },
+      "reconfigure": {
+        "title": "Change API key",
+        "description": "Enter your personal NED API key. The key is saved only after authentication has been validated.",
+        "data": {
+          "api_key": "API key"
+        }
+      }
+    },
+    "error": {
+      "invalid_key_format": "Enter a non-empty API key without whitespace or control characters.",
+      "invalid_auth": "Authentication was rejected. Check the API key.",
+      "access_denied": "NED denied access (HTTP 403). Check the key and access permissions.",
+      "cannot_connect": "Could not connect to NED. Try again later.",
+      "cannot_validate": "Access could not be established. Check NED availability and try again later.",
+      "rate_limited": "The local request budget is temporarily exhausted. Try again later."
+    },
+    "abort": {
+      "already_configured": "Nationaal Energie Dashboard is already configured.",
+      "already_in_progress": "A configuration flow is already in progress.",
+      "reauth_successful": "The API key has been renewed.",
+      "reconfigure_successful": "The API key has been changed."
+    }
+  },
+  "exceptions": {
+    "authentication_failed": {
+      "message": "NED authentication was rejected or the key is invalid."
+    },
+    "update_failed": {
+      "message": "NED data could not be retrieved or validated safely. Check access and availability."
+    },
+    "rate_limited": {
+      "message": "The request budget is temporarily exhausted; polling is paused."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "co2_intensity": {
+        "name": "CO₂ intensity",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "co2_intensity_forecast": {
+        "name": "Forecast CO₂ intensity",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          }
+        }
+      },
+      "renewable_electricity_share": {
+        "name": "Estimated renewable electricity share",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "method_version": {
+            "name": "Method version"
+          },
+          "waste_renewable_factor": {
+            "name": "Renewable waste factor"
+          },
+          "waste_factor_year": {
+            "name": "Waste factor source year"
+          }
+        }
+      },
+      "solar_power": {
+        "name": "Solar generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
+          }
+        }
+      },
+      "wind_onshore_power": {
+        "name": "Onshore wind generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
+          }
+        }
+      },
+      "wind_offshore_power": {
+        "name": "Offshore wind generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
+          }
+        }
+      },
+      "electricity_consumption": {
+        "name": "Electricity consumption",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
+          }
+        }
+      },
+      "electricity_production": {
+        "name": "Electricity generation",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Valid from"
+          },
+          "valid_to": {
+            "name": "Valid until"
+          },
+          "received_at": {
+            "name": "Received at"
+          }
+        }
+      }
+    }
+  }
+}

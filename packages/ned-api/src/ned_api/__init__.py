@@ -1,6 +1,8 @@
 """Provide the independent Nationaal Energie Dashboard API library."""
 
+from .authentication import NedAuthenticationClient
 from .exceptions import (
+    NedAccessDeniedError,
     NedApiError,
     NedAuthenticationError,
     NedConnectionError,
@@ -11,18 +13,32 @@ from .exceptions import (
     NedUnsupportedDatasetError,
     NedValidationError,
 )
+from .quarter import (
+    NedPowerDataset,
+    NedPowerReading,
+    NedQuarterClient,
+    validate_key_format,
+)
+from .rate_limiter import NedRequestBudget
 from .transport import NedTransport, TransportResponse
 
 __all__ = [
+    "NedAccessDeniedError",
     "NedApiError",
+    "NedAuthenticationClient",
     "NedAuthenticationError",
     "NedConnectionError",
     "NedPermissionError",
+    "NedPowerDataset",
+    "NedPowerReading",
+    "NedQuarterClient",
     "NedRateLimitError",
+    "NedRequestBudget",
     "NedResponseError",
     "NedTimeoutError",
     "NedTransport",
     "NedUnsupportedDatasetError",
     "NedValidationError",
     "TransportResponse",
+    "validate_key_format",
 ]

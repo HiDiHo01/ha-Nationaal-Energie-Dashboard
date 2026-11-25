@@ -1,8 +1,11 @@
 """Provide bounded, contract-independent HTTPS transport."""
 
 import math
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 
 from aiohttp import ClientError, ClientPayloadError, ClientSession, ClientTimeout, hdrs
 from yarl import URL
@@ -22,6 +25,33 @@ class TransportResponse:
 
     status: int
     body: bytes = field(repr=False)
+    media_type: str = field(default="", repr=False)
+    retry_after: float | None = None
+
+
+def parse_retry_after(value: str | None) -> float | None:
+    """Normalize HTTP delay-seconds or HTTP-date without retaining raw headers."""
+    if value is None:
+        return None
+    header = value.strip()
+    if header.isascii() and header.isdecimal():
+        digits = header.lstrip("0") or "0"
+        return math.inf if len(digits) > 6 else float(digits)
+    try:
+        date_value = parsedate_to_datetime(header)
+    except ValueError, TypeError, OverflowError:
+        return None
+    if date_value.tzinfo is None:
+        # RFC 9110 section 5.6.7: obsolete asctime-date uses implicit GMT.
+        if not re.fullmatch(
+            r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) "
+            r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) "
+            r"(?:[0-9]{2}| [0-9]) [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4}",
+            header,
+        ):
+            return None
+        date_value = date_value.replace(tzinfo=UTC)
+    return max(0.0, (date_value - datetime.now(UTC)).total_seconds())
 
 
 def _parse_origin(origin: str) -> URL:
@@ -78,12 +108,18 @@ class NedTransport:
         return self._origin
 
     async def async_get(
-        self, path: str, *, params: Mapping[str, str] | None = None
+        self,
+        path: str,
+        *,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, str] | None = None,
     ) -> TransportResponse:
         """Fetch one path with non-secret query parameters, without redirects.
 
-        Return all HTTP statuses without assigning NED-specific meaning. Reject
-        encoded bodies and oversized responses. Never close the borrowed session.
+        Return error status and sanitized retry metadata without reading error bodies.
+        Reject encoded or oversized successful responses. Never close the session.
+        Headers are supplied by trusted callers for this fixed origin only;
+        redirects remain disabled and credentials must never be query parameters.
         """
         if any(
             (
@@ -100,6 +136,12 @@ class NedTransport:
         if self._session.closed:
             raise NedConnectionError("The borrowed HTTP session is closed.")
         url = self._origin.with_path(path)
+        request_headers = {
+            name: value
+            for name, value in (headers or {}).items()
+            if name.lower() != "accept-encoding"
+        }
+        request_headers[hdrs.ACCEPT_ENCODING] = "identity"
         failure: NedApiError
         try:
             async with self._session.get(
@@ -110,8 +152,17 @@ class NedTransport:
                 raise_for_status=False,
                 ssl=True,
                 auto_decompress=False,
-                headers={hdrs.ACCEPT_ENCODING: "identity"},
+                headers=request_headers,
             ) as response:
+                if response.status != 200:
+                    # Status has priority over any malformed error body.
+                    retry_after = parse_retry_after(
+                        response.headers.get(hdrs.RETRY_AFTER)
+                    )
+                    response.close()
+                    return TransportResponse(
+                        status=response.status, body=b"", retry_after=retry_after
+                    )
                 encoding = response.headers.get(hdrs.CONTENT_ENCODING, "identity")
                 if encoding.lower() != "identity":
                     raise NedResponseError("Unsupported HTTP content encoding.")
@@ -122,7 +173,15 @@ class NedTransport:
                     if len(body) + len(chunk) > self._max_response_bytes:
                         raise NedResponseError("HTTP response exceeds the byte limit.")
                     body.extend(chunk)
-                return TransportResponse(status=response.status, body=bytes(body))
+                media_type = (
+                    response.headers.get(hdrs.CONTENT_TYPE, "")
+                    .partition(";")[0]
+                    .strip()
+                    .lower()
+                )
+                return TransportResponse(
+                    status=response.status, body=bytes(body), media_type=media_type
+                )
         except TimeoutError:
             failure = NedTimeoutError("HTTP request exceeded its time budget.")
         except ClientPayloadError:

@@ -12,7 +12,9 @@ python_bin="$(command -v python)"
 "$python_bin" -I -c 'import sys; from pathlib import Path; assert ".".join(map(str, sys.version_info[:3])) == Path(".python-version").read_text().strip()'
 UV_PROJECT_ENVIRONMENT="$work/venv" uv sync --locked --python "$python_bin" --project "$root"
 runtime="$work/venv/bin/python"
-mkdir -p "$work/project/src/ned_api_runtime_probe" "$work/wheelhouse" "$work/config"
+mkdir -p "$work/project/src/ned_api_runtime_probe" "$work/wheelhouse" "$work/config/custom_components"
+cp -R "$root/custom_components/nationaal_energie_dashboard" "$work/config/custom_components/"
+find "$work/config/custom_components" -type d -name __pycache__ -prune -exec rm -rf {} +
 cp LICENSE "$work/project/LICENSE"
 cat > "$work/project/pyproject.toml" <<'TOML'
 [build-system]
@@ -76,6 +78,11 @@ assert importlib.util.find_spec("ned_api_runtime_probe") is None
 assert importlib.util.find_spec("ned_api") is None
 before = {item.metadata["Name"]: item.version for item in distributions()}
 api_version = sys.argv[3]
+config_dir = Path(sys.argv[1]).resolve()
+manifest_path = config_dir / "custom_components/nationaal_energie_dashboard/manifest.json"
+manifest = json.loads(manifest_path.read_text())
+assert manifest["requirements"] == [f"ned-api=={api_version}"]
+assert manifest["version"] == api_version
 
 
 async def main() -> None:
@@ -85,7 +92,7 @@ async def main() -> None:
         hass, "ned_api_runtime_probe", ["ned-api-runtime-probe==0.0.1"], is_built_in=False
     )
     await async_process_requirements(
-        hass, "nationaal_energie_dashboard", [f"ned-api=={api_version}"], is_built_in=False
+        hass, "nationaal_energie_dashboard", manifest["requirements"], is_built_in=False
     )
     importlib.invalidate_caches()
     api_module = importlib.import_module("ned_api")
@@ -93,6 +100,16 @@ async def main() -> None:
         transport = api_module.NedTransport(session, "https://example.invalid")
         assert str(transport.origin) == "https://example.invalid"
         assert not session.closed
+    # Import the copied integration, never the repository checkout or an editable API.
+    sys.path.insert(0, str(config_dir))
+    component = importlib.import_module("custom_components.nationaal_energie_dashboard")
+    assert Path(component.__file__).resolve().is_relative_to(config_dir)
+    flow_module = importlib.import_module("custom_components.nationaal_energie_dashboard.config_flow")
+    sensor_module = importlib.import_module("custom_components.nationaal_energie_dashboard.sensor")
+    assert callable(component.async_setup_entry)
+    assert callable(flow_module.NedConfigFlow.async_step_user)
+    assert callable(sensor_module.async_setup_entry)
+    print("Copied alpha integration and manifest-pinned dependency import passed.")
 
 
 asyncio.run(main())
@@ -118,4 +135,155 @@ assert set(after) - set(before) == {"ned-api", "ned-api-runtime-probe"}
 print("Native HA actual API wheel install, dependency preservation, typed import and session injection passed.")
 PY
 uv pip check --python "$runtime"
-echo "Synthetic and actual runtime wheel probes passed; full integration installation is not evaluated."
+# Verify the actual installed wheel bytes with the same owner-test preflight.
+api_hash=$(sha256sum "$api_wheel" | cut -d ' ' -f 1)
+core_version=$("$runtime" -I -c 'import json,sys; print(json.load(open(sys.argv[1]))["homeassistant"])' "$root/hacs.json")
+python_version=$(cat "$root/.python-version")
+manifest_path="$work/config/custom_components/nationaal_energie_dashboard/manifest.json"
+bash -n "$root/scripts/run_local_alpha.sh"
+bash -n "$root/scripts/verify_alpha_wheel.sh"
+bash "$root/scripts/verify_alpha_wheel.sh" "$runtime" "$api_wheel" "$api_hash" "$manifest_path" "$core_version" "$python_version"
+if bash "$root/scripts/verify_alpha_wheel.sh" "$runtime" "$api_wheel" "invalid-hash" "$manifest_path" "$core_version" "$python_version"; then
+    echo "Unexpected acceptance of invalid wheel hash" >&2
+    exit 1
+fi
+echo "Alpha preflight rejects invalid wheel hash."
+echo "Synthetic and actual runtime wheel probes passed; copied alpha imports passed; full live setup is not evaluated."
+
+# R39-11: Core loads default integrations even with an HTTP-only YAML file.
+# Use a second disposable venv for Core startup, leaving the locked wheel-probe venv intact.
+# Read requirements from the installed, exact Core release, including its
+# dependency and after-dependency closure, using the upstream Core constraints.
+"$runtime" -I - "$work" <<'PY'
+"""Collect startup requirements from the exact installed Core release."""
+
+import json
+import sys
+from pathlib import Path
+
+import homeassistant
+from homeassistant.bootstrap import CORE_INTEGRATIONS, DEFAULT_INTEGRATIONS
+from homeassistant.const import BASE_PLATFORMS
+from packaging.requirements import Requirement
+
+work = Path(sys.argv[1])
+core_dir = Path(homeassistant.__file__).resolve().parent
+pending = set(CORE_INTEGRATIONS) | set(DEFAULT_INTEGRATIONS) | set(BASE_PLATFORMS)
+pending.add("http")
+seen: set[str] = set()
+requirements: set[str] = set()
+while pending:
+    domain = pending.pop()
+    if domain in seen:
+        continue
+    seen.add(domain)
+    manifest_path = core_dir / "components" / domain / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["domain"] == domain, f"Unexpected Core manifest: {domain}"
+    pending.update(set(manifest.get("dependencies", ())) - seen)
+    pending.update(set(manifest.get("after_dependencies", ())) - seen)
+    for raw in manifest.get("requirements", ()):
+        requirement = Requirement(raw)
+        assert requirement.url is None, f"Unexpected direct URL in {domain}"
+        requirements.add(str(requirement))
+assert any(item.startswith("home-assistant-frontend==") for item in requirements)
+(work / "startup-requirements.txt").write_text(
+    "\n".join(sorted(requirements)) + "\n", encoding="utf-8"
+)
+(work / "core-constraints-path").write_text(
+    str(core_dir / "package_constraints.txt"), encoding="utf-8"
+)
+print(f"Resolved {len(seen)} Core manifests and {len(requirements)} startup requirements.")
+PY
+# The development lock can conflict with upstream startup constraints (e.g. cffi).
+# Resolve the real Core environment separately instead of changing either pin set.
+uv venv --python "$python_bin" "$work/launch-venv"
+launch_runtime="$work/launch-venv/bin/python"
+env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
+    uv pip install --python "$launch_runtime" \
+    --constraint "$(cat "$work/core-constraints-path")" \
+    --requirement "$work/startup-requirements.txt" "homeassistant==$core_version"
+"$launch_runtime" -I -c 'import sys; from importlib.metadata import version; assert version("homeassistant") == sys.argv[1]; assert ".".join(map(str, sys.version_info[:3])) == sys.argv[2]' "$core_version" "$python_version"
+uv pip check --python "$launch_runtime"
+# Audit the actual startup environment before the locally built NED wheel is installed.
+# The audit tool itself remains in the unchanged locked development environment.
+launch_site=$("$launch_runtime" -I -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+"$runtime" -I -m pip_audit --path "$launch_site"
+
+# R39-11: exercise the actual launcher with no configured NED entry or credential.
+# Keep the localhost configuration minimal; Core's mandatory frontend is installed.
+# The full default_config and configured NED entry are not part of this test.
+cd "$root"
+commit=$(git rev-parse HEAD)
+alpha_config="$work/alpha-config"
+# Preparation may build with the pinned backend; package installation is offline.
+env -u UV_NO_INDEX -u UV_OFFLINE -u UV_NO_CACHE -u UV_FIND_LINKS \
+    bash scripts/run_local_alpha.sh prepare "$launch_runtime" "$alpha_config" "$commit"
+printf 'logger:\n  default: info\nhttp:\n  server_host: 127.0.0.1\n  server_port: 8124\n' > "$alpha_config/configuration.yaml"
+# Tampering with the tracked integration copy must fail before Core starts.
+manifest_copy="$alpha_config/custom_components/nationaal_energie_dashboard/manifest.json"
+cp "$manifest_copy" "$work/manifest-original.json"
+printf '\n' >> "$manifest_copy"
+if bash scripts/run_local_alpha.sh launch "$launch_runtime" "$alpha_config" "$commit"; then
+    echo "Unexpected acceptance of changed manifest" >&2
+    exit 1
+fi
+cp "$work/manifest-original.json" "$manifest_copy"
+alpha_wheel="$alpha_config/.ned-alpha/ned_api-${api_version}-py3-none-any.whl"
+cp "$alpha_wheel" "$work/alpha-original.whl"
+printf 'tampered' >> "$alpha_wheel"
+if bash scripts/run_local_alpha.sh launch "$launch_runtime" "$alpha_config" "$commit"; then
+    echo "Unexpected acceptance of changed wheel" >&2
+    exit 1
+fi
+cp "$work/alpha-original.whl" "$alpha_wheel"
+
+alpha_pid=""
+cleanup_alpha() {
+    if [[ -n "$alpha_pid" ]]; then
+        kill -TERM "$alpha_pid" 2>/dev/null || true
+        wait "$alpha_pid" 2>/dev/null || true
+    fi
+    rm -rf -- "$work"
+}
+trap cleanup_alpha EXIT
+for cycle in 1 2; do
+    bash scripts/run_local_alpha.sh launch "$launch_runtime" "$alpha_config" "$commit" \
+        > "$work/core-${cycle}.log" 2>&1 &
+    alpha_pid=$!
+    ready=false
+    for _ in $(seq 1 60); do
+        if ! kill -0 "$alpha_pid" 2>/dev/null; then
+            cat "$work/core-${cycle}.log"
+            exit 1
+        fi
+        if grep -Fq 'Home Assistant initialized in' "$work/core-${cycle}.log" && \
+            curl --noproxy '*' --fail --silent --max-time 1 --output /dev/null http://127.0.0.1:8124/; then
+            ready=true
+            break
+        fi
+        sleep 1
+    done
+    if [[ "$ready" != true ]]; then
+        cat "$work/core-${cycle}.log"
+        exit 1
+    fi
+    if grep -Eq 'Activating recovery mode|Starting in recovery mode|Setup failed for|Error during setup of component' "$work/core-${cycle}.log"; then
+        cat "$work/core-${cycle}.log"
+        exit 1
+    fi
+    kill -TERM "$alpha_pid"
+    # Bound process shutdown without leaving a test Core instance running.
+    for _ in $(seq 1 30); do
+        kill -0 "$alpha_pid" 2>/dev/null || break
+        sleep 1
+    done
+    if kill -0 "$alpha_pid" 2>/dev/null; then
+        kill -KILL "$alpha_pid"
+        echo "Core shutdown exceeded the test deadline" >&2
+        exit 1
+    fi
+    wait "$alpha_pid"
+    alpha_pid=""
+done
+echo "Local alpha prepare/start/stop/restart passed with mandatory Core frontend and minimal localhost configuration; no NED entry."

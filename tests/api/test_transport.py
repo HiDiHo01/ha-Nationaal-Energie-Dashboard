@@ -2,7 +2,8 @@
 
 from asyncio import CancelledError
 from collections.abc import AsyncIterator
-from unittest.mock import MagicMock
+from datetime import UTC, datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
 from aiohttp import (
@@ -22,6 +23,7 @@ from ned_api import (
     NedValidationError,
     TransportResponse,
 )
+from ned_api.transport import parse_retry_after
 
 
 async def _chunks(*parts: bytes) -> AsyncIterator[bytes]:
@@ -60,7 +62,9 @@ async def test_request_options_and_uninterpreted_status(
     transport = NedTransport(session, "https://example.invalid", max_response_bytes=3)
     assert transport.origin == URL("https://example.invalid")
     result = await transport.async_get("/resource", params={"page": "1"})
-    assert result == TransportResponse(status=status, body=b"abc")
+    assert result == TransportResponse(
+        status=status, body=b"abc" if status == 200 else b""
+    )
     assert "abc" not in repr(result)
     session.get.assert_called_once_with(
         URL("https://example.invalid/resource"),
@@ -72,7 +76,11 @@ async def test_request_options_and_uninterpreted_status(
         auto_decompress=False,
         headers={"Accept-Encoding": "identity"},
     )
-    response.content.iter_chunked.assert_called_once_with(4)
+    if status == 200:
+        response.content.iter_chunked.assert_called_once_with(4)
+    else:
+        response.content.iter_chunked.assert_not_called()
+        response.close.assert_called_once()
     session.get.return_value.__aexit__.assert_awaited_once()
     session.close.assert_not_awaited()
 
@@ -199,3 +207,44 @@ async def test_stream_cancellation(exchange: tuple[MagicMock, MagicMock]) -> Non
         await transport.async_get("/resource")
     session.get.return_value.__aexit__.assert_awaited_once()
     session.close.assert_not_awaited()
+
+
+@pytest.mark.parametrize("status", [401, 403, 429])
+@pytest.mark.asyncio
+async def test_error_status_precedes_body(
+    exchange: tuple[MagicMock, MagicMock], status: int
+) -> None:
+    """Do not read or validate a potentially oversized or corrupt error body."""
+    session, response = exchange
+    response.status = status
+    response.headers = {"Content-Encoding": "gzip", "Retry-After": "900"}
+    response.content.iter_chunked.side_effect = ClientPayloadError("synthetic")
+    result = await NedTransport(session, "https://example.invalid").async_get("/test")
+    assert result == TransportResponse(status, b"", retry_after=900.0)
+    response.content.iter_chunked.assert_not_called()
+    response.close.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("header", "expected"),
+    [
+        (None, None),
+        ("", None),
+        ("invalid", None),
+        ("-1", None),
+        ("0", 0.0),
+        (" 0900 ", 900.0),
+        ("9999999999999", float("inf")),
+        ("Wed, 25 Nov 2026 00:15:00 GMT", 900.0),
+        ("Wed, 24 Nov 2026 23:00:00 GMT", 0.0),
+        ("25 Nov 2026 00:15:00", None),
+        ("Wed Nov 25 00:15:00 2026", 900.0),
+        ("Sun Dec  6 00:00:00 2026", 950400.0),
+        ("Wed Nov 25 00:15:00 2026 -0000", None),
+    ],
+)
+def test_retry_after(header: str | None, expected: float | None) -> None:
+    """Parse standard HTTP dates and seconds, not arbitrary error text."""
+    with patch("ned_api.transport.datetime") as clock:
+        clock.now.return_value = datetime(2026, 11, 25, tzinfo=UTC)
+        assert parse_retry_after(header) == expected

@@ -4,6 +4,18 @@
 
 ### Nederlands
 
+- R39-09–12 en CodeRabbit: periodieke polling uitsluitend voor actieve entity-contexten (eerste refresh alle vijf), halfopen 30-minutenvenster, geen herstelmelding zonder vers gesloten kwartier; alle actieve datasets zonder bruikbare waarde geven een updatefout en bij setup een native retry. HTTP asctime-date wordt als UTC verwerkt volgens RFC 9110 §5.6.7. De launcherproef gebruikt een tijdelijke venv met minimale localhost-HTTP-configuratie, geen NED-entry of sleutel; volledige frontend- en eigenaarstest blijven open.
+
+- R39-01–08: status-first foutafhandeling, Retry-After, per-attempt limiter, gedeeltelijke datasetbeschikbaarheid, ontvangsttijd en gesloten-intervalbeleid, één actieve coordinator, native lifecycle-tests, gecontroleerde lokale launcher en Quality Scale-matrix. Definitieve CI nog vereist; geen live NED-probes of publicatie.
+
+- Beperkte lokale alpha 0.1.0a1: echte sleutelvalidatie en vijf nationale vermogensdatasets, strikte UTC-kwartierparser, gedeeld proceslokaal verzoekbudget, exact gepinde lokale wheel en regressietests. Geen nieuwe live tests of packagepublicatie; CO₂, forecast en hernieuwbaar aandeel blijven gereserveerd. Nieuwe CI moet nog worden bevestigd.
+
+- Config Flow-adapter gekoppeld aan de echte authenticatieclient achter de bestaande gesloten vrijgavecontrole; uitgebreide offline regressietests. Gitleaks rapporteert alleen regel-ID en bronlocatie bij een fout; sensor-ID-opbouw behoudt identiteit, zonder scanuitzonderingen. Definitieve CI nog niet bevestigd.
+
+- AUTH-001–005: drie handmatig gerapporteerde observaties vastgelegd, conceptmapping 401/403, NL/EN-foutmeldingen en synthetische regressietests toegevoegd; autorisatie blijft open, geen live koppeling of fasevrijgave. Eerdere Ruff/Pylint-bevindingen aangepakt; CI nog niet bevestigd.
+
+- Offline ontwikkelconcept voor de acht sensoren, gemaskeerde Config Flow, vertalingen, en een begrensde afzonderlijke authenticatieclient; synthetische tests toegevoegd, CI en runtimevalidatie niet bevestigd. Geen live koppeling, fasevrijgave of publicatie.
+
 - Acht prioritaire nationale sensoren vastgelegd; CO₂-forecast volgt fase 4 en het geschatte hernieuwbare elektriciteitsaandeel krijgt een expliciete rekenmethode met voorlopige CBS-afvalfactor 0.53 en vereist aanvullende contractvalidatie. Geen sensorimplementatie of wijziging van de fasepoorten.
 
 - Contractonafhankelijke asynchrone HTTPS-transportlaag met sessie-injectie, responslimiet, time-outs en geschoonde exceptions; 38 nieuwe synthetische tests. NED-specifieke verwerking blijft geblokkeerd door BL-003.
@@ -27,9 +39,21 @@
 - Marketplace als beoogd distributiekanaal; GPL-3.0-only gekozen om aan de OSI-licentievoorwaarde te voldoen. GitHub-herkenning bevestigd; catalogustoelating blijft open.
 - Synthetische runtime-wheel via native Home Assistant requirements-manager gevalideerd; initiële ADR's vastgelegd. Volledige installatie blijft open.
 - Beperkte gebruikstoestemming vervangen door GPL-3.0-only; country NL toegevoegd aan hacs.json.
-- Nog geen installeerbare integratie, daadwerkelijke integratievertalingen of publieke release.
+- Nog geen installeerbare productie-integratie of publieke release.
 
 ### English
+
+- R39-09–12 and CodeRabbit: periodic polling only for active entity contexts (first refresh all five), half-open 30-minute freshness window, no recovery message without a fresh closed quarter; all active datasets lacking usable readings fail the update and trigger native setup retry. HTTP asctime-date is interpreted as UTC per RFC 9110 section 5.6.7. The launcher probe uses a temporary venv and minimal localhost HTTP configuration, no NED entry or key; full frontend and owner testing remain open.
+
+- R39-01–08: status-first error handling, Retry-After, per-attempt limiter, partial dataset availability, receipt timestamp and closed-interval policy, single active coordinator, native lifecycle tests, controlled local launcher and Quality Scale matrix. Final CI required; no live NED probes or publication.
+
+- Limited local alpha 0.1.0a1: real credential validation and five national power datasets, strict UTC quarter parser, shared process-local request budget, exact local wheel pin and regression tests. No new live tests or package publication; CO₂, forecast and renewable share remain reserved. New CI remains to be verified.
+
+- Connect the Config Flow adapter to the actual authentication client behind the existing closed release guard; expanded offline regression tests. Gitleaks reports only rule ID and source location on failure; sensor identifiers retain identity without scan exclusions. Final CI unconfirmed.
+
+- AUTH-001–005: record three manually reported observations, draft 401/403 mapping, NL/EN errors and synthetic regression tests; permission semantics remain open, no live connection or phase acceptance. Addressed previous Ruff/Pylint findings; CI unconfirmed.
+
+- Offline development draft for the eight sensors, masked Config Flow, translations, and a bounded independent authentication client; synthetic tests added, CI and runtime validation unconfirmed. No live connection, phase acceptance or publication.
 
 - Eight priority national sensors specified; the CO₂ forecast follows phase 4 and estimated renewable electricity share has an explicit formula with provisional CBS waste factor 0.53 and requires additional contract validation. No sensor implementation or change to the phase gates.
 
@@ -54,4 +78,4 @@
 - Marketplace as the intended distribution channel; GPL-3.0-only chosen to meet the OSI license requirement. GitHub detection confirmed; catalog admission remains pending.
 - Synthetic runtime wheel validated through the native Home Assistant requirements manager; initial ADRs recorded. Full installation remains pending.
 - Limited usage permission replaced by GPL-3.0-only; country NL added to hacs.json.
-- No installable integration, actual integration translations or public release yet.
+- No installable production integration or public release yet.

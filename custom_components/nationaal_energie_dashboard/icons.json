@@ -1,0 +1,30 @@
+{
+  "entity": {
+    "sensor": {
+      "co2_intensity": {
+        "default": "mdi:molecule-co2"
+      },
+      "co2_intensity_forecast": {
+        "default": "mdi:chart-line"
+      },
+      "renewable_electricity_share": {
+        "default": "mdi:leaf"
+      },
+      "solar_power": {
+        "default": "mdi:solar-power"
+      },
+      "wind_onshore_power": {
+        "default": "mdi:wind-turbine"
+      },
+      "wind_offshore_power": {
+        "default": "mdi:wind-turbine"
+      },
+      "electricity_consumption": {
+        "default": "mdi:transmission-tower-import"
+      },
+      "electricity_production": {
+        "default": "mdi:transmission-tower-export"
+      }
+    }
+  }
+}

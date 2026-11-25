@@ -736,6 +736,7 @@ Gebruik geen vaste 96 records per dag. Dedupliceer historische revisies op datas
 
 ```text
 NedApiError
+├── NedAccessDeniedError
 ├── NedAuthenticationError
 ├── NedPermissionError
 ├── NedConnectionError
@@ -753,7 +754,7 @@ NedApiError
 | 200 | Response valideren |
 | 400 | Requestfout, geen retry |
 | 401 | Authenticatieprobleem |
-| 403 | Autorisatieprobleem onderzoeken |
+| 403 | Toegang geweigerd; controleer credentials en rechten; geen automatische reauth |
 | 404 | Endpoint of dataset controleren |
 | 429 | Throttling en backoff |
 | 500–599 | Tijdelijke storing, begrensde retry |
@@ -762,7 +763,7 @@ NedApiError
 | Lege tijdreeks | Afzonderlijke datastatus |
 | Coroutine geannuleerd | Annulering doorgeven |
 
-Verifieer 401/403-semantiek; start geen reauth voor een onbewezen authenticatiefout.
+AUTH-001/002/003/005: drie door eigenaar gerapporteerde observaties voor dezelfde historische nationale zonnequery (zie [API_REFERENCE.md](API_REFERENCE.md#handmatige-authenticatieobservaties--25-november-2026)). Conceptmapping: 401 naar NedAuthenticationError, 403 naar onafhankelijke NedAccessDeniedError; 403 is ook waargenomen bij een ongeldige key en is geen bewijs van onvoldoende rechten. Geen automatische reauth bij 403. AUTH-004 (rechten) en 429/Retry-After blijven open; overige tabelregels zijn ontwerp, geen bewezen NED-contract.
 
 ### 16.3 Home Assistant-mapping
 
@@ -982,6 +983,10 @@ Indicatieve inspanning, geen gegarandeerde kalenderdoorlooptijd.
 
 Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk starten vóór volledige BL-003-contractacceptatie: zelfstandige packageconfiguratie, teststructuur, exception-hiërarchie en generieke asynchrone transportlaag met uitsluitend synthetische tests. Datasetafhankelijke parsing, catalogus/meetsemantiek, authenticatie- en foutstatusmapping, API-specifieke rate limiting, revisies, kalenderaggregaties en live NED-aanvragen worden niet vrijgegeven zolang hun contractvoorwaarden ontbreken. BL-003 blijft open; volledige fase-1-acceptatie en volgende afhankelijke fasen blijven geblokkeerd. Geen wijziging aan coverage, CI-kwaliteitsdrempels, beveiliging, Platinum-doel of publicatietoestemming.
 
+Op eigenaarsopdracht van 25 november 2026 (herstel van de concrete technische blokkades voor een afzonderlijke Home Assistant-alpha) wordt alleen het aantoonbaar onderzochte deel voor een lokale proef uitgewerkt: positieve historische sleutelvalidatie en vijf nationale current-capacity-datasets (type 1, 2, 51, 27 met activiteit 1; type 59 met activiteit 2; point 0, granularity 4, timezone 0, classification 2). AUTH-001/002/003 en de eerdere kwartierproeven zijn de grondslag; geen algemene contractgarantie. Geen live uitvoering door AI, geen negatieve probes, geen publicatie. Vrijgave voor een eigenaarstest pas na geslaagde volledige CI en lokale wheelverificatie in een afzonderlijke Core-testomgeving. CO₂, forecast, hernieuwbaar aandeel, dagaggregaten, revisieselectie en onbewezen autorisatie-/rate-limitsemantiek blijven buiten actieve scope. Volledige faseacceptatie, kwaliteitsdrempels en releasepoorten blijven ongewijzigd.
+
+De alpha gebruikt capacity rechtstreeks in kW (suggestie MW), geen omzetting vanuit volume en geen reparatie van SEM-001. Query één UTC-dag met page=1 en itemsPerPage=100, maximaal 96 records; valideer mediatype, hydra:member, integer totalItems, afwezigheid van next-links, alle zes IRI-dimensies, eindige niet-negatieve numerieke capacity en unieke exact uitgelijnde UTC-kwartieren binnen het dagvenster. Ontbrekende intervallen blijven ontbrekend, echte nul blijft nul; dubbele revisies en onverwachte paginering falen gesloten. Alleen kwartieren die bij requestaanvang én ontvangst gesloten zijn, komen in aanmerking; receipt timestamp wordt vastgelegd en de voorlopige intervalgrens blijft 30 minuten. Per refresh maximaal vijf logische dagqueries, nabij UTC-middernacht maximaal tien; geen applicatieretries. Core maakt sessies met behoud van de native SSRF-middleware en extra per-attempt-middleware; flow-sessie detach in finally, entry-sessie native unload. Eén proceslokaal budget van 120 pogingen per 300 seconden telt ook aiohttp-interne GET-retries en fouten. Gewone zelfstandige geleende sessies zonder eigen retry-middleware reserveren conservatief twee slots per logische call op de gelockte aiohttp-baseline. Niet-200 status vóór bodyvalidatie; 429 blokkeert direct bij headers, geldige HTTP Retry-After seconden of datum worden genormaliseerd; minimum 300 seconden, langere geldige instructies respecteren, boven 24 uur procesblok. Dit is defensief HTTP-beleid, geen bewezen NED-quota- of headercontract. HTTP 401 leidt tot auth-fout; 403 en andere datasetfouten blijven per dataset geïsoleerd met geschoonde logcontext, geen automatische reauth bij 403. Alle datasets mislukt of globale 401/429 faalt de batch. Automatisch herstel bij volgende succesvolle refresh. Geen oude waarden voor mislukte datasets. Alleen currentcoordinator actief. Zie [PR39_REVIEW.md](PR39_REVIEW.md).
+
 - [x] Contractonafhankelijke packagebasis en exception-hiërarchie: [herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45497802933/job/138812806119) op b5b58f2 slaagt, inclusief strict mypy, negen API-tests, 100% coverage van 11 statements zonder branches en geïsoleerde wheelinstallatie. Eerste mypy-fout door lege integratiemap hersteld met recursieve bronselectie. Zie de [kwaliteitsverificatieskill](../.agents/skills/ha-quality-verification/SKILL.md). Geen volledige fase-1-acceptatie.
 - [x] Generieke transportlaag met synthetische tests: [PR #33-baseline](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45499428326/job/138818444788) slaagt op Python 3.14.10: 47 API-tests, 70 statements en 18 branches volledig gedekt, Ruff/Pylint/strict mypy en geïsoleerde wheelinstallatie met gelockte aiohttp/yarl-versies geslaagd. PR #33 gemerged op main 2886a03c033c2ae66a5af368ec5947811e7ce216. Het verschil met 71 lokale statements komt uit de verschillende meetomgevingen; geen gemiste statements in beide rapporten. Geen NED-specifieke mapping.
 - [x] Aanvullende loopback-HTTPS-regressietests: [herhaalde Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45501051151/job/138824117653) en [Python-next](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45501051016/job/138824116332) op d283ad3 beide 54 geslaagd; 70 statements en 18 branches volledig gedekt op de baseline. Eerste HA-socketblokkade hersteld met gerichte socket_enabled-fixture en loopback-hostrestrictie. Zie [API-tests](../tests/api/README.md). Geen volledige fase-1-acceptatie.
@@ -991,13 +996,15 @@ Op expliciet eigenaarsbesluit van 24 november 2026 mag fase 1 gedeeltelijk start
 - [x] Werkelijke API-wheel via de native requirements-manager installeren naast de synthetische proef: [PR #35 Baseline CI](https://github.com/HiDiHo01/ha-Nationaal-Energie-Dashboard/actions/runs/45502356362/job/138828614103) op 26db739 slaagt op Core 2026.11.3/Python 3.14.10: native installatie van beide wheels, geïsoleerde typed import, sessie-injectie, behoud van alle bestaande distributieversies en uv pip check (165 packages). Werkelijke wheel ned_api-0.0.0-py3-none-any.whl, SHA256 ebf07c57fe9d9e2a427fa660b9dbebcae11d73013c77c0ff5e321b55cff9303c voor deze build. 54 API-tests geslaagd, 70 statements en 18 branches volledig gedekt, dependency-audit zonder bekende kwetsbaarheden. PR #35 gemerged op main 6f0abe9a42b6a800a2d3d32d94ba913d120e59c2. Zie [runtimeproef](../scripts/check_runtime_distribution.sh).
 - [ ] Enums en datasetcatalogus ontwikkelen.
 - [ ] Datamodellen implementeren.
-- [ ] Authenticatie en HTTP-client toevoegen.
+- [ ] Authenticatie en HTTP-client toevoegen. Lokale alpha gebruikt dezelfde kwartierparser voor authenticatie en polling met AUTH-002/003-mapping; volledige contract-, runtime- en CI-validatie blijft open.
 - [ ] JSON-LD-parser ontwikkelen.
 - [ ] Paginering en revisieverwerking implementeren.
 - [ ] Rate limiter implementeren.
 - [ ] API-fixtures en contracttests opstellen.
 
 ### 21.3 Fase 2 — Integration Core
+
+De ontwikkelbranch bevat een beperkte lokale alpha (0.1.0a1): echte sleutelvalidatie, een zelfstandige UTC-kwartierparser en vijf nationale vermogenssensoren. Alleen de lokale, exact bijbehorende wheel is toegestaan voor de proefinstallatie; geen HACS-installatie of publieke release. CO₂, forecast en het geschatte hernieuwbare aandeel blijven gereserveerd totdat de contractvoorwaarden zijn vervuld. CI op 7a5956d is geslaagd; de nieuwe herstelcommit en live installatie moeten afzonderlijk worden bevestigd; BL-003 en algemene fasepoorten blijven open. Zie de beperkte scope in §21.2. De Config Flow gebruikt een door Core aangemaakte geïnstrumenteerde sessie met expliciete detach; de providerfactory maakt de werkelijke NedQuarterClient. De vijf vermogenssensoren delen één currentcoordinator; er wordt geen forecastcoordinator aangemaakt. Manifest en package zijn exact 0.1.0a1; de native requirements-proef gebruikt uitsluitend de lokaal gebouwde wheel, niet een publieke index. De overige drie beschrijvingen en alle acht unieke ID's blijven bewaard. Geen faseacceptatie.
 
 - [ ] manifest.json configureren.
 - [ ] Config Flow implementeren.
@@ -1176,3 +1183,8 @@ De actuele [Marketplace-repositoryvereisten](https://contributors.home-assistant
 ### 26.4 Vastleggingsnotitie
 
 Dit document is de Markdown-versie van het eerder in de projectchat uitgewerkte integratieplan. Interactieve calculators, demo's en checklists zijn omgezet naar formules, statische voorbeelden, Mermaid-diagrammen en GitHub-tasklists. Er is bij deze vastlegging geen nieuwe externe contractvalidatie of softwaretest uitgevoerd.
+
+
+### Reviewherstel PR #39 — aanvullende acceptatie
+
+Baseline CI 45522148253 op commit 7a5956d: 199/199 offline tests, 537/537 statements, 120/120 branches, 100% coverage; vijf upstream waarschuwingen. Alle vier workflows groen; native wheelinstallatie, hash/bytes/importlocatie en afwijzing ongeldige hash geslaagd. Dit is bewijs voor die commit, niet voor de nieuwe wijzigingen. R39-09–12 en CodeRabbit: periodieke polling uitsluitend voor actieve entity-contexten (eerste refresh alle vijf), halfopen 30-minutenvenster, geen herstelmelding zonder vers gesloten kwartier; alle actieve datasets zonder bruikbare waarde geven een updatefout en bij setup een native retry. HTTP asctime-date wordt als UTC verwerkt volgens RFC 9110 §5.6.7. De launcherproef gebruikt een tijdelijke venv met minimale localhost-HTTP-configuratie, geen NED-entry of sleutel; volledige frontend- en eigenaarstest blijven open. Geen nieuwe live probes, geen publicatie, geen wijziging aan contract- of kwaliteitscriteria.

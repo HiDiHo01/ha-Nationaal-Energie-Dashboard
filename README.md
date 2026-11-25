@@ -10,6 +10,12 @@ Dit project ontwikkelt een custom integratie voor [Home Assistant](https://www.h
 
 > **Ontwikkelstatus:** fase 1 is gedeeltelijk gestart met de contractonafhankelijke packagebasis. BL-003 blijft open voor contractafhankelijke functionaliteit. Er is nog geen werkende integratie of installeerbare release beschikbaar.
 
+De ontwikkelbranch bevat een beperkte lokale alpha (0.1.0a1): echte sleutelvalidatie, een zelfstandige UTC-kwartierparser en vijf nationale vermogenssensoren. Alleen de lokale, exact bijbehorende wheel is toegestaan voor de proefinstallatie; geen HACS-installatie of publieke release. CO₂, forecast en het geschatte hernieuwbare aandeel blijven gereserveerd totdat de contractvoorwaarden zijn vervuld. CI op 7a5956d is geslaagd; de nieuwe herstelcommit en live installatie moeten afzonderlijk worden bevestigd; BL-003 en algemene fasepoorten blijven open.
+
+Reviewherstel R39-01–08: status-first foutafhandeling, Retry-After, budget per HTTP-poging, afzonderlijke datasetbeschikbaarheid en ontvangsttijd. Gebruik de gecontroleerde lokale launcher voor de aparte testomgeving. De native lifecycle- en wheelpreflighttests zijn geslaagd op 7a5956d; hervalidatie van het nieuwe herstel is vereist. Geen nieuwe live probes of release.
+
+R39-09–12 en CodeRabbit: periodieke polling uitsluitend voor actieve entity-contexten (eerste refresh alle vijf), halfopen 30-minutenvenster, geen herstelmelding zonder vers gesloten kwartier; alle actieve datasets zonder bruikbare waarde geven een updatefout en bij setup een native retry. HTTP asctime-date wordt als UTC verwerkt volgens RFC 9110 §5.6.7. De launcherproef gebruikt een tijdelijke venv met minimale localhost-HTTP-configuratie, geen NED-entry of sleutel; volledige frontend- en eigenaarstest blijven open.
+
 ## Energiedata
 
 De NED API biedt volgens de bronbeschrijving onder meer de volgende gegevens. De geteste nationale P0-kwartierqueries zijn gevalideerd op structuur en dekking; verdere contract- en meetsemantiekvalidatie blijft open. Ondersteuning door de integratie moet nog worden geïmplementeerd.
@@ -28,7 +34,7 @@ Afhankelijk van de dataset zijn intervallen van 10 minuten, 15 minuten, een uur,
 
 ## Beoogde functionaliteit
 
-De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-intensiteit voorspelling, aandeel hernieuwbare elektriciteitsproductie, zon, wind op land, wind op zee, totaal elektriciteitsverbruik en totale elektriciteitsproductie. Dit is geplande functionaliteit. Het hernieuwbare aandeel wordt een herkenbaar gelabelde schatting op basis van zon, wind, bijstook van biomassa en 53% van de afvalelektriciteit (voorlopige CBS-jaarfactor 2025); overige gemengde bronnen zijn niet inbegrepen. De zes gebruikte datasets moeten eerst contractueel en gezamenlijk worden gevalideerd; BL-003 blijft open.
+De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-intensiteit voorspelling, aandeel hernieuwbare elektriciteitsproductie, zon, wind op land, wind op zee, totaal elektriciteitsverbruik en totale elektriciteitsproductie. De vijf vermogenssensoren zijn in de alpha geïmplementeerd; CO₂, forecast en hernieuwbaar aandeel blijven gepland. Het hernieuwbare aandeel wordt een herkenbaar gelabelde schatting op basis van zon, wind, bijstook van biomassa en 53% van de afvalelektriciteit (voorlopige CBS-jaarfactor 2025); overige gemengde bronnen zijn niet inbegrepen. De zes gebruikte datasets moeten eerst contractueel en gezamenlijk worden gevalideerd; BL-003 blijft open.
 
 - Configuratie via de Home Assistant-gebruikersinterface.
 - Selecteerbare energiegegevens en sensoren.
@@ -38,6 +44,8 @@ De eerste acht prioritaire nationale sensoren zijn CO₂-intensiteit, CO₂-inte
 - Opname in de algemene Home Assistant Marketplace-catalogus.
 
 ## API-sleutel
+
+Drie handmatig gerapporteerde authenticatieproeven bevestigen voor dezelfde nationale zonnequery HTTP 200 (geldige key), 401 (ontbrekend) en 403 (ongeldig). De verondersteld beperkte key krijgt toegang; rechtensemantiek blijft open. De alphaclient en Config Flow onderscheiden 401 van 403 zonder foutpayloads te loggen; de lokale eigenaarstest vereist geslaagde CI en de exacte wheel.
 
 Voor toegang tot de NED API is een persoonlijke API-sleutel vereist.
 
@@ -49,6 +57,8 @@ Voor toegang tot de NED API is een persoonlijke API-sleutel vereist.
 Het beoogde API-basisadres is `https://api.ned.nl/v1`. Deel API-sleutels nooit via GitHub-issues, commits of diagnostische gegevens.
 
 ## Installatie en configuratie
+
+[Lokale alpha-test (uitsluitend aparte Core-testomgeving)](docs/user/nl/alpha-test.md).
 
 **Minimale Home Assistant Core-versie: 2026.11.3.** Per nieuwe integratierelease wordt de nieuwste stabiele Core-release als minimum gehanteerd. Oudere Core-versies en prereleases hoeven niet ondersteund te worden. De actuele baseline is een ontwikkeldoel, nog geen geteste compatibiliteitsclaim.
 

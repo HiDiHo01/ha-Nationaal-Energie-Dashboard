@@ -1,0 +1,168 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nationaal Energie Dashboard configureren",
+        "description": "Lokale alpha: voer je persoonlijke NED API-sleutel in. Een historische zonnequery valideert toegang; andere datasets kunnen afzonderlijk onbeschikbaar zijn.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      },
+      "reauth_confirm": {
+        "title": "API-sleutel vernieuwen",
+        "description": "Voer je persoonlijke NED API-sleutel in. De sleutel wordt pas opgeslagen nadat authenticatie is gevalideerd.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      },
+      "reconfigure": {
+        "title": "API-sleutel wijzigen",
+        "description": "Voer je persoonlijke NED API-sleutel in. De sleutel wordt pas opgeslagen nadat authenticatie is gevalideerd.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      }
+    },
+    "error": {
+      "invalid_key_format": "Voer een niet-lege API-sleutel zonder spaties of controletekens in.",
+      "invalid_auth": "Authenticatie is geweigerd. Controleer de API-sleutel.",
+      "access_denied": "NED weigert toegang (HTTP 403). Controleer de sleutel en toegangsrechten.",
+      "cannot_connect": "Verbinding met NED mislukt. Probeer het later opnieuw.",
+      "cannot_validate": "Toegang kon niet worden vastgesteld. Controleer de beschikbaarheid van NED en probeer het later opnieuw.",
+      "rate_limited": "Het lokale verzoekbudget is tijdelijk uitgeput. Probeer het later opnieuw."
+    },
+    "abort": {
+      "already_configured": "Nationaal Energie Dashboard is al geconfigureerd.",
+      "already_in_progress": "Er loopt al een configuratie.",
+      "reauth_successful": "De API-sleutel is vernieuwd.",
+      "reconfigure_successful": "De API-sleutel is gewijzigd."
+    }
+  },
+  "exceptions": {
+    "authentication_failed": {
+      "message": "NED-authenticatie is geweigerd of de sleutel is ongeldig."
+    },
+    "update_failed": {
+      "message": "NED-gegevens konden niet veilig worden opgehaald of gevalideerd. Controleer toegang en beschikbaarheid."
+    },
+    "rate_limited": {
+      "message": "Het verzoekbudget is tijdelijk uitgeput; ophalen is gepauzeerd."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "co2_intensity": {
+        "name": "CO₂-intensiteit",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "co2_intensity_forecast": {
+        "name": "Voorspelde CO₂-intensiteit",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          }
+        }
+      },
+      "renewable_electricity_share": {
+        "name": "Geschat aandeel hernieuwbare elektriciteit",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "method_version": {
+            "name": "Methodeversie"
+          },
+          "waste_renewable_factor": {
+            "name": "Hernieuwbare afvalfactor"
+          },
+          "waste_factor_year": {
+            "name": "Bronjaar afvalfactor"
+          }
+        }
+      },
+      "solar_power": {
+        "name": "Zonne-energieproductie",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
+          }
+        }
+      },
+      "wind_onshore_power": {
+        "name": "Windenergieproductie op land",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
+          }
+        }
+      },
+      "wind_offshore_power": {
+        "name": "Windenergieproductie op zee",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
+          }
+        }
+      },
+      "electricity_consumption": {
+        "name": "Elektriciteitsverbruik",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
+          }
+        }
+      },
+      "electricity_production": {
+        "name": "Elektriciteitsproductie",
+        "state_attributes": {
+          "valid_from": {
+            "name": "Geldig vanaf"
+          },
+          "valid_to": {
+            "name": "Geldig tot"
+          },
+          "received_at": {
+            "name": "Ontvangen op"
+          }
+        }
+      }
+    }
+  }
+}

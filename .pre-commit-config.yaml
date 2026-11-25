@@ -27,7 +27,12 @@ repos:
           snapshot=$(mktemp -d);
           trap "rm -rf -- \"$snapshot\"" EXIT;
           git checkout-index --all --prefix="$snapshot/";
-          gitleaks dir --redact=100 --no-banner "$snapshot"'
+          report=$(mktemp);
+          trap "rm -rf -- \"$snapshot\"; rm -f -- \"$report\"" EXIT;
+          if gitleaks dir --redact=100 --no-banner --report-format json
+          --report-path "$report" "$snapshot"; then exit 0; else status=$?; fi;
+          python -c "import json,sys; from pathlib import Path; report=Path(sys.argv[1]); findings=json.loads(report.read_text()) if report.stat().st_size else []; print(json.dumps([{k: item[k] for k in (\"RuleID\", \"File\", \"StartLine\")} for item in findings]))" "$report";
+          exit "$status"'
         pass_filenames: false
         always_run: true
   - repo: local
