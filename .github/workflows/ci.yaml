@@ -87,7 +87,7 @@ jobs:
               name = Path(path).name
               if name in {'config_flow.py', 'diagnostics.py'} or name.startswith('forecast'):
                   minimum = 100
-              elif name in {'client.py', 'transport.py', 'parser.py', 'models.py', 'coordinator.py', 'sensor.py', 'binary_sensor.py', 'services.py'}:
+              elif name in {'client.py', 'authentication.py', 'quarter.py', 'rate_limiter.py', 'transport.py', 'parser.py', 'models.py', 'coordinator.py', 'sensor.py', 'binary_sensor.py', 'services.py'}:
                   minimum = 95
               else:
                   continue
@@ -102,7 +102,8 @@ jobs:
           work=$(mktemp -d)
           trap 'rm -rf -- "$work"' EXIT
           uv build --wheel --no-sources --out-dir "$work" packages/ned-api
-          wheel="$work/ned_api-0.0.0-py3-none-any.whl"
+          api_version=$(uv run --no-sync python -c 'import tomllib; from pathlib import Path; print(tomllib.loads(Path("packages/ned-api/pyproject.toml").read_text())["project"]["version"])')
+          wheel="$work/ned_api-${api_version}-py3-none-any.whl"
           test -f "$wheel"
           uv venv --python "$(command -v python)" "$work/venv"
           uv pip freeze --python .venv/bin/python > "$work/constraints.txt"
@@ -110,7 +111,7 @@ jobs:
           uv pip check --python "$work/venv/bin/python"
           aiohttp_version=$(uv run --no-sync python -c 'from importlib.metadata import version; print(version("aiohttp"))')
           yarl_version=$(uv run --no-sync python -c 'from importlib.metadata import version; print(version("yarl"))')
-          "$work/venv/bin/python" -I - "$aiohttp_version" "$yarl_version" <<'PY'
+          "$work/venv/bin/python" -I - "$aiohttp_version" "$yarl_version" "$api_version" <<'PY'
           import importlib.util
           import sys
           from importlib.metadata import distribution
@@ -119,7 +120,7 @@ jobs:
           import ned_api
 
           dist = distribution("ned-api")
-          assert dist.version == "0.0.0"
+          assert dist.version == sys.argv[3]
           assert dist.metadata["License-Expression"] == "GPL-3.0-only"
           assert Path(ned_api.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
           assert Path(ned_api.__file__).with_name("py.typed").is_file()
