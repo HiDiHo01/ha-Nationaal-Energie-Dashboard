@@ -7,7 +7,6 @@ from homeassistant.const import Platform
 
 DOMAIN = "nationaal_energie_dashboard"
 PLATFORMS = (Platform.SENSOR,)
-CONTRACT_PENDING = "contract_pending"
 
 CURRENT_INTERVAL = timedelta(minutes=5)
 FORECAST_INTERVAL = timedelta(hours=1)
