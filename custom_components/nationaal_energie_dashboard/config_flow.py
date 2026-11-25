@@ -9,10 +9,12 @@ from homeassistant.const import CONF_API_KEY
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from ned_api import (
     NedAccessDeniedError,
     NedApiError,
+    NedAuthenticationClient,
     NedAuthenticationError,
     NedConnectionError,
     NedTimeoutError,
@@ -25,17 +27,23 @@ API_KEY_SCHEMA = probatio.Schema(
 )
 
 
-async def async_validate_api_key(_hass: HomeAssistant, _api_key: str) -> None:
-    """Fail closed until a validated NED client can authenticate the key.
-
-    The future client must use bounded, authenticated requests and sanitized
-    exceptions. This draft neither sends the key nor treats syntax as proof
-    of authentication.
-    """
+def _ensure_authentication_ready() -> None:
+    """Prevent live validation until the runtime and phase gates are released."""
     raise ConfigEntryError(
         translation_domain=DOMAIN,
         translation_key=CONTRACT_PENDING,
     )
+
+
+async def async_validate_api_key(hass: HomeAssistant, api_key: str) -> None:
+    """Validate with the independent client and a borrowed Core HTTP session.
+
+    The readiness guard remains closed in this draft. Offline tests may
+    replace the guard and transport, never the production authentication logic.
+    """
+    _ensure_authentication_ready()
+    client = NedAuthenticationClient(async_get_clientsession(hass))
+    await client.async_validate_api_key(api_key)
 
 
 class NedConfigFlow(ConfigFlow, domain=DOMAIN):
