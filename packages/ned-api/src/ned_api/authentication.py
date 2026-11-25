@@ -1,117 +1,35 @@
-"""Prepare bounded NED credential verification against the documented endpoint.
+"""Verify credentials using the observed historical solar power query."""
 
-Only a positive response to the fixed solar query is evidence of access.
-HTTP 401 and 403 have distinct, conservative mappings based on AUTH-002/003.
-A 403 does not establish whether credentials or permissions caused denial.
-The bounded positive check is permitted for the local alpha scope.
-"""
-
-import json
 from datetime import UTC, datetime, timedelta
 
 from aiohttp import ClientSession
 
-from .exceptions import (
-    NedAccessDeniedError,
-    NedAuthenticationError,
-    NedResponseError,
-    NedValidationError,
-)
+from .exceptions import NedResponseError
+from .quarter import NedPowerDataset, NedQuarterClient
 from .rate_limiter import NedRequestBudget
-from .transport import NedTransport, TransportResponse
-
-_ORIGIN = "https://api.ned.nl"
-_PATH = "/v1/utilizations"
-_MEDIA_TYPE = "application/ld+json"
-_DIMENSIONS = {
-    "point": ("points", 0),
-    "type": ("types", 2),
-    "activity": ("activities", 1),
-    "classification": ("classifications", 2),
-    "granularity": ("granularities", 4),
-    "granularitytimezone": ("granularity_time_zones", 0),
-}
-
-
-def _validate_response(response: TransportResponse) -> None:
-    """Map observed denials, otherwise require positive structural evidence.
-
-    Never include or parse upstream error text, including for JSON error bodies.
-    """
-    if response.status == 401:
-        raise NedAuthenticationError("NED did not accept authentication (HTTP 401).")
-    if response.status == 403:
-        raise NedAccessDeniedError("NED denied access (HTTP 403).")
-    if response.status != 200:
-        raise NedResponseError(
-            f"Credential verification returned HTTP {response.status}; "
-            "access could not be established."
-        )
-    if response.media_type != _MEDIA_TYPE:
-        raise NedResponseError("Unexpected credential verification media type.")
-    try:
-        document: object = json.loads(response.body)
-    except ValueError, RecursionError:
-        document = None
-    if not isinstance(document, dict):
-        raise NedResponseError("Expected a JSON-LD collection object.")
-    members = document.get("hydra:member")
-    if not isinstance(members, list) or not 1 <= len(members) <= 96:
-        raise NedResponseError("No bounded nonempty collection evidence.")
-    for member in members:
-        if not isinstance(member, dict):
-            raise NedResponseError("Invalid collection member.")
-        for field, (resource, identifier) in _DIMENSIONS.items():
-            iri = f"/v1/{resource}/{identifier}"
-            if member.get(field) not in (iri, f"{_ORIGIN}{iri}"):
-                raise NedResponseError("Unexpected verification dataset dimension.")
 
 
 class NedAuthenticationClient:
-    """Validate access using a borrowed session and a fixed HTTPS origin."""
+    """Confirm access to one bounded query, not authorization to all datasets."""
 
     def __init__(
         self, session: ClientSession, budget: NedRequestBudget | None = None
     ) -> None:
-        """Construct the transport without retaining credentials."""
-        self._transport = NedTransport(session, _ORIGIN)
-        self._budget = budget if budget is not None else NedRequestBudget()
+        """Use the same parser and request budget as the polling client."""
+        self._client = NedQuarterClient(
+            session, budget if budget is not None else NedRequestBudget()
+        )
 
     @property
     def origin(self) -> str:
         """Expose the fixed credential destination without exposing credentials."""
-        return _ORIGIN
+        return self._client.origin
 
     async def async_validate_api_key(self, api_key: str) -> None:
-        """Perform one bounded historical solar request without retries.
-
-        A successful response confirms access only to this request, not
-        authorization for every dataset. No raw response or token is returned.
-        """
-        if (
-            not api_key
-            or not api_key.isascii()
-            or not api_key.isprintable()
-            or any(character.isspace() for character in api_key)
-        ):
-            raise NedValidationError("Provide a nonempty printable ASCII API key.")
+        """Require nonempty, validated historical solar evidence; never retry."""
         day = datetime.now(UTC).date() - timedelta(days=2)
-        params = {
-            field: str(identifier) for field, (_, identifier) in _DIMENSIONS.items()
-        }
-        params.update(
-            {
-                "page": "1",
-                "itemsPerPage": "100",
-                "order[validfrom]": "asc",
-                "validfrom[after]": day.isoformat(),
-                "validfrom[strictly_before]": (day + timedelta(days=1)).isoformat(),
-            }
+        readings = await self._client.async_read_day(
+            api_key, NedPowerDataset.SOLAR, day
         )
-        response = await self._budget.async_get(
-            self._transport,
-            _PATH,
-            params=params,
-            headers={"Accept": _MEDIA_TYPE, "X-AUTH-TOKEN": api_key},
-        )
-        _validate_response(response)
+        if not readings:
+            raise NedResponseError("No bounded nonempty collection evidence.")
