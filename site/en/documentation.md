@@ -8,13 +8,15 @@ other_url: /nl/documentation/
 ---
 ## Installation and requirements
 
+Follow the local alpha test instructions in the English repository README; do not use HACS or a public package index for the alpha.
+
 The integration is still in development. No installable release is available. Distribution through Home Assistant Marketplace is intended. GPL-3.0-only has been chosen to meet the [HACS license requirement](https://www.hacs.xyz/docs/publish/include/#check-license). GitHub license detection is confirmed; actual catalog admission remains pending. The runtime distribution strategy has been validated using a synthetic wheel; full production installation still requires verification.
 
-This development branch contains the nine requested integration files, eight sensor descriptions, a masked API-key flow and a separate authentication client. This is an offline draft: the provider factory and authentication connection block real configuration and live data requests; no working integration or release. Existing phase gates remain in effect.
+The development branch contains a limited local alpha (0.1.0a1): real credential validation, an independent UTC quarter-hour parser and five national power sensors. Use only the exact matching locally built wheel for the test installation; no HACS installation or public release. CO₂, forecast and the estimated renewable share remain reserved until their contract conditions are met. New CI and live installation are not yet confirmed; BL-003 and the general phase gates remain open.
 
 ## NED API key
 
-Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The draft client and Config Flow distinguish 401 from 403 without logging error payloads; the live connection remains blocked.
+Three manually reported authentication observations reproduce HTTP 200 (valid key), 401 (missing) and 403 (invalid) for the same national solar query. The presumed limited key receives access; permission semantics remain open. The alpha client and Config Flow distinguish 401 from 403 without logging error payloads; local owner testing requires successful CI and the exact wheel.
 
 For future use, create an account at [NED](https://ned.nl/), open Mijn account (My account) → API and generate a personal API key. Store it securely. Never disclose keys in issues or logs.
 
