@@ -18,6 +18,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity_platform import async_get_platforms
 
 # The pinned upstream test helper lacks a py.typed marker.
 from pytest_homeassistant.common import async_fire_time_changed  # type: ignore[import-untyped]
@@ -186,7 +187,12 @@ async def test_native_lifecycle(hass: HomeAssistant) -> None:
         assert await hass.config_entries.async_unload(entry.entry_id)
         await hass.async_block_till_done()
         _assert_entry_state(entry, ConfigEntryState.NOT_LOADED)
-        assert all(hass.states.get(entity_id) is None for entity_id in ids)
+        # Core preserves registered entities as restored, unavailable states.
+        for entity_id in ids:
+            state = hass.states.get(entity_id)
+            assert state is not None and state.state == STATE_UNAVAILABLE
+            assert state.attributes.get("restored") is True
+        assert all(not platform.entities for platform in async_get_platforms(hass, DOMAIN))
         request_count = len(api.calls)
         async_fire_time_changed(hass, _NOW + timedelta(minutes=10))
         await hass.async_block_till_done()
