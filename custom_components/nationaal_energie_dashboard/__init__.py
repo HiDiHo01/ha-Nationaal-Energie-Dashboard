@@ -7,11 +7,7 @@ from .coordinator import NedConfigEntry, create_provider, create_runtime
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: NedConfigEntry) -> bool:
-    """Set up a validated provider before forwarding the sensor platform.
-
-    The current provider factory raises ConfigEntryError deliberately while
-    BL-003 is open; a test may inject an explicitly synthetic provider.
-    """
+    """Set up the bounded alpha provider before forwarding the sensor platform."""
     provider = create_provider(hass, entry)
     runtime = create_runtime(hass, entry, provider)
     await runtime.current.async_config_entry_first_refresh()
