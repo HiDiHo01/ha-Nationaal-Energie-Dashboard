@@ -110,10 +110,10 @@ def _collection_members(response: TransportResponse) -> list[object]:
     members = document.get("hydra:member")
     total = document.get("hydra:totalItems")
     view = document.get("hydra:view", {})
+    if not isinstance(members, list) or len(members) > 96:
+        raise NedResponseError("Incomplete or unexpected single-day collection.")
     if (
-        not isinstance(members, list)
-        or len(members) > 96
-        or isinstance(total, bool)
+        isinstance(total, bool)
         or not isinstance(total, int)
         or total != len(members)
         or not isinstance(view, dict)
