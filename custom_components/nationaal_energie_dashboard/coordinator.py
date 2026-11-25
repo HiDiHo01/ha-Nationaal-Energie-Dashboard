@@ -22,6 +22,8 @@ from ned_api import (
     NedQuarterClient,
     NedRateLimitError,
     NedRequestBudget,
+    NedValidationError,
+    validate_key_format,
 )
 
 from .const import (
@@ -152,11 +154,12 @@ class NedAlphaProvider:
 
 def create_provider(hass: HomeAssistant, entry: NedConfigEntry) -> NedDataProvider:
     """Construct the alpha provider from the stored credential and shared session."""
-    api_key = entry.data.get(CONF_API_KEY)
-    if not isinstance(api_key, str) or not api_key:
+    try:
+        api_key = validate_key_format(entry.data.get(CONF_API_KEY))
+    except NedValidationError as err:
         raise ConfigEntryAuthFailed(
             translation_domain=DOMAIN, translation_key="authentication_failed"
-        )
+        ) from err
     client = NedQuarterClient(async_get_clientsession(hass), get_request_budget(hass))
     return NedAlphaProvider(client, api_key)
 
